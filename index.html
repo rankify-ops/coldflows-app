@@ -39,6 +39,26 @@ const {useState} = React;
 
 const D = {
   sentToday:47,cap:120,totalSent:1847,replies:38,bounces:22,warm:5,warmup:4200,rr:2.1,
+  account:{
+    daysSinceStart:12,warmupDays:28,
+    plan:"Growth",planPrice:"$2,500/mo",
+    milestones:[
+      {day:0,label:"Account setup",desc:"Domains, mailboxes, targeting configured",done:true,icon:"⚡"},
+      {day:1,label:"Warmup started",desc:"Sending reputation building",done:true,icon:"🔥"},
+      {day:7,label:"First emails sent",desc:"Initial outreach to first leads",done:true,icon:"📧"},
+      {day:14,label:"Ramp up phase 1",desc:"Volume increases to 120 emails/day",done:false,icon:"📈",current:true},
+      {day:21,label:"Ramp up phase 2",desc:"Volume increases to 200 emails/day",done:false,icon:"🚀"},
+      {day:28,label:"Full volume unlocked",desc:"300+ emails/day · A/B testing active",done:false,icon:"⚡"},
+      {day:42,label:"AI optimisation active",desc:"Self-learning copy improvements begin",done:false,icon:"🧠"},
+      {day:60,label:"Optimised performance",desc:"System tuned · Maximum reply rates",done:false,icon:"💎"}
+    ],
+    weeklyVolume:[
+      {week:"Week 1-2",emails:420,max:840,label:"Warmup phase"},
+      {week:"Week 3",emails:0,max:840,label:"Ramp phase 1",upcoming:true},
+      {week:"Week 4",emails:0,max:1400,label:"Ramp phase 2",upcoming:true},
+      {week:"Week 5+",emails:0,max:2100,label:"Full volume",upcoming:true,unlocked:true}
+    ]
+  },
   campaigns:[
     {id:1,name:"SEO services",st:"testing",sent:412,rep:9,bnc:4,leads:220,prog:41,tgt:1000,
       a:{l:"Baseline",sub:"{{company_name}} + SEO",body:"Hey {{first_name}},\n\nQuick question — is {{company_name}} getting leads from Google, or is most of your business coming from referrals?\n\nIf Google isn't pulling its weight, that's usually fixable. I run SEO campaigns starting at $1,500/mo.\n\nWorth a 15 min chat?",sent:206,rep:3,rate:1.5},
@@ -217,6 +237,107 @@ function Modal({c,onClose}){
   </div>;
 }
 
+function WarmupProgress({compact}){
+  const a=D.account;
+  const pct=Math.round(a.daysSinceStart/a.warmupDays*100);
+  const daysLeft=Math.max(0,a.warmupDays-a.daysSinceStart);
+
+  if(compact) return <Card style={{padding:24,marginBottom:32,borderColor:"var(--green-bd)",background:"linear-gradient(135deg,rgba(0,212,126,0.04),rgba(0,212,126,0.01))"}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
+      <div>
+        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:4}}>Account warmup</div>
+        <div style={{fontSize:22,fontWeight:800}}>{daysLeft>0?daysLeft+" days remaining":"Warmup complete"}</div>
+        <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>Day {a.daysSinceStart} of {a.warmupDays} · {pct}% complete</div>
+      </div>
+      <div style={{textAlign:"right"}}>
+        <div style={{fontSize:11,color:"var(--text3)"}}>Current volume</div>
+        <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:700,color:"var(--green)"}}>{D.cap}/day</div>
+        <div style={{fontSize:10,color:"var(--text3)"}}>→ 300/day at full ramp</div>
+      </div>
+    </div>
+    <div style={{height:6,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden",marginBottom:16}}>
+      <div style={{height:"100%",width:pct+"%",borderRadius:3,background:"linear-gradient(90deg,var(--green),#00ff99)",boxShadow:"0 0 16px rgba(0,212,126,0.4)",transition:"width 1s ease"}}/>
+    </div>
+    <div style={{display:"flex",gap:0}}>
+      {a.milestones.map((m,i)=>{
+        const mPct=Math.round(m.day/a.warmupDays*100);
+        return <div key={i} style={{flex:1,textAlign:"center",position:"relative"}}>
+          <div style={{width:m.current?14:10,height:m.current?14:10,borderRadius:"50%",margin:"0 auto 6px",
+            background:m.done?"var(--green)":m.current?"var(--green)":"var(--border)",
+            boxShadow:m.done||m.current?"0 0 8px rgba(0,212,126,0.4)":"none",
+            border:m.current?"2px solid var(--green2)":"none",
+            opacity:m.done?1:m.current?1:0.4}}/>
+          <div style={{fontSize:9,color:m.done||m.current?"var(--text2)":"var(--text3)",fontWeight:m.current?700:400,lineHeight:1.3}}>{m.label}</div>
+        </div>;})}
+    </div>
+  </Card>;
+
+  // Full version for dedicated section
+  return <div style={{marginBottom:32}}>
+    <div style={{fontSize:13,fontWeight:700,marginBottom:14,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Account progress</div>
+
+    {/* Main progress card */}
+    <Card style={{padding:28,marginBottom:14,borderColor:"var(--green-bd)",background:"linear-gradient(135deg,rgba(0,212,126,0.04),rgba(0,212,126,0.01))"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
+        <div>
+          <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:6}}>Warmup progress</div>
+          <div style={{fontSize:28,fontWeight:800}}>{daysLeft>0?<>{daysLeft} <span style={{fontSize:14,color:"var(--text2)",fontWeight:500}}>days remaining</span></>:<span style={{color:"var(--green)"}}>Complete</span>}</div>
+        </div>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)"}}>Day {a.daysSinceStart}/{a.warmupDays}</div>
+          <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:"var(--green)"}}>{pct}%</div>
+        </div>
+      </div>
+      <div style={{height:8,background:"rgba(255,255,255,0.04)",borderRadius:4,overflow:"hidden"}}>
+        <div style={{height:"100%",width:pct+"%",borderRadius:4,background:"linear-gradient(90deg,var(--green),#00ff99)",boxShadow:"0 0 20px rgba(0,212,126,0.4)",transition:"width 1s ease"}}/>
+      </div>
+    </Card>
+
+    {/* Milestone timeline */}
+    <Card style={{padding:24,marginBottom:14}}>
+      <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:16}}>Milestones</div>
+      {a.milestones.map((m,i)=>{
+        const isLast=i===a.milestones.length-1;
+        return <div key={i} style={{display:"flex",gap:14,paddingBottom:isLast?0:16,position:"relative"}}>
+          {!isLast&&<div style={{position:"absolute",left:11,top:24,bottom:0,width:2,
+            background:m.done?"var(--green)":"var(--border)",
+            boxShadow:m.done?"0 0 6px rgba(0,212,126,0.2)":"none"}}/>}
+          <div style={{width:24,height:24,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,
+            background:m.done?"var(--green-bg)":m.current?"var(--green-bg)":"rgba(255,255,255,0.03)",
+            border:m.current?"1px solid var(--green-bd)":"1px solid "+(m.done?"var(--green-bd)":"var(--border)"),
+            boxShadow:m.current?"0 0 12px rgba(0,212,126,0.3)":"none"}}>{m.done?"✓":m.icon}</div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:13,fontWeight:m.current?700:500,color:m.done||m.current?"var(--text)":"var(--text3)"}}>{m.label}
+              {m.current&&<span style={{fontSize:9,marginLeft:8,padding:"2px 6px",borderRadius:6,background:"var(--green-bg)",color:"var(--green)",fontWeight:700}}>CURRENT</span>}
+            </div>
+            <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{m.desc}</div>
+            <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>Day {m.day}</div>
+          </div>
+        </div>;})}
+    </Card>
+
+    {/* Weekly volume unlock */}
+    <Card style={{padding:24}}>
+      <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:16}}>Volume unlocks</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10}}>
+        {a.weeklyVolume.map((w,i)=><div key={i} style={{padding:16,borderRadius:12,
+          background:w.upcoming?"rgba(255,255,255,0.02)":"var(--green-bg)",
+          border:"1px solid "+(w.upcoming?w.unlocked?"var(--green-bd)":"var(--border)":"var(--green-bd)"),
+          opacity:w.upcoming&&!w.unlocked?0.5:1}}>
+          <div style={{fontSize:11,fontWeight:600,color:w.upcoming?"var(--text3)":"var(--green)",marginBottom:6}}>{w.week}</div>
+          <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:w.upcoming?"var(--text3)":"var(--text)"}}>
+            {w.upcoming?w.max.toLocaleString():w.emails.toLocaleString()}<span style={{fontSize:11,fontWeight:400,color:"var(--text3)"}}> /{w.max.toLocaleString()}</span>
+          </div>
+          <div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>{w.label}{w.unlocked?" ✨":""}</div>
+          {!w.upcoming&&<div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,marginTop:8,overflow:"hidden"}}>
+            <div style={{height:"100%",width:Math.round(w.emails/w.max*100)+"%",borderRadius:2,background:"var(--green)",boxShadow:"0 0 6px rgba(0,212,126,0.3)"}}/>
+          </div>}
+        </div>)}
+      </div>
+    </Card>
+  </div>;
+}
+
 function LeadDetail({lead,onClose}){
   if(!lead)return null;
   const stColor={delivered:"var(--green)",replied:"var(--green)",pending:"var(--text3)",skipped:"var(--text3)",bounced:"var(--red)"};
@@ -379,6 +500,8 @@ function App(){
           <Stat label="Warmup" val={(D.warmup/1000).toFixed(1)+"k"} sub="emails sent"/>
         </div>
 
+        <WarmupProgress compact/>
+
         <div style={{fontSize:13,fontWeight:700,marginBottom:14,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Active campaigns</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14,marginBottom:32}}>
           {D.campaigns.map(c=><CampaignCard key={c.id} c={c} onClick={()=>setMd(c)}/>)}
@@ -390,6 +513,8 @@ function App(){
 
       {pg==="campaigns"&&<div className="fade-in">
         <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Campaigns</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Click to view A/B test details</p></div>
+        <WarmupProgress/>
+        <div style={{fontSize:13,fontWeight:700,marginBottom:14,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Active campaigns</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14}}>
           {D.campaigns.map(c=><CampaignCard key={c.id} c={c} onClick={()=>setMd(c)}/>)}
         </div>
