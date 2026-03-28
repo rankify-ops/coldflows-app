@@ -17,6 +17,31 @@ body{font-family:'Sora',sans-serif;background:#06060b;color:#e8e8ed;min-height:1
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
 @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,30px)}}
+
+@media(max-width:1024px){
+  .stats-grid-6{grid-template-columns:repeat(3,1fr)!important}
+  .campaign-grid-2{grid-template-columns:1fr!important}
+  .mailbox-grid-4{grid-template-columns:repeat(2,1fr)!important}
+  .ab-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:768px){
+  .sidebar-nav{transform:translateX(-100%);transition:transform .3s ease}
+  .sidebar-nav.open{transform:translateX(0)}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9}
+  .sidebar-overlay.open{display:block}
+  .main-content{margin-left:0!important;padding:16px!important}
+  .stats-grid-6{grid-template-columns:repeat(2,1fr)!important}
+  .campaign-grid-2{grid-template-columns:1fr!important}
+  .mailbox-grid-4{grid-template-columns:1fr!important}
+  .ab-grid{grid-template-columns:1fr!important}
+  .mobile-header{display:flex!important}
+  .modal-pad{padding:16px!important}
+  .modal-wrap{padding:16px!important}
+  .lead-table-wrap{overflow-x:auto}
+}
+@media(max-width:480px){
+  .stats-grid-6{grid-template-columns:1fr 1fr!important;gap:8px!important}
+}
 </style>
 </head>
 <body>
@@ -126,14 +151,14 @@ function Reply({r}){
 function Modal({c,onClose}){
   if(!c)return null;
   const cReplies=data.replies.filter(r=>r.campaign===c.name);
-  return React.createElement('div',{onClick:e=>{if(e.target===e.currentTarget)onClose()},style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",backdropFilter:"blur(10px)",WebkitBackdropFilter:"blur(10px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:40,overflowY:"auto"}},
-    React.createElement('div',{style:{background:"#0c0c14",border:"1px solid rgba(255,255,255,0.08)",borderRadius:20,width:"100%",maxWidth:920,animation:"modalIn .25s ease"}},
+  return React.createElement('div',{onClick:e=>{if(e.target===e.currentTarget)onClose()},className:'modal-wrap',style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",backdropFilter:"blur(10px)",WebkitBackdropFilter:"blur(10px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:40,overflowY:"auto"}},
+    React.createElement('div',{className:'modal-pad',style:{background:"#0c0c14",border:"1px solid rgba(255,255,255,0.08)",borderRadius:20,width:"100%",maxWidth:920,animation:"modalIn .25s ease"}},
       React.createElement('div',{style:{padding:"24px 28px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",justifyContent:"space-between",alignItems:"center"}},
         React.createElement('h2',{style:{fontSize:18,fontWeight:600}},c.name),
         React.createElement('button',{onClick:onClose,style:{width:34,height:34,borderRadius:8,border:"1px solid rgba(255,255,255,0.08)",background:"transparent",color:"#6e6e7a",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}},"✕")),
       React.createElement('div',{style:{padding:"24px 28px"}},
         React.createElement('div',{style:{fontSize:13,fontWeight:600,marginBottom:14}},"A/B test — copy comparison"),
-        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}},
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24},className:"ab-grid"}},
           [c.a,c.b].map((side,i)=>React.createElement('div',{key:i,style:{borderRadius:14,padding:20,border:"1px solid "+(i===0?"rgba(116,185,255,0.2)":"rgba(108,92,231,0.2)"),background:i===0?"rgba(116,185,255,0.06)":"rgba(108,92,231,0.06)"}},
             React.createElement('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}},
               React.createElement('span',{style:{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,padding:"3px 8px",borderRadius:6,background:i===0?"rgba(116,185,255,0.12)":"rgba(108,92,231,0.12)",color:i===0?"#74b9ff":"#a29bfe",border:"1px solid "+(i===0?"rgba(116,185,255,0.2)":"rgba(108,92,231,0.2)")}},side.label+" ("+(i===0?"A":"B")+")"),
@@ -157,9 +182,10 @@ function Modal({c,onClose}){
 
 function App(){
   const [page,setPage]=useState("overview");
+  const [sb,setSb]=useState(false);
   const [modal,setModal]=useState(null);
   const [rf,setRf]=useState("all");
-  const nav=p=>{setPage(p);setModal(null)};
+  const nav=p=>{setPage(p);setModal(null);setSb(false)};
   const pct=Math.round(data.sentToday/data.dailyCapacity*100);
   const wc=data.replies.filter(r=>r.category==="warm").length;
   const filt=rf==="all"?data.replies:data.replies.filter(r=>r.category===rf);
@@ -173,7 +199,7 @@ function App(){
     React.createElement('div',{style:{position:"fixed",width:500,height:500,borderRadius:"50%",background:"rgba(0,184,148,0.04)",filter:"blur(150px)",bottom:-150,left:-100,pointerEvents:"none",animation:"float2 25s ease-in-out infinite"}}),
 
     // Sidebar
-    React.createElement('nav',{style:{width:220,borderRight:"1px solid rgba(255,255,255,0.05)",padding:"24px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"rgba(6,6,11,0.9)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",zIndex:10}},
+    React.createElement('nav',{className:'sidebar-nav'+(sb?' open':''),style:{width:220,borderRight:"1px solid rgba(255,255,255,0.05)",padding:"24px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"rgba(6,6,11,0.9)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",zIndex:10}},
       React.createElement('div',{style:{fontSize:18,fontWeight:700,letterSpacing:"-0.5px",padding:"0 10px",marginBottom:36,display:"flex",alignItems:"center",gap:10}},
         React.createElement('div',{style:{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#6c5ce7,#00b894)",display:"flex",alignItems:"center",justifyContent:"center"}},
           React.createElement('span',{style:{fontSize:12,color:"white"}},"⚡")),
@@ -188,8 +214,19 @@ function App(){
         React.createElement('div',{style:{fontSize:10,color:"#4e4e58"}},"Current plan"),
         React.createElement('div',{style:{fontSize:12,fontWeight:600,color:"#00b894",marginTop:2}},"Growth — $2,500/mo"))),
 
+
+    // Mobile header
+    React.createElement('div',{className:'mobile-header',style:{display:'none',position:'fixed',top:0,left:0,right:0,height:56,background:'rgba(6,6,11,0.95)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',borderBottom:'1px solid rgba(255,255,255,0.05)',zIndex:11,alignItems:'center',padding:'0 16px',justifyContent:'space-between'}},
+      React.createElement('div',{onClick:()=>setSb(!sb),style:{width:36,height:36,borderRadius:8,border:'1px solid rgba(255,255,255,0.08)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'#e8e8ed',fontSize:18}},'☰'),
+      React.createElement('div',{style:{fontSize:16,fontWeight:700,display:'flex',alignItems:'center',gap:8}},
+        React.createElement('div',{style:{width:22,height:22,borderRadius:6,background:'linear-gradient(135deg,#6c5ce7,#00b894)',display:'flex',alignItems:'center',justifyContent:'center'}},
+          React.createElement('span',{style:{fontSize:10,color:'white'}},'⚡')),
+        'coldflows'),
+      React.createElement('div',{style:{width:36}})),
+    // Sidebar overlay
+    sb&&React.createElement('div',{className:'sidebar-overlay open',onClick:()=>setSb(false),style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:9}}),
     // Main
-    React.createElement('main',{style:{flex:1,marginLeft:220,padding:"32px 40px",position:"relative",zIndex:1,maxWidth:1100}},
+    React.createElement('main',{className:'main-content',style:{flex:1,marginLeft:220,padding:'32px 40px',paddingTop:typeof window!=='undefined'&&window.innerWidth<=768?72:32,position:"relative",zIndex:1,maxWidth:1100}},
 
       // Overview
       page==="overview"&&React.createElement(React.Fragment,null,
@@ -198,7 +235,7 @@ function App(){
           React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"Last updated 3 minutes ago")),
         wc>0&&React.createElement('div',{style:{padding:"12px 18px",borderRadius:12,marginBottom:16,fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,background:"rgba(0,184,148,0.08)",color:"#00b894",border:"1px solid rgba(0,184,148,0.15)"}},
           React.createElement('div',{style:{width:8,height:8,borderRadius:"50%",background:"#00b894",animation:"pulse 2s infinite"}}),wc+" warm lead"+(wc>1?"s":"")+" waiting for follow-up"),
-        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12,marginBottom:28}},
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12,marginBottom:28},className:"stats-grid-6"}},
           React.createElement(Stat,{label:"Sent today",value:React.createElement(React.Fragment,null,data.sentToday,React.createElement('span',{style:{fontSize:14,color:"#6e6e7a",fontWeight:400}},"/"+data.dailyCapacity)),bar:true,pct}),
           React.createElement(Stat,{label:"Total sent",value:data.totalSent.toLocaleString(),sub:"lifetime"}),
           React.createElement(Stat,{label:"Replies",value:data.totalReplies,color:"#00b894",sub:data.replyRate+"% rate"}),
@@ -206,7 +243,7 @@ function App(){
           React.createElement(Stat,{label:"Bounces",value:data.totalBounces,sub:(data.totalBounces/data.totalSent*100).toFixed(1)+"% rate"}),
           React.createElement(Stat,{label:"Warmup",value:(data.warmupSent/1000).toFixed(1)+"k",sub:"emails sent"})),
         React.createElement('div',{style:{fontSize:15,fontWeight:600,marginBottom:14}},"Active campaigns"),
-        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:28}},
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:28},className:"campaign-grid-2"}},
           data.campaigns.map(c=>React.createElement(CCard,{key:c.id,c,onClick:()=>setModal(c)}))),
         React.createElement('div',{style:{fontSize:15,fontWeight:600,marginBottom:14}},"Recent replies"),
         data.replies.slice(0,4).map((r,i)=>React.createElement(Reply,{key:i,r}))),
@@ -216,7 +253,7 @@ function App(){
         React.createElement('div',{style:{marginBottom:28}},
           React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Campaigns"),
           React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"Click any campaign to see A/B test details and copy")),
-        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}},
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14},className:"campaign-grid-2"}},
           data.campaigns.map(c=>React.createElement(CCard,{key:c.id,c,onClick:()=>setModal(c)})))),
 
       // Replies
@@ -234,7 +271,7 @@ function App(){
         React.createElement('div',{style:{marginBottom:28}},
           React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Leads"),
           React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"All leads across campaigns")),
-        React.createElement('div',{style:{...gs(),padding:0,overflow:"hidden"}},
+        React.createElement('div',{className:'lead-table-wrap',style:{...gs(),padding:0,overflow:'hidden'}},
           React.createElement('table',{style:{width:"100%",borderCollapse:"collapse"}},
             React.createElement('thead',null,React.createElement('tr',null,
               ["Lead","Company","Campaign","Status","Seq"].map(h=>React.createElement('th',{key:h,style:{textAlign:"left",fontSize:9,textTransform:"uppercase",letterSpacing:"1px",color:"#3d3d48",fontWeight:500,padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.05)"}},h)))),
@@ -262,7 +299,7 @@ function App(){
         React.createElement('div',{style:{marginBottom:28}},
           React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Mailboxes"),
           React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"Email account health and sending")),
-        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}},
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12},className:"mailbox-grid-4"}},
           data.mailboxes.map((m,i)=>{
             const rc=m.rep>=95?"#00b894":m.rep>=80?"#fdcb6e":"#ff6b6b";
             return React.createElement('div',{key:i,style:{...gs(),padding:18}},
