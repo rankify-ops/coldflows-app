@@ -517,63 +517,113 @@ function App(){
         {/* WARMUP UNLOCK SECTION */}
         {(()=>{
           const a=D.account;
-          const daysLeft=Math.max(0,a.warmupDays-a.daysSinceStart);
-          const pctW=Math.round(a.daysSinceStart/a.warmupDays*100);
-          const currentMilestone=a.milestones.find(m=>m.current);
-          const nextMilestone=a.milestones.find(m=>!m.done&&!m.current);
-          const daysToNext=nextMilestone?Math.max(0,nextMilestone.day-a.daysSinceStart):0;
+          const day=a.daysSinceStart;
 
-          const unlocks=[
-            {label:"120 emails/day capacity",done:a.daysSinceStart>=7,day:7},
-            {label:"A/B testing enabled",done:a.daysSinceStart>=7,day:7},
-            {label:"200 emails/day capacity",done:a.daysSinceStart>=14,day:14},
-            {label:"AI copy optimisation",done:a.daysSinceStart>=21,day:21},
-            {label:"300+ emails/day (full volume)",done:a.daysSinceStart>=28,day:28},
-            {label:"Advanced analytics",done:a.daysSinceStart>=28,day:28},
-            {label:"Self-learning loop active",done:a.daysSinceStart>=42,day:42},
-            {label:"Peak performance mode",done:a.daysSinceStart>=60,day:60},
+          const phases=[
+            {id:1,name:"Warmup",range:"Day 1–14",emails:60,unit:"/day",desc:"Building sender reputation",day:0,endDay:14,
+              unlocks:["Domain authentication","Warmup emails active","Reputation monitoring","Deliverability tracking"]},
+            {id:2,name:"Phase 1",range:"Day 15–21",emails:120,unit:"/day",desc:"Initial outreach begins",day:14,endDay:21,
+              unlocks:["Live outreach enabled","A/B copy testing","Lead sourcing active","Reply classification"]},
+            {id:3,name:"Phase 2",range:"Day 22–28",emails:200,unit:"/day",desc:"Volume ramp-up",day:21,endDay:28,
+              unlocks:["200 emails/day capacity","AI copy optimisation","Advanced targeting","Multi-sequence campaigns"]},
+            {id:4,name:"Full capacity",range:"Day 29+",emails:300,unit:"+/day",desc:"Maximum performance",day:28,endDay:60,
+              unlocks:["300+ emails/day unlocked","Self-learning copy loop","Predictive send timing","Peak performance analytics"]}
           ];
 
-          return <Card style={{padding:28,marginBottom:32,borderColor:"var(--green-bd)",background:"linear-gradient(135deg,rgba(0,212,126,0.04),rgba(0,212,126,0.01))"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
-              <div>
-                <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:6}}>
-                  {nextMilestone?"Next unlock in "+daysToNext+" days":"All features unlocked"}
-                </div>
-                <div style={{fontSize:22,fontWeight:800}}>
-                  {nextMilestone?nextMilestone.label:"Full power"}
-                </div>
-                <div style={{fontSize:11,color:"var(--text3)",marginTop:4}}>Day {a.daysSinceStart} of {a.warmupDays} · {pctW}% complete</div>
-              </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:"var(--green)"}}>{D.cap}<span style={{fontSize:12,fontWeight:400,color:"var(--text3)"}}>/day</span></div>
-                <div style={{fontSize:10,color:"var(--text3)"}}>current capacity</div>
-              </div>
+          const currentPhase=phases.reduce((best,p)=>day>=p.day?p:best,phases[0]);
+          const nextPhase=phases.find(p=>day<p.day);
+          const daysToNext=nextPhase?nextPhase.day-day:0;
+
+          return <>
+            {/* Next phase countdown */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <div style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Account progress</div>
+              {nextPhase&&<div style={{fontSize:12,fontWeight:600,color:"var(--green)",fontFamily:"var(--mono)"}}>
+                {daysToNext} day{daysToNext!==1?"s":""} until {nextPhase.name}
+              </div>}
             </div>
 
-            {/* Progress bar */}
-            <div style={{height:6,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden",marginBottom:20}}>
-              <div style={{height:"100%",width:pctW+"%",borderRadius:3,background:"linear-gradient(90deg,var(--green),#00ff99)",boxShadow:"0 0 16px rgba(0,212,126,0.4)"}}/>
+            {/* 4 Phase cards */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
+              {phases.map(p=>{
+                const done=day>=p.endDay;
+                const active=currentPhase.id===p.id;
+                const future=day<p.day;
+                const phaseProgress=active?Math.round(Math.min(100,((day-p.day)/(p.endDay-p.day))*100)):done?100:0;
+
+                return <Card key={p.id} style={{padding:18,position:"relative",overflow:"hidden",
+                  borderColor:active?"var(--green-bd)":done?"var(--green-bd)":"var(--border)",
+                  background:active?"linear-gradient(135deg,rgba(0,212,126,0.06),rgba(0,212,126,0.02))":done?"rgba(0,212,126,0.03)":"var(--glass)",
+                  boxShadow:active?"0 0 24px rgba(0,212,126,0.1)":"none",
+                  opacity:future?0.45:1}}>
+
+                  {/* Phase indicator dot */}
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                    <div style={{width:10,height:10,borderRadius:"50%",
+                      background:done||active?"var(--green)":"var(--text3)",
+                      boxShadow:active?"0 0 10px rgba(0,212,126,0.6)":done?"0 0 6px rgba(0,212,126,0.3)":"none"}}/>
+                    <span style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",
+                      color:active?"var(--green)":done?"var(--green)":"var(--text3)"}}>{p.name}</span>
+                    {active&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:6,background:"var(--green-bg)",color:"var(--green)",fontWeight:700,border:"1px solid var(--green-bd)"}}>NOW</span>}
+                  </div>
+
+                  {/* Volume */}
+                  <div style={{fontFamily:"var(--mono)",fontSize:26,fontWeight:700,color:done||active?"var(--text)":"var(--text3)",lineHeight:1}}>{p.emails}<span style={{fontSize:12,fontWeight:400,color:"var(--text3)"}}>{p.unit}</span></div>
+
+                  {/* Range */}
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{p.range}</div>
+                  <div style={{fontSize:11,color:active?"var(--text2)":"var(--text3)",marginTop:4}}>{p.desc}</div>
+
+                  {/* Phase progress bar */}
+                  {(active||done)&&<div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,marginTop:12,overflow:"hidden"}}>
+                    <div style={{height:"100%",width:phaseProgress+"%",borderRadius:2,background:"var(--green)",
+                      boxShadow:active?"0 0 8px rgba(0,212,126,0.4)":"none"}}/>
+                  </div>}
+                  {future&&<div style={{height:3,background:"rgba(255,255,255,0.03)",borderRadius:2,marginTop:12}}/>}
+                </Card>;})}
             </div>
 
-            {/* Unlock checklist */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-              {unlocks.map((u,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",borderRadius:8,
-                background:u.done?"rgba(0,212,126,0.05)":"rgba(255,255,255,0.02)",
-                border:"1px solid "+(u.done?"rgba(0,212,126,0.1)":"rgba(255,255,255,0.03)"),
-                opacity:u.done?1:0.5}}>
-                <div style={{width:18,height:18,borderRadius:5,border:u.done?"none":"1.5px solid var(--text3)",
-                  background:u.done?"var(--green)":"transparent",
-                  display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  {u.done&&<span style={{color:"#000",fontSize:11,fontWeight:800}}>✓</span>}
+            {/* What current phase unlocks + what next phase brings */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:32}}>
+              {/* Current phase unlocks */}
+              <Card style={{padding:20,borderColor:"var(--green-bd)",background:"var(--green-bg)"}}>
+                <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12}}>
+                  ✓ Unlocked — {currentPhase.name}
                 </div>
-                <div>
-                  <div style={{fontSize:12,fontWeight:u.done?600:400,color:u.done?"var(--text)":"var(--text3)"}}>{u.label}</div>
-                  {!u.done&&<div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {u.day}</div>}
+                {currentPhase.unlocks.map((u,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <div style={{width:16,height:16,borderRadius:4,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <span style={{color:"#000",fontSize:10,fontWeight:800}}>✓</span>
+                  </div>
+                  <span style={{fontSize:12,fontWeight:500,color:"var(--text)"}}>{u}</span>
+                </div>)}
+                {/* Also show all previous phase unlocks */}
+                {phases.filter(p=>p.id<currentPhase.id).map(p=>p.unlocks.map((u,j)=>
+                  <div key={p.id+"-"+j} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                    <div style={{width:16,height:16,borderRadius:4,background:"rgba(0,212,126,0.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                      <span style={{color:"#000",fontSize:10,fontWeight:800}}>✓</span>
+                    </div>
+                    <span style={{fontSize:12,fontWeight:400,color:"var(--text2)"}}>{u}</span>
+                  </div>))}
+              </Card>
+
+              {/* Next phase preview */}
+              {nextPhase?<Card style={{padding:20,opacity:0.7}}>
+                <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>
+                  Coming in {daysToNext} day{daysToNext!==1?"s":""} — {nextPhase.name}
                 </div>
-              </div>)}
+                {nextPhase.unlocks.map((u,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <div style={{width:16,height:16,borderRadius:4,border:"1.5px solid var(--text3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}/>
+                  <span style={{fontSize:12,fontWeight:400,color:"var(--text3)"}}>{u}</span>
+                </div>)}
+              </Card>
+              :<Card style={{padding:20,borderColor:"var(--green-bd)",background:"var(--green-bg)"}}>
+                <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12}}>
+                  All features unlocked
+                </div>
+                <div style={{fontSize:13,color:"var(--text2)"}}>Your account is running at maximum capacity with all optimisations active.</div>
+              </Card>}
             </div>
-          </Card>;
+          </>;
         })()}
 
         {/* RECENT REPLIES */}
