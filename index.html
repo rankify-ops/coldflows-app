@@ -445,6 +445,7 @@ function App(){
   const [ld,setLd]=useState(null);
   const [lf,setLf]=useState("replied");
   const [showAll,setShowAll]=useState(false);
+  const [showAdd,setShowAdd]=useState(false);
   const nav=p=>{setPg(p);setMd(null);setLd(null)};
   const pct=Math.round(D.sentToday/D.cap*100);
   const wc=D.reps.filter(r=>r.cat==="warm").length;
@@ -504,7 +505,12 @@ function App(){
         {/* CAMPAIGNS FIRST */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Active campaigns</div>
-          <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length} campaigns</div>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/4 slots</div>
+            <div onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",borderRadius:8,background:"var(--green-bg)",border:"1px solid var(--green-bd)",color:"var(--green)",fontSize:11,fontWeight:700,cursor:"pointer",transition:"all .15s"}}>
+              <span style={{fontSize:14,lineHeight:1}}>+</span> Add campaign
+            </div>
+          </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14,marginBottom:showAll?14:0}}>
           {(showAll?D.campaigns:D.campaigns.slice(0,4)).map(c=><CampaignCard key={c.id} c={c} onClick={()=>setMd(c)}/>)}
@@ -538,7 +544,7 @@ function App(){
             {/* Header with progress bar */}
             <div style={{marginBottom:14}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <div style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Account progress</div>
+                <div style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Mailbox progress</div>
                 {nextPhase&&<div style={{fontSize:12,fontWeight:600,color:"var(--green)",fontFamily:"var(--mono)"}}>
                   {daysToNext} day{daysToNext!==1?"s":""} until {nextPhase.name}
                 </div>}
@@ -556,6 +562,11 @@ function App(){
                 <div style={{textAlign:"right",flexShrink:0}}>
                   <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{Math.max(0,60-day)}</div>
                   <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>days left</div>
+                </div>
+                <div style={{borderLeft:"1px solid var(--border)",paddingLeft:20,flexShrink:0}}>
+                  <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Mailboxes</div>
+                  <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{D.mbs.length}</div>
+                  <div onClick={()=>nav("mailboxes")} style={{fontSize:10,color:"var(--green)",cursor:"pointer",marginTop:2,fontWeight:600}}>View details →</div>
                 </div>
               </Card>
             </div>
@@ -769,6 +780,52 @@ function App(){
 
     {md&&<Modal c={md} onClose={()=>setMd(null)}/>}
     {ld&&<LeadDetail lead={ld} onClose={()=>setLd(null)}/>}
+
+    {/* Add Campaign / Purchase Slots Modal */}
+    {showAdd&&<div onClick={e=>{if(e.target===e.currentTarget)setShowAdd(false)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
+      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:560,animation:"fadeIn .3s ease"}}>
+        <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <h2 style={{fontSize:18,fontWeight:700}}>Add campaign slot</h2>
+          <button onClick={()=>setShowAdd(false)} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        </div>
+        <div style={{padding:"24px 28px"}}>
+          <div style={{fontSize:12,color:"var(--text2)",marginBottom:20,lineHeight:1.6}}>
+            You're currently using <span style={{color:"var(--text)",fontWeight:600}}>{D.campaigns.length} of 4</span> campaign slots on your Growth plan. Add more slots to run additional campaigns simultaneously.
+          </div>
+
+          {/* Slot options */}
+          {[
+            {slots:1,price:"$500",desc:"1 additional campaign slot",per:"/mo"},
+            {slots:2,price:"$900",desc:"2 additional campaign slots",per:"/mo",popular:true},
+            {slots:4,price:"$1,600",desc:"4 additional campaign slots",per:"/mo"}
+          ].map((opt,i)=><div key={i} style={{padding:16,borderRadius:12,marginBottom:10,cursor:"pointer",
+            background:opt.popular?"var(--green-bg)":"var(--glass)",
+            border:"1px solid "+(opt.popular?"var(--green-bd)":"var(--border)"),
+            display:"flex",justifyContent:"space-between",alignItems:"center",transition:"all .15s"}}>
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:14,fontWeight:700}}>{opt.desc}</span>
+                {opt.popular&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:6,background:"var(--green)",color:"#000",fontWeight:700,textTransform:"uppercase"}}>Best value</span>}
+              </div>
+              <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>Includes dedicated mailboxes, warmup, and A/B testing</div>
+            </div>
+            <div style={{textAlign:"right",flexShrink:0}}>
+              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:opt.popular?"var(--green)":"var(--text)"}}>{opt.price}</div>
+              <div style={{fontSize:10,color:"var(--text3)"}}>{opt.per}</div>
+            </div>
+          </div>)}
+
+          <div style={{marginTop:16,fontSize:11,color:"var(--text3)",lineHeight:1.6}}>
+            New slots include fresh sending domains and mailboxes. Warmup begins immediately after purchase. Volume ramps up automatically.
+          </div>
+
+          <div style={{marginTop:20,display:"flex",gap:10}}>
+            <div style={{flex:1,padding:"12px",borderRadius:10,background:"var(--green)",color:"#000",fontSize:13,fontWeight:700,textAlign:"center",cursor:"pointer",boxShadow:"0 0 20px rgba(0,212,126,0.3)"}}>Purchase slots</div>
+            <div onClick={()=>setShowAdd(false)} style={{padding:"12px 20px",borderRadius:10,background:"var(--glass)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",textAlign:"center"}}>Cancel</div>
+          </div>
+        </div>
+      </div>
+    </div>}
   </div>;
 }
 
