@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coldflows — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sora',sans-serif;background:#06060b;color:#e8e8ed;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,30px)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+
+const data = {
+  sentToday:47,dailyCapacity:120,totalSent:1847,totalReplies:38,
+  totalBounces:22,warmLeads:5,warmupSent:4200,replyRate:2.1,
+  campaigns:[
+    {id:1,name:"SEO services",status:"testing",sent:412,replies:9,bounces:4,leads:220,progress:41,target:1000,
+      a:{label:"Baseline",subject:"{{company_name}} + SEO",body:"Hey {{first_name}},\n\nQuick question — is {{company_name}} getting leads from Google, or is most of your business coming from referrals?\n\nIf Google isn't pulling its weight, that's usually fixable. I run SEO campaigns for businesses like yours starting at $1,500/mo.\n\nWorth a 15 min chat?",sent:206,replies:3,rate:1.5},
+      b:{label:"Challenger",subject:"quick question about {{company_name}}",body:"Hey {{first_name}},\n\nI searched for what {{company_name}} does on Google and you're not showing up in the first few results.\n\nThat means potential customers are finding your competitors instead. I fix that — typically takes 3-4 months to get ranking on page 1.\n\nInterested in seeing how?",sent:206,replies:6,rate:2.9,winning:true}},
+    {id:2,name:"Website builds",status:"testing",sent:389,replies:11,bounces:6,leads:200,progress:39,target:1000,
+      a:{label:"Baseline",subject:"website for {{company_name}}",body:"Hey {{first_name}},\n\nIs {{company_name}}'s website working the way you want it to? If it's outdated, slow, or just not converting — I build fast, modern websites.\n\n$5,999 flat rate. 3-4 weeks. Skilled Australian developer.\n\nBook a call?",sent:195,replies:4,rate:2.1},
+      b:{label:"Challenger",subject:"{{first_name}}, quick one",body:"Hey {{first_name}},\n\nI looked at {{company_name}}'s website. Honestly — you're losing customers.\n\nSlow load, not mobile-friendly, and the design looks dated. I can rebuild it in 3 weeks.\n\nWant to see some recent builds?",sent:194,replies:7,rate:3.6,winning:true}},
+    {id:3,name:"Logo & branding",status:"active",sent:580,replies:12,bounces:7,leads:300,progress:58,target:1000,
+      a:{label:"Baseline",subject:"branding for {{company_name}}",body:"Hey {{first_name}},\n\nAre you happy with {{company_name}}'s logo and branding? If you've been thinking about a refresh — $499, 48-hour delivery, 100% money-back guarantee.\n\nReal designers, not AI.",sent:290,replies:8,rate:2.8,winning:true},
+      b:{label:"Challenger",subject:"{{company_name}}'s brand",body:"Hey {{first_name}},\n\nI noticed {{company_name}}'s branding could use a refresh. Not a dig — just something that stands out.\n\nProfessional logo + full brand identity for $499. 48 hours. Money-back if you're not happy.",sent:290,replies:4,rate:1.4}},
+    {id:4,name:"Shopify dev",status:"active",sent:466,replies:6,bounces:5,leads:250,progress:47,target:1000,
+      a:{label:"Baseline",subject:"shopify dev for {{company_name}}",body:"Hey {{first_name}},\n\nDo you have a developer for your Shopify store?\n\nMonthly retainer starting at $249/mo — submit requests, I build them. No lock-in, money-back guarantee.",sent:233,replies:4,rate:1.7,winning:true},
+      b:{label:"Challenger",subject:"re: {{company_name}} shopify",body:"Hey {{first_name}},\n\nWhat's on your Shopify store's to-do list right now?\n\nCustom layouts, speed fixes, app integrations — I handle it all for $249/mo. No contracts.",sent:233,replies:2,rate:0.9}}
+  ],
+  replies:[
+    {name:"Sarah Chen",company:"Bloom Studio",email:"sarah@bloomstudio.com.au",campaign:"Logo & branding",category:"warm",text:"Hi! Yes we've actually been thinking about rebranding for a while. Can you send through some examples? Our current logo feels really dated.",time:"2h ago"},
+    {name:"Marcus Webb",company:"Webb Engineering",email:"marcus@webbeng.com.au",campaign:"Website builds",category:"warm",text:"Thanks for reaching out. Our website is definitely overdue for an update. What's your process and can you show me some recent builds?",time:"5h ago"},
+    {name:"Raj Patel",company:"CloudMetrics",email:"raj@cloudmetrics.io",campaign:"SEO services",category:"warm",text:"Interesting timing — we just had a meeting about our organic traffic declining. Would love to chat. Are you free Thursday?",time:"1d ago"},
+    {name:"Tom Bradley",company:"Bradley Homes",email:"tom@bradleyhomes.com.au",campaign:"Website builds",category:"warm",text:"Hi there, yes our website is pretty bad honestly. We've been quoted $15-20k by agencies. Your price seems much more reasonable.",time:"1d ago"},
+    {name:"Lisa Park",company:"Park Dental",email:"lisa@parkdental.com.au",campaign:"SEO services",category:"warm",text:"We do get most patients from referrals but I know we should be doing better online. What does the $1,500/mo include?",time:"2d ago"},
+    {name:"Dave O'Neil",company:"O'Neil Plumbing",email:"dave@oneilplumbing.com.au",campaign:"Website builds",category:"negative",text:"Not interested and your approach is quite rude. Don't contact me again.",time:"2d ago"},
+    {name:"Auto-reply",company:"Johnson Legal",email:"info@johnsonlegal.com.au",campaign:"SEO services",category:"auto_reply",text:"Thank you for your email. Our office is currently closed. We will return on Monday.",time:"3d ago"},
+    {name:"Karen White",company:"White Accounting",email:"karen@whiteaccounting.com.au",campaign:"Logo & branding",category:"unsubscribe",text:"Please remove me from your mailing list.",time:"3d ago"}
+  ],
+  mailboxes:[
+    {email:"thomas@outreach.studio",sent:12,limit:30,rep:100,inbox:98,warmup:"Active",total:1100},
+    {email:"tom@outreach.studio",sent:15,limit:30,rep:100,inbox:97,warmup:"Active",total:1050},
+    {email:"tom@reach.au",sent:11,limit:30,rep:98,inbox:96,warmup:"Active",total:1020},
+    {email:"tflood@reach.au",sent:9,limit:30,rep:100,inbox:99,warmup:"Active",total:1030}
+  ],
+  experiments:[
+    {id:"EXP-007",service:"SEO",hyp:"Mentioning they're not showing up on Google creates urgency",status:"active",bRate:"1.5%",cRate:"2.9%",sent:412},
+    {id:"EXP-006",service:"Websites",hyp:"Being direct about website problems converts better",status:"active",bRate:"2.1%",cRate:"3.6%",sent:389},
+    {id:"EXP-005",service:"Branding",hyp:"Noticing branding needs refresh is more specific",status:"active",bRate:"2.8%",cRate:"1.4%",sent:580},
+    {id:"EXP-003",service:"SEO",hyp:"Specific ranking claims outperform generic questions",status:"done",bRate:"1.2%",cRate:"1.5%",learning:"Saying 'you're not showing up' created more urgency than asking about lead sources."},
+    {id:"EXP-002",service:"Websites",hyp:"Price transparency filters for serious buyers",status:"done",bRate:"0.8%",cRate:"2.1%",learning:"Price upfront dramatically increased reply rate. Respondents are pre-qualified on budget."},
+    {id:"EXP-001",service:"Branding",hyp:"Money-back guarantee reduces friction",status:"done",bRate:"1.1%",cRate:"2.8%",learning:"Money-back + 48hr turnaround increased trust. Real designers not AI resonated."}
+  ]
+};
+
+const catC={warm:"#00b894",negative:"#ff6b6b",auto_reply:"#74b9ff",unsubscribe:"#636e72"};
+const catB={warm:"rgba(0,184,148,0.12)",negative:"rgba(255,107,107,0.12)",auto_reply:"rgba(116,185,255,0.12)",unsubscribe:"rgba(99,110,114,0.12)"};
+const gs=()=>({background:"rgba(255,255,255,0.05)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16});
+
+function Stat({label,value,sub,color,bar,pct,bc}){
+  return React.createElement('div',{style:{...gs(),padding:"20px 22px",transition:"all .2s"}},
+    React.createElement('div',{style:{fontSize:10,textTransform:"uppercase",letterSpacing:"1.2px",color:"#6e6e7a",fontWeight:500,marginBottom:10}},label),
+    React.createElement('div',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:28,fontWeight:500,letterSpacing:"-1px",color:color||"#e8e8ed",lineHeight:1}},value),
+    sub&&React.createElement('div',{style:{fontSize:11,color:"#6e6e7a",marginTop:5,fontFamily:"'IBM Plex Mono',monospace"}},sub),
+    bar&&React.createElement('div',{style:{height:4,background:"rgba(255,255,255,0.04)",borderRadius:2,marginTop:12,overflow:"hidden"}},
+      React.createElement('div',{style:{height:"100%",width:Math.min(pct,100)+"%",borderRadius:2,background:bc||"linear-gradient(90deg,#6c5ce7,#00b894)",transition:"width .8s ease"}}))
+  );
+}
+
+function CCard({c,onClick}){
+  const rr=c.sent>0?(c.replies/c.sent*100).toFixed(1):"0.0";
+  const stC=c.status==="testing"?{bg:"rgba(108,92,231,0.15)",c:"#a29bfe",bd:"rgba(108,92,231,0.25)"}:{bg:"rgba(0,184,148,0.12)",c:"#00b894",bd:"rgba(0,184,148,0.2)"};
+  return React.createElement('div',{onClick,style:{...gs(),cursor:"pointer",overflow:"hidden",transition:"all .2s"}},
+    React.createElement('div',{style:{padding:"18px 22px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}},
+      React.createElement('span',{style:{fontSize:14,fontWeight:600}},c.name),
+      React.createElement('span',{style:{fontSize:9,padding:"3px 10px",borderRadius:20,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",background:stC.bg,color:stC.c,border:"1px solid "+stC.bd}},c.status)),
+    React.createElement('div',{style:{display:"flex",borderTop:"1px solid rgba(255,255,255,0.05)"}},
+      [{v:c.sent,l:"Sent"},{v:c.replies,l:"Replies",c:"#00b894"},{v:rr+"%",l:"Rate"},{v:c.bounces,l:"Bounced"}].map((s,i)=>
+        React.createElement('div',{key:i,style:{flex:1,padding:"14px 8px",textAlign:"center",borderRight:i<3?"1px solid rgba(255,255,255,0.05)":"none"}},
+          React.createElement('div',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:16,fontWeight:500,color:s.c||"#e8e8ed"}},s.v),
+          React.createElement('div',{style:{fontSize:9,color:"#6e6e7a",marginTop:2,textTransform:"uppercase",letterSpacing:"0.5px"}},s.l)))),
+    React.createElement('div',{style:{display:"flex",borderTop:"1px solid rgba(255,255,255,0.05)"}},
+      React.createElement('div',{style:{flex:1,padding:"14px 18px",borderRight:"1px solid rgba(255,255,255,0.05)"}},
+        React.createElement('div',{style:{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,color:"#74b9ff",marginBottom:4}},"Baseline"),
+        React.createElement('div',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:18,fontWeight:500}},c.a.rate+"%"),
+        React.createElement('div',{style:{fontSize:10,color:"#6e6e7a"}},c.a.replies+"/"+c.a.sent)),
+      React.createElement('div',{style:{flex:1,padding:"14px 18px"}},
+        React.createElement('div',{style:{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,color:"#a29bfe",marginBottom:4}},"Challenger"),
+        React.createElement('div',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:18,fontWeight:500}},c.b.rate+"%"),
+        React.createElement('div',{style:{fontSize:10,color:"#6e6e7a"}},c.b.replies+"/"+c.b.sent))),
+    React.createElement('div',{style:{padding:"14px 20px",borderTop:"1px solid rgba(255,255,255,0.05)"}},
+      React.createElement('div',{style:{display:"flex",justifyContent:"space-between",fontSize:10,color:"#6e6e7a",marginBottom:6}},
+        React.createElement('span',null,"Test progress"),
+        React.createElement('span',{style:{fontFamily:"'IBM Plex Mono',monospace"}},c.sent+"/"+c.target)),
+      React.createElement('div',{style:{height:4,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}},
+        React.createElement('div',{style:{height:"100%",width:c.progress+"%",borderRadius:2,background:"linear-gradient(90deg,#6c5ce7,#00b894)"}})))
+  );
+}
+
+function Reply({r}){
+  return React.createElement('div',{style:{display:"flex",gap:14,padding:"14px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}},
+    React.createElement('div',{style:{width:38,height:38,borderRadius:10,background:catB[r.category],color:catC[r.category],display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:600,flexShrink:0}},r.name[0]),
+    React.createElement('div',{style:{flex:1,minWidth:0}},
+      React.createElement('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+        React.createElement('span',{style:{fontSize:13,fontWeight:600}},r.name),
+        React.createElement('span',{style:{fontSize:9,padding:"2px 8px",borderRadius:20,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",background:catB[r.category],color:catC[r.category]}},r.category.replace("_"," "))),
+      React.createElement('div',{style:{fontSize:11,color:"#6e6e7a"}},r.company+" · "+r.campaign),
+      React.createElement('div',{style:{fontSize:12,color:"#8e8e9a",marginTop:6,lineHeight:1.6,maxHeight:50,overflow:"hidden"}},r.text),
+      React.createElement('div',{style:{fontSize:10,color:"#4e4e58",marginTop:4,fontFamily:"'IBM Plex Mono',monospace"}},r.time)));
+}
+
+function Modal({c,onClose}){
+  if(!c)return null;
+  const cReplies=data.replies.filter(r=>r.campaign===c.name);
+  return React.createElement('div',{onClick:e=>{if(e.target===e.currentTarget)onClose()},style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",backdropFilter:"blur(10px)",WebkitBackdropFilter:"blur(10px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:40,overflowY:"auto"}},
+    React.createElement('div',{style:{background:"#0c0c14",border:"1px solid rgba(255,255,255,0.08)",borderRadius:20,width:"100%",maxWidth:920,animation:"modalIn .25s ease"}},
+      React.createElement('div',{style:{padding:"24px 28px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",justifyContent:"space-between",alignItems:"center"}},
+        React.createElement('h2',{style:{fontSize:18,fontWeight:600}},c.name),
+        React.createElement('button',{onClick:onClose,style:{width:34,height:34,borderRadius:8,border:"1px solid rgba(255,255,255,0.08)",background:"transparent",color:"#6e6e7a",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}},"✕")),
+      React.createElement('div',{style:{padding:"24px 28px"}},
+        React.createElement('div',{style:{fontSize:13,fontWeight:600,marginBottom:14}},"A/B test — copy comparison"),
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}},
+          [c.a,c.b].map((side,i)=>React.createElement('div',{key:i,style:{borderRadius:14,padding:20,border:"1px solid "+(i===0?"rgba(116,185,255,0.2)":"rgba(108,92,231,0.2)"),background:i===0?"rgba(116,185,255,0.06)":"rgba(108,92,231,0.06)"}},
+            React.createElement('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}},
+              React.createElement('span',{style:{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,padding:"3px 8px",borderRadius:6,background:i===0?"rgba(116,185,255,0.12)":"rgba(108,92,231,0.12)",color:i===0?"#74b9ff":"#a29bfe",border:"1px solid "+(i===0?"rgba(116,185,255,0.2)":"rgba(108,92,231,0.2)")}},side.label+" ("+(i===0?"A":"B")+")"),
+              side.winning&&React.createElement('span',{style:{fontSize:9,color:"#00b894",fontWeight:600,textTransform:"uppercase"}},"★ winning")),
+            React.createElement('div',{style:{fontSize:12,fontWeight:600,marginBottom:8,color:"#b0b0ba"}},"Subject: "+side.subject),
+            React.createElement('div',{style:{fontSize:12,lineHeight:1.7,color:"#7e7e8a",whiteSpace:"pre-wrap"}},side.body),
+            React.createElement('div',{style:{display:"flex",gap:20,marginTop:14,paddingTop:14,borderTop:"1px solid rgba(255,255,255,0.05)"}},
+              [{v:side.sent,l:"Sent"},{v:side.replies,l:"Replies",c:"#00b894"},{v:side.rate+"%",l:"Reply rate"}].map((m,j)=>
+                React.createElement('div',{key:j,style:{textAlign:"center"}},
+                  React.createElement('div',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:18,fontWeight:500,color:m.c||"#e8e8ed"}},m.v),
+                  React.createElement('div',{style:{fontSize:9,color:"#6e6e7a",marginTop:2,textTransform:"uppercase"}},m.l))))))),
+        React.createElement('div',{style:{marginBottom:20}},
+          React.createElement('div',{style:{display:"flex",justifyContent:"space-between",fontSize:10,color:"#6e6e7a",marginBottom:6}},
+            React.createElement('span',null,"Test progress — evaluates at "+c.target+" sends"),
+            React.createElement('span',{style:{fontFamily:"'IBM Plex Mono',monospace"}},c.sent+"/"+c.target)),
+          React.createElement('div',{style:{height:4,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}},
+            React.createElement('div',{style:{height:"100%",width:c.progress+"%",borderRadius:2,background:"linear-gradient(90deg,#6c5ce7,#00b894)"}}))),
+        React.createElement('div',{style:{fontSize:13,fontWeight:600,marginBottom:10}},"Replies from this campaign"),
+        cReplies.length>0?cReplies.map((r,i)=>React.createElement(Reply,{key:i,r})):React.createElement('div',{style:{color:"#6e6e7a",fontSize:13,padding:"20px 0"}},"No replies yet"))));
+}
+
+function App(){
+  const [page,setPage]=useState("overview");
+  const [modal,setModal]=useState(null);
+  const [rf,setRf]=useState("all");
+  const nav=p=>{setPage(p);setModal(null)};
+  const pct=Math.round(data.sentToday/data.dailyCapacity*100);
+  const wc=data.replies.filter(r=>r.category==="warm").length;
+  const filt=rf==="all"?data.replies:data.replies.filter(r=>r.category===rf);
+
+  const navI=[{id:"overview",icon:"◉",l:"Overview"},{id:"campaigns",icon:"◎",l:"Campaigns"},{id:"replies",icon:"◈",l:"Replies"},{id:"leads",icon:"◇",l:"Leads"}];
+  const sysI=[{id:"mailboxes",icon:"◆",l:"Mailboxes"},{id:"experiments",icon:"◐",l:"Experiments"}];
+
+  return React.createElement('div',{style:{minHeight:"100vh",display:"flex",position:"relative"}},
+    // Ambient glow
+    React.createElement('div',{style:{position:"fixed",width:600,height:600,borderRadius:"50%",background:"rgba(108,92,231,0.06)",filter:"blur(150px)",top:-200,right:-150,pointerEvents:"none",animation:"float1 20s ease-in-out infinite"}}),
+    React.createElement('div',{style:{position:"fixed",width:500,height:500,borderRadius:"50%",background:"rgba(0,184,148,0.04)",filter:"blur(150px)",bottom:-150,left:-100,pointerEvents:"none",animation:"float2 25s ease-in-out infinite"}}),
+
+    // Sidebar
+    React.createElement('nav',{style:{width:220,borderRight:"1px solid rgba(255,255,255,0.05)",padding:"24px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"rgba(6,6,11,0.9)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",zIndex:10}},
+      React.createElement('div',{style:{fontSize:18,fontWeight:700,letterSpacing:"-0.5px",padding:"0 10px",marginBottom:36,display:"flex",alignItems:"center",gap:10}},
+        React.createElement('div',{style:{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#6c5ce7,#00b894)",display:"flex",alignItems:"center",justifyContent:"center"}},
+          React.createElement('span',{style:{fontSize:12,color:"white"}},"⚡")),
+        "coldflows"),
+      navI.map(n=>React.createElement('a',{key:n.id,onClick:()=>nav(n.id),style:{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,color:page===n.id?"#e8e8ed":"#6e6e7a",fontSize:13,fontWeight:500,cursor:"pointer",marginBottom:2,transition:"all .15s",background:page===n.id?"rgba(108,92,231,0.1)":"transparent",border:page===n.id?"1px solid rgba(108,92,231,0.2)":"1px solid transparent"}},
+        React.createElement('span',{style:{opacity:page===n.id?1:0.4,fontSize:14}},n.icon),n.l,
+        n.id==="replies"&&wc>0&&React.createElement('span',{style:{marginLeft:"auto",fontSize:10,fontFamily:"'IBM Plex Mono',monospace",color:"#00b894",background:"rgba(0,184,148,0.12)",padding:"1px 6px",borderRadius:10}},wc))),
+      React.createElement('div',{style:{fontSize:9,textTransform:"uppercase",letterSpacing:"1.5px",color:"#3d3d48",padding:"22px 12px 8px",fontWeight:600}},"System"),
+      sysI.map(n=>React.createElement('a',{key:n.id,onClick:()=>nav(n.id),style:{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,color:page===n.id?"#e8e8ed":"#6e6e7a",fontSize:13,fontWeight:500,cursor:"pointer",marginBottom:2,transition:"all .15s",background:page===n.id?"rgba(108,92,231,0.1)":"transparent",border:page===n.id?"1px solid rgba(108,92,231,0.2)":"1px solid transparent"}},
+        React.createElement('span',{style:{opacity:page===n.id?1:0.4,fontSize:14}},n.icon),n.l)),
+      React.createElement('div',{style:{marginTop:"auto",padding:14,borderTop:"1px solid rgba(255,255,255,0.04)"}},
+        React.createElement('div',{style:{fontSize:10,color:"#4e4e58"}},"Current plan"),
+        React.createElement('div',{style:{fontSize:12,fontWeight:600,color:"#00b894",marginTop:2}},"Growth — $2,500/mo"))),
+
+    // Main
+    React.createElement('main',{style:{flex:1,marginLeft:220,padding:"32px 40px",position:"relative",zIndex:1,maxWidth:1100}},
+
+      // Overview
+      page==="overview"&&React.createElement(React.Fragment,null,
+        React.createElement('div',{style:{marginBottom:28}},
+          React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Overview"),
+          React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"Last updated 3 minutes ago")),
+        wc>0&&React.createElement('div',{style:{padding:"12px 18px",borderRadius:12,marginBottom:16,fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,background:"rgba(0,184,148,0.08)",color:"#00b894",border:"1px solid rgba(0,184,148,0.15)"}},
+          React.createElement('div',{style:{width:8,height:8,borderRadius:"50%",background:"#00b894",animation:"pulse 2s infinite"}}),wc+" warm lead"+(wc>1?"s":"")+" waiting for follow-up"),
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12,marginBottom:28}},
+          React.createElement(Stat,{label:"Sent today",value:React.createElement(React.Fragment,null,data.sentToday,React.createElement('span',{style:{fontSize:14,color:"#6e6e7a",fontWeight:400}},"/"+data.dailyCapacity)),bar:true,pct}),
+          React.createElement(Stat,{label:"Total sent",value:data.totalSent.toLocaleString(),sub:"lifetime"}),
+          React.createElement(Stat,{label:"Replies",value:data.totalReplies,color:"#00b894",sub:data.replyRate+"% rate"}),
+          React.createElement(Stat,{label:"Warm leads",value:data.warmLeads,color:"#00b894",sub:"need follow-up"}),
+          React.createElement(Stat,{label:"Bounces",value:data.totalBounces,sub:(data.totalBounces/data.totalSent*100).toFixed(1)+"% rate"}),
+          React.createElement(Stat,{label:"Warmup",value:(data.warmupSent/1000).toFixed(1)+"k",sub:"emails sent"})),
+        React.createElement('div',{style:{fontSize:15,fontWeight:600,marginBottom:14}},"Active campaigns"),
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:28}},
+          data.campaigns.map(c=>React.createElement(CCard,{key:c.id,c,onClick:()=>setModal(c)}))),
+        React.createElement('div',{style:{fontSize:15,fontWeight:600,marginBottom:14}},"Recent replies"),
+        data.replies.slice(0,4).map((r,i)=>React.createElement(Reply,{key:i,r}))),
+
+      // Campaigns
+      page==="campaigns"&&React.createElement(React.Fragment,null,
+        React.createElement('div',{style:{marginBottom:28}},
+          React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Campaigns"),
+          React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"Click any campaign to see A/B test details and copy")),
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}},
+          data.campaigns.map(c=>React.createElement(CCard,{key:c.id,c,onClick:()=>setModal(c)})))),
+
+      // Replies
+      page==="replies"&&React.createElement(React.Fragment,null,
+        React.createElement('div',{style:{marginBottom:28}},
+          React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Replies"),
+          React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"All replies across campaigns")),
+        React.createElement('div',{style:{display:"flex",gap:4,marginBottom:20}},
+          [{id:"all",l:"All",n:data.replies.length},{id:"warm",l:"Warm",n:data.replies.filter(r=>r.category==="warm").length},{id:"negative",l:"Negative",n:data.replies.filter(r=>r.category==="negative").length},{id:"auto_reply",l:"Auto-reply",n:data.replies.filter(r=>r.category==="auto_reply").length},{id:"unsubscribe",l:"Unsub",n:data.replies.filter(r=>r.category==="unsubscribe").length}].map(t=>
+            React.createElement('div',{key:t.id,onClick:()=>setRf(t.id),style:{padding:"8px 14px",borderRadius:10,fontSize:12,fontWeight:500,cursor:"pointer",transition:"all .15s",color:rf===t.id?"#e8e8ed":"#6e6e7a",background:rf===t.id?"rgba(108,92,231,0.1)":"transparent",border:rf===t.id?"1px solid rgba(108,92,231,0.2)":"1px solid transparent"}},t.l," ",React.createElement('span',{style:{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,opacity:0.5}},t.n)))),
+        filt.map((r,i)=>React.createElement(Reply,{key:i,r}))),
+
+      // Leads
+      page==="leads"&&React.createElement(React.Fragment,null,
+        React.createElement('div',{style:{marginBottom:28}},
+          React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Leads"),
+          React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"All leads across campaigns")),
+        React.createElement('div',{style:{...gs(),padding:0,overflow:"hidden"}},
+          React.createElement('table',{style:{width:"100%",borderCollapse:"collapse"}},
+            React.createElement('thead',null,React.createElement('tr',null,
+              ["Lead","Company","Campaign","Status","Seq"].map(h=>React.createElement('th',{key:h,style:{textAlign:"left",fontSize:9,textTransform:"uppercase",letterSpacing:"1px",color:"#3d3d48",fontWeight:500,padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.05)"}},h)))),
+            React.createElement('tbody',null,
+              [{n:"Sarah Chen",e:"sarah@bloomstudio.com.au",co:"Bloom Studio",ca:"Logo & branding",s:"replied",sq:"2/3"},
+               {n:"Marcus Webb",e:"marcus@webbeng.com.au",co:"Webb Engineering",ca:"Website builds",s:"replied",sq:"1/3"},
+               {n:"Raj Patel",e:"raj@cloudmetrics.io",co:"CloudMetrics",ca:"SEO services",s:"replied",sq:"2/3"},
+               {n:"James Park",e:"james@greenfield.com.au",co:"Greenfield Co",ca:"SEO services",s:"sent",sq:"2/3"},
+               {n:"Anna Rivera",e:"anna@designloft.com",co:"Design Loft",ca:"Logo & branding",s:"sent",sq:"1/3"},
+               {n:"Mike Torres",e:"mike@steelworks.com.au",co:"Steelworks AU",ca:"Website builds",s:"sent",sq:"3/3"},
+               {n:"Kim Nguyen",e:"kim@freshfoods.com.au",co:"Fresh Foods",ca:"Shopify dev",s:"bounced",sq:"1/3"},
+               {n:"Paul Garcia",e:"paul@nextlevel.io",co:"NextLevel",ca:"SEO services",s:"pending",sq:"0/3"}
+              ].map((l,i)=>React.createElement('tr',{key:i},
+                React.createElement('td',{style:{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.03)"}},
+                  React.createElement('div',{style:{fontWeight:500,fontSize:13}},l.n),
+                  React.createElement('div',{style:{fontSize:11,color:"#6e6e7a",fontFamily:"'IBM Plex Mono',monospace"}},l.e)),
+                React.createElement('td',{style:{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.03)",fontSize:12}},l.co),
+                React.createElement('td',{style:{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.03)",fontSize:12}},l.ca),
+                React.createElement('td',{style:{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.03)",fontSize:12}},
+                  React.createElement('span',{style:{display:"inline-block",width:7,height:7,borderRadius:"50%",marginRight:6,background:{sent:"#74b9ff",replied:"#00b894",bounced:"#ff6b6b",pending:"#3d3d48"}[l.s]}}),l.s),
+                React.createElement('td',{style:{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.03)",fontSize:12,fontFamily:"'IBM Plex Mono',monospace"}},l.sq))))))),
+
+      // Mailboxes
+      page==="mailboxes"&&React.createElement(React.Fragment,null,
+        React.createElement('div',{style:{marginBottom:28}},
+          React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Mailboxes"),
+          React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"Email account health and sending")),
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}},
+          data.mailboxes.map((m,i)=>{
+            const rc=m.rep>=95?"#00b894":m.rep>=80?"#fdcb6e":"#ff6b6b";
+            return React.createElement('div',{key:i,style:{...gs(),padding:18}},
+              React.createElement('div',{style:{fontSize:11,fontWeight:600,color:"#a29bfe",marginBottom:12,fontFamily:"'IBM Plex Mono',monospace",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},m.email),
+              [["Sent today",m.sent+"/"+m.limit],["Warmup",m.warmup],["Inbox rate",m.inbox+"%"],["Warmup sent",m.total.toLocaleString()]].map(([l,v],j)=>
+                React.createElement('div',{key:j,style:{display:"flex",justifyContent:"space-between",fontSize:11,color:"#6e6e7a",marginBottom:4}},
+                  React.createElement('span',null,l),React.createElement('span',{style:{color:l==="Warmup"?"#00b894":"#e8e8ed",fontFamily:"'IBM Plex Mono',monospace",fontWeight:500}},v))),
+              React.createElement('div',{style:{marginTop:8}},
+                React.createElement('div',{style:{display:"flex",justifyContent:"space-between",fontSize:11,color:"#6e6e7a",marginBottom:4}},
+                  React.createElement('span',null,"Reputation"),React.createElement('span',{style:{color:rc,fontFamily:"'IBM Plex Mono',monospace",fontWeight:500}},m.rep+"/100")),
+                React.createElement('div',{style:{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}},
+                  React.createElement('div',{style:{height:"100%",width:m.rep+"%",borderRadius:2,background:rc}}))))}))),
+
+      // Experiments
+      page==="experiments"&&React.createElement(React.Fragment,null,
+        React.createElement('div',{style:{marginBottom:28}},
+          React.createElement('h1',{style:{fontSize:24,fontWeight:700,letterSpacing:"-0.5px"}},"Experiments"),
+          React.createElement('p',{style:{fontSize:12,color:"#6e6e7a",marginTop:4}},"Self-learning copy optimisation")),
+        React.createElement('div',{style:{fontSize:14,fontWeight:600,marginBottom:12}},"Active experiments"),
+        data.experiments.filter(e=>e.status==="active").map((e,i)=>
+          React.createElement('div',{key:i,style:{display:"flex",gap:14,padding:"14px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}},
+            React.createElement('div',{style:{width:8,height:8,borderRadius:"50%",background:"#a29bfe",marginTop:6,flexShrink:0}}),
+            React.createElement('div',null,
+              React.createElement('div',{style:{fontSize:13,fontWeight:500}},e.id+" — "+e.service),
+              React.createElement('div',{style:{fontSize:11,color:"#6e6e7a",marginTop:2}},e.hyp),
+              React.createElement('div',{style:{fontSize:11,color:"#6e6e7a",marginTop:6,fontFamily:"'IBM Plex Mono',monospace"}},"B: "+e.bRate+" → C: "+e.cRate+" · "+e.sent+" sent")))),
+        React.createElement('div',{style:{fontSize:14,fontWeight:600,marginTop:28,marginBottom:12}},"Completed — learnings applied"),
+        data.experiments.filter(e=>e.status==="done").map((e,i)=>
+          React.createElement('div',{key:i,style:{display:"flex",gap:14,padding:"14px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}},
+            React.createElement('div',{style:{width:8,height:8,borderRadius:"50%",background:"#00b894",marginTop:6,flexShrink:0}}),
+            React.createElement('div',null,
+              React.createElement('div',{style:{fontSize:13,fontWeight:500}},e.id+" — "+e.service," ",React.createElement('span',{style:{color:"#00b894",fontSize:10}},"★ challenger won")),
+              React.createElement('div',{style:{fontSize:11,color:"#6e6e7a",marginTop:2,fontFamily:"'IBM Plex Mono',monospace"}},"B: "+e.bRate+" → C: "+e.cRate),
+              React.createElement('div',{style:{fontSize:11,color:"#7e7e8a",marginTop:4,fontStyle:"italic",lineHeight:1.6}},'"'+e.learning+'"')))))),
+
+    modal&&React.createElement(Modal,{c:modal,onClose:()=>setModal(null)})
+  );
+}
+
+ReactDOM.render(React.createElement(App), document.getElementById('root'));
+</script>
+</body>
+</html>
