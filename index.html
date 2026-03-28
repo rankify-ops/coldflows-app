@@ -520,13 +520,13 @@ function App(){
           const day=a.daysSinceStart;
 
           const phases=[
-            {id:1,name:"Warmup",range:"Day 1–14",emails:60,unit:"/day",desc:"Building sender reputation",day:0,endDay:14,
+            {id:1,name:"Warmup",range:"Day 1–14",emails:60,weekly:420,unit:"/day",desc:"Building sender reputation",day:0,endDay:14,
               unlocks:["Domain authentication","Warmup emails active","Reputation monitoring","Deliverability tracking"]},
-            {id:2,name:"Phase 1",range:"Day 15–21",emails:120,unit:"/day",desc:"Initial outreach begins",day:14,endDay:21,
+            {id:2,name:"Phase 1",range:"Day 15–21",emails:120,weekly:840,unit:"/day",desc:"Initial outreach begins",day:14,endDay:21,
               unlocks:["Live outreach enabled","A/B copy testing","Lead sourcing active","Reply classification"]},
-            {id:3,name:"Phase 2",range:"Day 22–28",emails:200,unit:"/day",desc:"Volume ramp-up",day:21,endDay:28,
+            {id:3,name:"Phase 2",range:"Day 22–28",emails:200,weekly:1400,unit:"/day",desc:"Volume ramp-up",day:21,endDay:28,
               unlocks:["200 emails/day capacity","AI copy optimisation","Advanced targeting","Multi-sequence campaigns"]},
-            {id:4,name:"Full capacity",range:"Day 29+",emails:300,unit:"+/day",desc:"Maximum performance",day:28,endDay:60,
+            {id:4,name:"Full capacity",range:"Day 29+",emails:300,weekly:2100,unit:"+/day",desc:"Maximum performance",day:28,endDay:60,
               unlocks:["300+ emails/day unlocked","Self-learning copy loop","Predictive send timing","Peak performance analytics"]}
           ];
 
@@ -567,8 +567,9 @@ function App(){
                     {active&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:6,background:"var(--green-bg)",color:"var(--green)",fontWeight:700,border:"1px solid var(--green-bd)"}}>NOW</span>}
                   </div>
 
-                  {/* Volume */}
-                  <div style={{fontFamily:"var(--mono)",fontSize:26,fontWeight:700,color:done||active?"var(--text)":"var(--text3)",lineHeight:1}}>{p.emails}<span style={{fontSize:12,fontWeight:400,color:"var(--text3)"}}>{p.unit}</span></div>
+                  {/* Volume — weekly is the hero */}
+                  <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:done||active?"var(--text)":"var(--text3)",lineHeight:1}}>{p.weekly.toLocaleString()}<span style={{fontSize:11,fontWeight:400,color:"var(--text3)"}}>/week</span></div>
+                  <div style={{fontSize:11,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{p.emails}{p.unit}</div>
 
                   {/* Range */}
                   <div style={{fontSize:10,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{p.range}</div>
