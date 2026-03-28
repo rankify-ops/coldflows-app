@@ -53,6 +53,38 @@ const D = {
       a:{l:"Baseline",sub:"shopify dev for {{company_name}}",body:"Hey {{first_name}},\n\nDo you have a developer for your Shopify store?\n\nMonthly retainer starting at $249/mo — submit requests, I build them. No lock-in.",sent:233,rep:4,rate:1.7,w:true},
       b:{l:"Challenger",sub:"re: {{company_name}} shopify",body:"Hey {{first_name}},\n\nWhat's on your Shopify store's to-do list right now?\n\nCustom layouts, speed fixes, app integrations — $249/mo. No contracts.",sent:233,rep:2,rate:0.9}}
   ],
+  leads:[
+    {id:1,n:"Sarah Chen",e:"sarah@bloomstudio.com.au",co:"Bloom Studio",ca:"Logo & branding",s:"replied",sq:"2/3",
+      steps:[
+        {seq:1,st:"delivered",dt:"Mar 22, 9:14am",sub:"branding for Bloom Studio",body:"Hey Sarah,\n\nAre you happy with Bloom Studio's logo and branding?\n\n$499, 48-hour delivery, 100% money-back guarantee. Real designers, not AI.",frm:"thomas@outreach.studio"},
+        {seq:2,st:"replied",dt:"Mar 24, 11:20am",sub:"re: branding for Bloom Studio",body:"Sarah — just following up. Most businesses I work with haven't updated their branding in years.",frm:"tom@outreach.studio",rpl:{dt:"Mar 24, 2:45pm",txt:"Hi! Yes we've been thinking about rebranding. Can you send examples? Our current logo feels dated."}},
+        {seq:3,st:"skipped",dt:"—",sub:"re: branding for Bloom Studio",body:"Final one from me Sarah.",frm:"—",note:"Skipped — lead replied"}]},
+    {id:2,n:"Marcus Webb",e:"marcus@webbeng.com.au",co:"Webb Engineering",ca:"Website builds",s:"replied",sq:"1/3",
+      steps:[
+        {seq:1,st:"replied",dt:"Mar 21, 8:07am",sub:"website for Webb Engineering",body:"Hey Marcus,\n\nI looked at Webb Engineering's website. Honestly — you're losing customers.\n\nSlow load, not mobile-friendly, dated design.",frm:"tom@reach.au",rpl:{dt:"Mar 21, 3:12pm",txt:"Our website is definitely overdue. What's your process and can you show recent builds?"}},
+        {seq:2,st:"skipped",dt:"—",sub:"re: website for Webb Engineering",body:"Marcus — just following up.",frm:"—",note:"Skipped — lead replied"},
+        {seq:3,st:"skipped",dt:"—",sub:"re: website for Webb Engineering",body:"Final one from me.",frm:"—",note:"Skipped — lead replied"}]},
+    {id:3,n:"Raj Patel",e:"raj@cloudmetrics.io",co:"CloudMetrics",ca:"SEO services",s:"replied",sq:"2/3",
+      steps:[
+        {seq:1,st:"delivered",dt:"Mar 20, 9:30am",sub:"quick question about CloudMetrics",body:"Hey Raj,\n\nI searched for what CloudMetrics does on Google and you're not showing up in the first few results.",frm:"thomas@outreach.studio"},
+        {seq:2,st:"replied",dt:"Mar 22, 10:15am",sub:"re: quick question about CloudMetrics",body:"Raj — following up. Most businesses don't realise how much revenue they're losing.",frm:"tflood@reach.au",rpl:{dt:"Mar 22, 4:30pm",txt:"Interesting timing — we just discussed our organic traffic declining. Would love to chat. Free Thursday?"}},
+        {seq:3,st:"skipped",dt:"—",sub:"—",body:"—",frm:"—",note:"Skipped — lead replied"}]},
+    {id:4,n:"James Park",e:"james@greenfield.com.au",co:"Greenfield Co",ca:"SEO services",s:"sent",sq:"2/3",
+      steps:[
+        {seq:1,st:"delivered",dt:"Mar 23, 8:45am",sub:"quick question about Greenfield Co",body:"Hey James,\n\nI searched for what Greenfield Co does on Google and you're not showing up.",frm:"tom@outreach.studio"},
+        {seq:2,st:"delivered",dt:"Mar 25, 9:20am",sub:"re: quick question about Greenfield Co",body:"James — following up on my last email.",frm:"thomas@outreach.studio"},
+        {seq:3,st:"pending",dt:"Due Mar 27",sub:"re: quick question about Greenfield Co",body:"Final follow-up.",frm:"—",note:"Scheduled"}]},
+    {id:5,n:"Anna Rivera",e:"anna@designloft.com",co:"Design Loft",ca:"Logo & branding",s:"sent",sq:"1/3",
+      steps:[
+        {seq:1,st:"delivered",dt:"Mar 25, 10:05am",sub:"branding for Design Loft",body:"Hey Anna,\n\nAre you happy with Design Loft's logo and branding?",frm:"tflood@reach.au"},
+        {seq:2,st:"pending",dt:"Due Mar 27",sub:"re: branding for Design Loft",body:"Anna — following up.",frm:"—",note:"Scheduled"},
+        {seq:3,st:"pending",dt:"Due Mar 29",sub:"re: branding for Design Loft",body:"Final one from me.",frm:"—",note:"Scheduled"}]},
+    {id:6,n:"Kim Nguyen",e:"kim@freshfoods.com.au",co:"Fresh Foods",ca:"Shopify dev",s:"bounced",sq:"1/3",
+      steps:[
+        {seq:1,st:"bounced",dt:"Mar 24, 8:30am",sub:"shopify dev for Fresh Foods",body:"Hey Kim,\n\nDo you have a developer for your Shopify store?",frm:"tom@reach.au",note:"554 5.7.1 Spam message rejected"},
+        {seq:2,st:"skipped",dt:"—",sub:"—",body:"—",frm:"—",note:"Skipped — email bounced"},
+        {seq:3,st:"skipped",dt:"—",sub:"—",body:"—",frm:"—",note:"Skipped — email bounced"}]}
+  ],
   reps:[
     {nm:"Sarah Chen",co:"Bloom Studio",em:"sarah@bloomstudio.com.au",ca:"Logo & branding",cat:"warm",txt:"Hi! Yes we've been thinking about rebranding. Can you send examples? Our current logo feels dated.",t:"2h ago"},
     {nm:"Marcus Webb",co:"Webb Engineering",em:"marcus@webbeng.com.au",ca:"Website builds",cat:"warm",txt:"Our website is definitely overdue. What's your process and can you show recent builds?",t:"5h ago"},
@@ -185,11 +217,112 @@ function Modal({c,onClose}){
   </div>;
 }
 
+function LeadDetail({lead,onClose}){
+  if(!lead)return null;
+  const stColor={delivered:"var(--green)",replied:"var(--green)",pending:"var(--text3)",skipped:"var(--text3)",bounced:"var(--red)"};
+  const stGlow={delivered:"0 0 12px rgba(0,212,126,0.4)",replied:"0 0 12px rgba(0,212,126,0.6)",bounced:"0 0 12px rgba(255,71,87,0.4)"};
+  const stLabel={delivered:"Delivered",replied:"Replied",pending:"Pending",skipped:"Skipped",bounced:"Bounced"};
+
+  return <div onClick={e=>{if(e.target===e.currentTarget)onClose()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:40,overflowY:"auto"}}>
+    <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:700,animation:"fadeIn .3s ease"}}>
+      {/* Header */}
+      <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div>
+          <h2 style={{fontSize:20,fontWeight:800}}>{lead.n}</h2>
+          <div style={{fontSize:12,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{lead.e}</div>
+          <div style={{fontSize:12,color:"var(--text2)",marginTop:2}}>{lead.co} · {lead.ca}</div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:9,padding:"4px 10px",borderRadius:20,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.5px",
+            background:lead.s==="replied"?"var(--green-bg)":lead.s==="bounced"?"var(--red-bg)":"rgba(255,255,255,0.04)",
+            color:lead.s==="replied"?"var(--green)":lead.s==="bounced"?"var(--red)":"var(--text2)",
+            border:"1px solid "+(lead.s==="replied"?"var(--green-bd)":lead.s==="bounced"?"rgba(255,71,87,0.2)":"var(--border)")}}>{lead.s}</span>
+          <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        </div>
+      </div>
+
+      {/* Sequence Flow */}
+      <div style={{padding:"28px 28px"}}>
+        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:24}}>Email sequence flow</div>
+
+        <div style={{position:"relative"}}>
+          {lead.steps.map((step,i)=>{
+            const isLast=i===lead.steps.length-1;
+            const isActive=step.st==="delivered"||step.st==="replied";
+            const hasReply=!!step.rpl;
+
+            return <div key={i} style={{position:"relative",paddingLeft:40,paddingBottom:isLast?0:32,minHeight:isLast?'auto':80}}>
+
+              {/* Vertical connecting line */}
+              {!isLast&&<div style={{position:"absolute",left:15,top:32,bottom:0,width:2,
+                background:isActive?"var(--green)":"var(--border)",
+                boxShadow:isActive?"0 0 8px rgba(0,212,126,0.3)":"none"}}/>}
+
+              {/* Node dot */}
+              <div style={{position:"absolute",left:8,top:8,width:16,height:16,borderRadius:"50%",
+                background:stColor[step.st]||"var(--text3)",
+                border:"2px solid "+(stColor[step.st]||"var(--text3)"),
+                boxShadow:stGlow[step.st]||"none",
+                display:"flex",alignItems:"center",justifyContent:"center"}}>
+                {step.st==="delivered"&&<div style={{width:6,height:6,borderRadius:"50%",background:"#000"}}/>}
+                {step.st==="replied"&&<div style={{width:0,height:0,borderLeft:"5px solid #000",borderTop:"3px solid transparent",borderBottom:"3px solid transparent",marginLeft:1}}/>}
+                {step.st==="bounced"&&<div style={{color:"#000",fontSize:10,fontWeight:800,lineHeight:1}}>!</div>}
+              </div>
+
+              {/* Step content card */}
+              <Card style={{padding:16,background:isActive?"var(--glass-h)":"var(--glass)",borderColor:step.st==="replied"?"var(--green-bd)":step.st==="bounced"?"rgba(255,71,87,0.15)":"var(--border)"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:10,fontWeight:700,color:stColor[step.st],textTransform:"uppercase",letterSpacing:"0.5px"}}>{stLabel[step.st]}</span>
+                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Sequence {step.seq}/3</span>
+                  </div>
+                  <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{step.dt}</span>
+                </div>
+
+                {step.st!=="skipped"&&step.st!=="pending"&&<>
+                  <div style={{fontSize:12,fontWeight:600,color:"var(--text)",marginBottom:6}}>Subject: {step.sub}</div>
+                  <div style={{fontSize:11,lineHeight:1.6,color:"var(--text3)",whiteSpace:"pre-wrap",maxHeight:80,overflow:"hidden"}}>{step.body}</div>
+                  {step.frm!=="—"&&<div style={{fontSize:10,color:"var(--text3)",marginTop:6,fontFamily:"var(--mono)"}}>From: {step.frm}</div>}
+                </>}
+
+                {(step.st==="skipped"||step.st==="pending")&&<div style={{fontSize:11,color:"var(--text3)",fontStyle:"italic"}}>{step.note||"Pending"}</div>}
+
+                {step.st==="bounced"&&step.note&&<div style={{fontSize:10,color:"var(--red)",marginTop:6,fontFamily:"var(--mono)"}}>{step.note}</div>}
+              </Card>
+
+              {/* Reply card with green accent */}
+              {hasReply&&<div style={{marginTop:12,marginLeft:20,position:"relative"}}>
+                {/* Reply connector line */}
+                <div style={{position:"absolute",left:-20,top:0,width:20,height:20,borderLeft:"2px solid var(--green)",borderBottom:"2px solid var(--green)",borderBottomLeftRadius:8,boxShadow:"-2px 2px 6px rgba(0,212,126,0.15)"}}/>
+
+                <Card style={{padding:14,borderColor:"var(--green-bd)",background:"var(--green-bg)"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                    <span style={{fontSize:10,fontWeight:700,color:"var(--green)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Lead replied</span>
+                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{step.rpl.dt}</span>
+                  </div>
+                  <div style={{fontSize:12,lineHeight:1.6,color:"var(--text)"}}>{step.rpl.txt}</div>
+                </Card>
+              </div>}
+            </div>;
+          })}
+        </div>
+
+        {/* Reply action */}
+        {lead.s==="replied"&&<div style={{marginTop:24,display:"flex",gap:10}}>
+          <a href={"mailto:"+lead.e} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 20px",borderRadius:10,background:"var(--green)",color:"#000",fontSize:12,fontWeight:700,textDecoration:"none",cursor:"pointer",boxShadow:"0 0 20px rgba(0,212,126,0.3)"}}>Reply to {lead.n.split(" ")[0]}</a>
+          <button style={{padding:"10px 20px",borderRadius:10,background:"var(--glass)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12,fontWeight:600,cursor:"pointer"}}>Copy email</button>
+        </div>}
+      </div>
+    </div>
+  </div>;
+}
+
 function App(){
   const [pg,setPg]=useState("overview");
   const [md,setMd]=useState(null);
   const [rf,setRf]=useState("all");
-  const nav=p=>{setPg(p);setMd(null)};
+  const [ld,setLd]=useState(null);
+  const nav=p=>{setPg(p);setMd(null);setLd(null)};
   const pct=Math.round(D.sentToday/D.cap*100);
   const wc=D.reps.filter(r=>r.cat==="warm").length;
   const fl=rf==="all"?D.reps:D.reps.filter(r=>r.cat===rf);
@@ -276,18 +409,12 @@ function App(){
       </div>}
 
       {pg==="leads"&&<div className="fade-in">
-        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Leads</h1></div>
+        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Leads</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Click a lead to view their email sequence flow</p></div>
         <Card style={{padding:0,overflow:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",minWidth:600}}>
             <thead><tr>{["Lead","Company","Campaign","Status","Seq"].map(h=><th key={h} style={{textAlign:"left",fontSize:9,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",fontWeight:600,padding:"14px 16px",borderBottom:"1px solid var(--border)"}}>{h}</th>)}</tr></thead>
             <tbody>
-              {[{n:"Sarah Chen",e:"sarah@bloomstudio.com.au",co:"Bloom Studio",ca:"Logo & branding",s:"replied",sq:"2/3"},
-                {n:"Marcus Webb",e:"marcus@webbeng.com.au",co:"Webb Engineering",ca:"Website builds",s:"replied",sq:"1/3"},
-                {n:"Raj Patel",e:"raj@cloudmetrics.io",co:"CloudMetrics",ca:"SEO services",s:"replied",sq:"2/3"},
-                {n:"James Park",e:"james@greenfield.com.au",co:"Greenfield Co",ca:"SEO services",s:"sent",sq:"2/3"},
-                {n:"Anna Rivera",e:"anna@designloft.com",co:"Design Loft",ca:"Logo & branding",s:"sent",sq:"1/3"},
-                {n:"Kim Nguyen",e:"kim@freshfoods.com.au",co:"Fresh Foods",ca:"Shopify dev",s:"bounced",sq:"1/3"},
-              ].map((l,i)=><tr key={i}>
+              {D.leads.map((l,i)=><tr key={i} onClick={()=>setLd(l)} style={{cursor:"pointer",transition:"background .15s"}}>
                 <td style={{padding:"12px 16px",borderBottom:"1px solid var(--border)"}}>
                   <div style={{fontWeight:600,fontSize:13}}>{l.n}</div>
                   <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{l.e}</div>
@@ -354,6 +481,7 @@ function App(){
     </main>
 
     {md&&<Modal c={md} onClose={()=>setMd(null)}/>}
+    {ld&&<LeadDetail lead={ld} onClose={()=>setLd(null)}/>}
   </div>;
 }
 
