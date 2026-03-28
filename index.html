@@ -116,10 +116,10 @@ const D = {
     {nm:"Karen White",co:"White Accounting",em:"karen@white.com.au",ca:"Logo & branding",cat:"unsubscribe",txt:"Please remove me from your mailing list.",t:"3d ago"}
   ],
   mbs:[
-    {em:"thomas@outreach.studio",s:12,lim:30,rep:100,inb:98,ws:"Active",wt:1100},
-    {em:"tom@outreach.studio",s:15,lim:30,rep:100,inb:97,ws:"Active",wt:1050},
-    {em:"tom@reach.au",s:11,lim:30,rep:98,inb:96,ws:"Active",wt:1020},
-    {em:"tflood@reach.au",s:9,lim:30,rep:100,inb:99,ws:"Active",wt:1030}
+    {em:"thomas@outreach.studio",s:12,lim:30,rep:100,inb:98,ws:"Active",wt:1100,day:12},
+    {em:"tom@outreach.studio",s:15,lim:30,rep:100,inb:97,ws:"Active",wt:1050,day:12},
+    {em:"tom@reach.au",s:11,lim:30,rep:98,inb:96,ws:"Active",wt:1020,day:12},
+    {em:"tflood@reach.au",s:9,lim:30,rep:100,inb:99,ws:"Active",wt:1030,day:12}
   ],
   exps:[
     {id:"EXP-007",svc:"SEO",hyp:"Mentioning they're not showing up creates urgency",st:"active",b:"1.5%",c:"2.9%",s:412},
@@ -128,6 +128,44 @@ const D = {
     {id:"EXP-003",svc:"SEO",hyp:"Specific ranking claims outperform generic questions",st:"done",b:"1.2%",c:"1.5%",learn:"'You're not showing up' created more urgency than asking about lead sources."},
     {id:"EXP-002",svc:"Websites",hyp:"Price transparency filters for serious buyers",st:"done",b:"0.8%",c:"2.1%",learn:"Price upfront dramatically increased reply rate. Respondents pre-qualified on budget."},
     {id:"EXP-001",svc:"Branding",hyp:"Money-back guarantee reduces friction",st:"done",b:"1.1%",c:"2.8%",learn:"Money-back + 48hr turnaround increased trust. Real designers not AI resonated."}
+  ],
+  tree:[
+    {gen:1,month:"Oct",svc:"SEO",change:"copy",
+      a:{sub:"SEO for {{company}}",rate:0.8,sent:500,status:"lost",summary:"Generic SEO pitch"},
+      b:{sub:"{{company}} + Google rankings",rate:1.2,sent:500,status:"promoted",summary:"Mentioned Google specifically"},
+      learning:"Mentioning Google by name increased relevance"},
+    {gen:2,month:"Oct",svc:"SEO",change:"copy",
+      a:{sub:"{{company}} + Google rankings",rate:1.2,sent:600,status:"promoted",summary:"Promoted from Gen 1 winner"},
+      b:{sub:"quick question about {{company}}",rate:1.5,sent:600,status:"promoted",summary:"Casual subject line, question format"},
+      learning:"Question-based subjects outperform statements. Promoted challenger."},
+    {gen:3,month:"Nov",svc:"SEO",change:"copy",
+      a:{sub:"quick question about {{company}}",rate:1.5,sent:800,status:"lost",summary:"Promoted from Gen 2"},
+      b:{sub:"{{company}} isn't showing up on Google",rate:2.1,sent:800,status:"promoted",summary:"Direct, specific claim about their visibility"},
+      learning:"Specific negative claims ('you're NOT showing up') dramatically outperform generic questions"},
+    {gen:4,month:"Dec",svc:"SEO",change:"body",
+      a:{sub:"{{company}} isn't showing up on Google",rate:2.1,sent:1000,status:"lost",summary:"Long body with stats and case study"},
+      b:{sub:"{{company}} isn't showing up on Google",rate:2.9,sent:1000,status:"promoted",summary:"Short body, 3 lines max, direct CTA"},
+      learning:"Shorter emails convert better. Removed case study, kept to 3 punchy lines."},
+    {gen:5,month:"Jan",svc:"SEO",change:"copy",
+      a:{sub:"{{company}} isn't showing up on Google",rate:2.9,sent:1200,status:"current",summary:"Current champion — short & direct"},
+      b:{sub:"I searched for {{company}} on Google",rate:3.1,sent:800,status:"testing",summary:"First-person framing, implies research done"},
+      learning:null},
+    {gen:1,month:"Oct",svc:"Websites",change:"copy",
+      a:{sub:"website for {{company}}",rate:0.6,sent:400,status:"lost",summary:"Generic website pitch"},
+      b:{sub:"{{company}}'s website needs work",rate:0.8,sent:400,status:"promoted",summary:"Direct critique approach"},
+      learning:"Direct approach slightly better but both low. Need stronger hook."},
+    {gen:2,month:"Nov",svc:"Websites",change:"copy",
+      a:{sub:"{{company}}'s website needs work",rate:0.8,sent:600,status:"lost",summary:"Critique without specifics"},
+      b:{sub:"website for {{company}} — $5,999",rate:2.1,sent:600,status:"promoted",summary:"Price in subject line"},
+      learning:"Price transparency in first touch dramatically increased replies. Pre-qualifies on budget."},
+    {gen:3,month:"Dec",svc:"Websites",change:"body",
+      a:{sub:"website for {{company}} — $5,999",rate:2.1,sent:800,status:"lost",summary:"Listed features and timeline"},
+      b:{sub:"{{first_name}}, quick one",rate:3.6,sent:800,status:"promoted",summary:"Casual, personal, short. Critique their site directly"},
+      learning:"Casual first-name subject + direct site critique massively outperformed. Feels personal."},
+    {gen:4,month:"Jan",svc:"Websites",change:"copy",
+      a:{sub:"{{first_name}}, quick one",rate:3.6,sent:1000,status:"current",summary:"Current champion — casual & direct"},
+      b:{sub:"I looked at {{company}}'s website",rate:2.8,sent:600,status:"testing",summary:"Research-implied approach"},
+      learning:null}
   ]
 };
 
@@ -222,32 +260,186 @@ function Reply({r}){
 function Modal({c,onClose}){
   if(!c)return null;
   const cr=D.reps.filter(r=>r.ca===c.name);
-  return <div onClick={e=>{if(e.target===e.currentTarget)onClose()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:40,overflowY:"auto"}}>
-    <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:940,animation:"fadeIn .3s ease"}}>
-      <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <h2 style={{fontSize:18,fontWeight:700}}>{c.name}</h2>
+  const phase=getPhase(c.day);
+  const phases=[
+    {name:"Warmup",weekly:420,day:0,endDay:14},
+    {name:"Phase 1",weekly:840,day:14,endDay:21},
+    {name:"Phase 2",weekly:"1,400",day:21,endDay:28},
+    {name:"Full capacity",weekly:"2,100+",day:28,endDay:60}
+  ];
+  const nextPhase=phases.find(p=>c.day<p.day);
+  const daysToNext=nextPhase?nextPhase.day-c.day:0;
+
+  // 6 months of mock A/B test history — reply rate climbing with each optimisation
+  const testHistory=[
+    {id:"EXP-01",month:"Oct",week:"W1-2",baseline:{sub:"Generic intro",rate:0.8},challenger:{sub:"Pain point opener",rate:1.2},winner:"challenger",learning:"Leading with a specific pain point outperformed generic introductions",rateAfter:1.2},
+    {id:"EXP-02",month:"Oct",week:"W3-4",baseline:{sub:"Pain point opener",rate:1.2},challenger:{sub:"+ Price upfront",rate:1.8},winner:"challenger",learning:"Adding price in the first email pre-qualifies leads and increases reply quality",rateAfter:1.8},
+    {id:"EXP-03",month:"Nov",week:"W1-2",baseline:{sub:"Price upfront",rate:1.8},challenger:{sub:"+ Social proof",rate:1.6},winner:"baseline",learning:"Social proof didn't improve rates — prospects prefer directness over testimonials",rateAfter:1.8},
+    {id:"EXP-04",month:"Nov",week:"W3-4",baseline:{sub:"Price upfront",rate:1.8},challenger:{sub:"+ Competitor mention",rate:2.3},winner:"challenger",learning:"Mentioning they're losing to competitors created urgency. Biggest jump so far",rateAfter:2.3},
+    {id:"EXP-05",month:"Dec",week:"W1-2",baseline:{sub:"Competitor mention",rate:2.3},challenger:{sub:"+ Question format",rate:2.1},winner:"baseline",learning:"Direct statements outperform questions in subject lines for this ICP",rateAfter:2.3},
+    {id:"EXP-06",month:"Dec",week:"W3-4",baseline:{sub:"Competitor mention",rate:2.3},challenger:{sub:"+ Shorter copy",rate:2.7},winner:"challenger",learning:"Cutting email length by 40% increased replies. Less is more",rateAfter:2.7},
+    {id:"EXP-07",month:"Jan",week:"W1-2",baseline:{sub:"Short + competitor",rate:2.7},challenger:{sub:"+ Personalised opener",rate:2.5},winner:"baseline",learning:"Generic personalisation tokens didn't help — specificity matters more than {{first_name}}",rateAfter:2.7},
+    {id:"EXP-08",month:"Jan",week:"W3-4",baseline:{sub:"Short + competitor",rate:2.7},challenger:{sub:"+ CTA variation",rate:3.1},winner:"challenger",learning:"Soft CTA ('worth a look?') beat hard CTA ('book a call'). Lower commitment = higher reply",rateAfter:3.1},
+    {id:"EXP-09",month:"Feb",week:"W1-2",baseline:{sub:"Soft CTA",rate:3.1},challenger:{sub:"+ Send time test",rate:3.4},winner:"challenger",learning:"Tuesday 9am sends outperform all other time slots by 15%",rateAfter:3.4},
+    {id:"EXP-10",month:"Feb",week:"W3-4",baseline:{sub:"Tue 9am + soft CTA",rate:3.4},challenger:{sub:"+ Follow-up timing",rate:3.6},winner:"challenger",learning:"3-day follow-up gap beats 2-day. Gives prospects time to think",rateAfter:3.6},
+    {id:"CURRENT",month:"Mar",week:"W1-2",baseline:{sub:c.a.l,rate:c.a.rate},challenger:{sub:c.b.l,rate:c.b.rate},winner:c.b.w?"challenger":c.a.w?"baseline":"testing",learning:"Currently testing...",rateAfter:Math.max(c.a.rate,c.b.rate),active:true}
+  ];
+
+  // Rate progression for the visual chart
+  const rates=testHistory.map(t=>t.rateAfter);
+  const maxRate=Math.max(...rates)+0.5;
+  const chartW=820;
+  const chartH=120;
+
+  return <div onClick={e=>{if(e.target===e.currentTarget)onClose()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:30,overflowY:"auto"}}>
+    <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:960,animation:"fadeIn .3s ease"}}>
+
+      {/* HEADER */}
+      <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div>
+          <h2 style={{fontSize:20,fontWeight:800}}>{c.name}</h2>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
+            <span style={{fontSize:9,padding:"3px 8px",borderRadius:6,fontWeight:700,textTransform:"uppercase",background:"var(--green-bg)",color:"var(--green)",border:"1px solid var(--green-bd)"}}>{phase.name}</span>
+            <span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
+            <span style={{fontSize:11,color:"var(--text3)"}}>·</span>
+            <span style={{fontFamily:"var(--mono)",fontSize:11,fontWeight:600,color:"var(--text)"}}>{c.weekly.toLocaleString()}/week</span>
+          </div>
+        </div>
         <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
       </div>
+
       <div style={{padding:"24px 28px"}}>
-        <div style={{fontSize:12,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:16}}>A/B copy comparison</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}}>
-          {[c.a,c.b].map((s,i)=><Card key={i} style={{padding:20,borderColor:i===0?"rgba(79,172,254,0.15)":"var(--green-bd)",background:i===0?"rgba(79,172,254,0.04)":"var(--green-bg)"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+
+        {/* PHASE CARDS */}
+        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>
+          Campaign phase {nextPhase&&<span style={{color:"var(--green)",fontWeight:600,textTransform:"none",letterSpacing:0,marginLeft:8}}>→ {nextPhase.name} in {daysToNext} days</span>}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:24}}>
+          {phases.map((p,i)=>{
+            const done=c.day>=p.endDay;
+            const active=c.day>=p.day&&c.day<p.endDay;
+            const future=c.day<p.day;
+            return <div key={i} style={{padding:"10px 12px",borderRadius:10,
+              background:active?"var(--green-bg)":done?"rgba(0,212,126,0.03)":"rgba(255,255,255,0.02)",
+              border:"1px solid "+(active?"var(--green-bd)":done?"rgba(0,212,126,0.1)":"var(--border)"),
+              opacity:future?0.35:1}}>
+              <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
+                <div style={{width:7,height:7,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)",
+                  boxShadow:active?"0 0 6px rgba(0,212,126,0.5)":"none"}}/>
+                <span style={{fontSize:9,fontWeight:700,textTransform:"uppercase",color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
+                {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:4,background:"var(--green)",color:"#000",fontWeight:800}}>NOW</span>}
+              </div>
+              <div style={{fontFamily:"var(--mono)",fontSize:15,fontWeight:700,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:8,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
+            </div>;})}
+        </div>
+
+        {/* REPLY RATE CHART — visual improvement over time */}
+        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>
+          Reply rate improvement <span style={{color:"var(--green)",fontWeight:600,textTransform:"none",letterSpacing:0,marginLeft:8}}>0.8% → {Math.max(c.a.rate,c.b.rate)}% (+{(Math.max(c.a.rate,c.b.rate)-0.8).toFixed(1)}%)</span>
+        </div>
+        <Card style={{padding:"20px 24px 16px",marginBottom:24}}>
+          <svg width="100%" viewBox={`0 0 ${chartW} ${chartH+30}`} style={{overflow:"visible"}}>
+            {/* Grid lines */}
+            {[0,1,2,3,4].map(v=><g key={v}>
+              <line x1={0} y1={chartH-(v/maxRate)*chartH} x2={chartW} y2={chartH-(v/maxRate)*chartH} stroke="rgba(255,255,255,0.04)" strokeWidth={1}/>
+              <text x={-4} y={chartH-(v/maxRate)*chartH+4} fill="rgba(255,255,255,0.2)" fontSize={9} textAnchor="end" fontFamily="'JetBrains Mono',monospace">{v}%</text>
+            </g>)}
+
+            {/* Area fill */}
+            <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(0,212,126,0.15)"/><stop offset="100%" stopColor="rgba(0,212,126,0)"/>
+            </linearGradient></defs>
+            <path d={`M0,${chartH} ${rates.map((r,i)=>`L${i*(chartW/(rates.length-1))},${chartH-(r/maxRate)*chartH}`).join(' ')} L${chartW},${chartH} Z`} fill="url(#areaGrad)"/>
+
+            {/* Line */}
+            <path d={rates.map((r,i)=>`${i===0?'M':'L'}${i*(chartW/(rates.length-1))},${chartH-(r/maxRate)*chartH}`).join(' ')} fill="none" stroke="var(--green)" strokeWidth={2} style={{filter:"drop-shadow(0 0 4px rgba(0,212,126,0.4))"}}/>
+
+            {/* Dots + labels */}
+            {rates.map((r,i)=>{
+              const x=i*(chartW/(rates.length-1));
+              const y=chartH-(r/maxRate)*chartH;
+              const t=testHistory[i];
+              return <g key={i}>
+                <circle cx={x} cy={y} r={t.active?5:3} fill={t.active?"var(--green)":"rgba(0,212,126,0.6)"} style={{filter:t.active?"drop-shadow(0 0 6px rgba(0,212,126,0.6))":"none"}}/>
+                <text x={x} y={chartH+14} fill="rgba(255,255,255,0.25)" fontSize={8} textAnchor="middle" fontFamily="'JetBrains Mono',monospace">{t.month}</text>
+                <text x={x} y={y-8} fill="rgba(255,255,255,0.5)" fontSize={8} textAnchor="middle" fontFamily="'JetBrains Mono',monospace">{r}%</text>
+              </g>;})}
+          </svg>
+        </Card>
+
+        {/* A/B TEST HISTORY TREE */}
+        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>
+          Optimisation history — {testHistory.length} experiments
+        </div>
+        <div style={{maxHeight:300,overflowY:"auto",marginBottom:24}}>
+          {testHistory.map((t,i)=>{
+            const isLast=i===testHistory.length-1;
+            const won=t.winner==="challenger";
+            const lost=t.winner==="baseline";
+            return <div key={i} style={{display:"flex",gap:12,paddingBottom:isLast?0:0,position:"relative"}}>
+              {/* Timeline line */}
+              {!isLast&&<div style={{position:"absolute",left:11,top:24,bottom:0,width:2,
+                background:t.active?"var(--green)":"rgba(0,212,126,0.15)"}}/>}
+              {/* Dot */}
+              <div style={{width:24,height:24,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
+                background:t.active?"var(--green-bg)":won?"var(--green-bg)":"rgba(255,255,255,0.03)",
+                border:"1px solid "+(t.active?"var(--green-bd)":won?"rgba(0,212,126,0.15)":"var(--border)"),
+                boxShadow:t.active?"0 0 8px rgba(0,212,126,0.3)":"none",marginTop:2}}>
+                <span style={{fontSize:9,fontWeight:700,color:t.active?"var(--green)":won?"var(--green)":"var(--text3)"}}>{t.active?"▶":won?"↑":"="}</span>
+              </div>
+              {/* Content */}
+              <div style={{flex:1,paddingBottom:12,borderBottom:isLast?"none":"1px solid rgba(255,255,255,0.03)"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <span style={{fontSize:12,fontWeight:600}}>{t.id}</span>
+                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{t.month} {t.week}</span>
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>{t.baseline.rate}%</span>
+                    <span style={{fontSize:10,color:won?"var(--green)":lost?"var(--red)":"var(--text3)"}}>→</span>
+                    <span style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600,color:won?"var(--green)":lost?"var(--text3)":"var(--text)"}}>{t.challenger.rate}%</span>
+                    {won&&<span style={{fontSize:8,padding:"1px 5px",borderRadius:4,background:"var(--green-bg)",color:"var(--green)",fontWeight:700}}>↑</span>}
+                    {t.active&&<span style={{fontSize:8,padding:"1px 5px",borderRadius:4,background:"var(--green-bg)",color:"var(--green)",fontWeight:700,border:"1px solid var(--green-bd)"}}>LIVE</span>}
+                  </div>
+                </div>
+                <div style={{fontSize:11,color:"var(--text3)",marginTop:3,lineHeight:1.5}}>{t.learning}</div>
+              </div>
+            </div>;})}
+        </div>
+
+        {/* CURRENT A/B TEST */}
+        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>Current A/B test</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:20}}>
+          {[c.a,c.b].map((s,i)=><Card key={i} style={{padding:18,borderColor:i===0?"rgba(79,172,254,0.15)":"var(--green-bd)",background:i===0?"rgba(79,172,254,0.04)":"var(--green-bg)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <span style={{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,padding:"3px 8px",borderRadius:6,background:i===0?"var(--blue-bg)":"var(--green-bg)",color:i===0?"var(--blue)":"var(--green)"}}>{s.l} ({i===0?"A":"B"})</span>
               {s.w&&<span style={{fontSize:9,color:"var(--green)",fontWeight:700}}>★ WINNING</span>}
             </div>
-            <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:8}}>Subject: {s.sub}</div>
-            <div style={{fontSize:11,lineHeight:1.7,color:"var(--text3)",whiteSpace:"pre-wrap"}}>{s.body}</div>
-            <div style={{display:"flex",gap:20,marginTop:14,paddingTop:14,borderTop:"1px solid var(--border)"}}>
+            <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:6}}>Subject: {s.sub}</div>
+            <div style={{fontSize:11,lineHeight:1.7,color:"var(--text3)",whiteSpace:"pre-wrap",maxHeight:100,overflow:"hidden"}}>{s.body}</div>
+            <div style={{display:"flex",gap:16,marginTop:12,paddingTop:12,borderTop:"1px solid var(--border)"}}>
               {[{v:s.sent,l:"Sent"},{v:s.rep,l:"Replies",c:"var(--green)"},{v:s.rate+"%",l:"Rate"}].map((m,j)=>
                 <div key={j} style={{textAlign:"center"}}>
-                  <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600,color:m.c||"var(--text)"}}>{m.v}</div>
-                  <div style={{fontSize:9,color:"var(--text3)",marginTop:2,textTransform:"uppercase"}}>{m.l}</div>
+                  <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:600,color:m.c||"var(--text)"}}>{m.v}</div>
+                  <div style={{fontSize:8,color:"var(--text3)",marginTop:2,textTransform:"uppercase"}}>{m.l}</div>
                 </div>)}
             </div>
           </Card>)}
         </div>
-        {cr.length>0&&<><div style={{fontSize:12,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>Replies</div>
+
+        {/* Test progress */}
+        <div style={{marginBottom:20}}>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text3)",marginBottom:6}}>
+            <span>Test progress — evaluates at {c.tgt} sends</span>
+            <span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
+          </div>
+          <div style={{height:4,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}}>
+            <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",boxShadow:"0 0 8px rgba(0,212,126,0.3)"}}/>
+          </div>
+        </div>
+
+        {/* REPLIES */}
+        {cr.length>0&&<><div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>Replies from this campaign</div>
         {cr.map((r,i)=><Reply key={i} r={r}/>)}</>}
       </div>
     </div>
@@ -463,6 +655,8 @@ function App(){
   const [lf,setLf]=useState("replied");
   const [showAll,setShowAll]=useState(false);
   const [showAdd,setShowAdd]=useState(false);
+  const [mb,setMb]=useState(null);
+  const [treeFilter,setTreeFilter]=useState("SEO");
   const nav=p=>{setPg(p);setMd(null);setLd(null)};
   const pct=Math.round(D.sentToday/D.cap*100);
   const wc=D.reps.filter(r=>r.cat==="warm").length;
