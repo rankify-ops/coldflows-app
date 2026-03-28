@@ -60,16 +60,16 @@ const D = {
     ]
   },
   campaigns:[
-    {id:1,name:"SEO services",st:"testing",sent:412,rep:9,bnc:4,leads:220,prog:41,tgt:1000,
+    {id:1,name:"SEO services",st:"testing",sent:412,rep:9,bnc:4,leads:220,prog:41,tgt:1000,day:12,weekly:840,
       a:{l:"Baseline",sub:"{{company_name}} + SEO",body:"Hey {{first_name}},\n\nQuick question — is {{company_name}} getting leads from Google, or is most of your business coming from referrals?\n\nIf Google isn't pulling its weight, that's usually fixable. I run SEO campaigns starting at $1,500/mo.\n\nWorth a 15 min chat?",sent:206,rep:3,rate:1.5},
       b:{l:"Challenger",sub:"quick question about {{company_name}}",body:"Hey {{first_name}},\n\nI searched for what {{company_name}} does on Google and you're not showing up in the first few results.\n\nThat means potential customers are finding your competitors instead. I fix that — typically 3-4 months to page 1.\n\nInterested?",sent:206,rep:6,rate:2.9,w:true}},
-    {id:2,name:"Website builds",st:"testing",sent:389,rep:11,bnc:6,leads:200,prog:39,tgt:1000,
+    {id:2,name:"Website builds",st:"testing",sent:389,rep:11,bnc:6,leads:200,prog:39,tgt:1000,day:12,weekly:840,
       a:{l:"Baseline",sub:"website for {{company_name}}",body:"Hey {{first_name}},\n\nIs {{company_name}}'s website working the way you want it to? If it's outdated, slow, or just not converting — I build fast, modern websites.\n\n$5,999 flat rate. 3-4 weeks.\n\nBook a call?",sent:195,rep:4,rate:2.1},
       b:{l:"Challenger",sub:"{{first_name}}, quick one",body:"Hey {{first_name}},\n\nI looked at {{company_name}}'s website. Honestly — you're losing customers.\n\nSlow load, not mobile-friendly, dated design. I can rebuild it in 3 weeks.\n\nWant to see recent builds?",sent:194,rep:7,rate:3.6,w:true}},
-    {id:3,name:"Logo & branding",st:"active",sent:580,rep:12,bnc:7,leads:300,prog:58,tgt:1000,
+    {id:3,name:"Logo & branding",st:"active",sent:580,rep:12,bnc:7,leads:300,prog:58,tgt:1000,day:12,weekly:840,
       a:{l:"Baseline",sub:"branding for {{company_name}}",body:"Hey {{first_name}},\n\nAre you happy with {{company_name}}'s logo and branding?\n\n$499, 48-hour delivery, 100% money-back guarantee. Real designers, not AI.",sent:290,rep:8,rate:2.8,w:true},
       b:{l:"Challenger",sub:"{{company_name}}'s brand",body:"Hey {{first_name}},\n\nI noticed {{company_name}}'s branding could use a refresh.\n\nProfessional logo + full brand identity for $499. 48 hours. Money-back if you're not happy.",sent:290,rep:4,rate:1.4}},
-    {id:4,name:"Shopify dev",st:"active",sent:466,rep:6,bnc:5,leads:250,prog:47,tgt:1000,
+    {id:4,name:"Shopify dev",st:"active",sent:466,rep:6,bnc:5,leads:250,prog:47,tgt:1000,day:12,weekly:840,
       a:{l:"Baseline",sub:"shopify dev for {{company_name}}",body:"Hey {{first_name}},\n\nDo you have a developer for your Shopify store?\n\nMonthly retainer starting at $249/mo — submit requests, I build them. No lock-in.",sent:233,rep:4,rate:1.7,w:true},
       b:{l:"Challenger",sub:"re: {{company_name}} shopify",body:"Hey {{first_name}},\n\nWhat's on your Shopify store's to-do list right now?\n\nCustom layouts, speed fixes, app integrations — $249/mo. No contracts.",sent:233,rep:2,rate:0.9}}
   ],
@@ -151,15 +151,32 @@ function Stat({label,val,sub,color,bar,pct}){
   </Card>;
 }
 
+function getPhase(day){
+  if(day>=28)return{name:"Full capacity",color:"var(--green)",weekly:2100};
+  if(day>=21)return{name:"Phase 2",color:"var(--green)",weekly:1400};
+  if(day>=14)return{name:"Phase 1",color:"var(--green)",weekly:840};
+  return{name:"Warmup",color:"var(--orange)",weekly:420};
+}
+
 function CampaignCard({c,onClick}){
   const rr=c.sent>0?(c.rep/c.sent*100).toFixed(1):"0.0";
+  const phase=getPhase(c.day);
   return <Card onClick={onClick} style={{cursor:"pointer",overflow:"hidden",padding:0}}>
     <div style={{padding:"20px 24px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <span style={{fontSize:15,fontWeight:700}}>{c.name}</span>
-      <span style={{fontSize:9,padding:"4px 10px",borderRadius:20,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",
-        background:c.st==="testing"?"var(--green-bg)":"rgba(255,255,255,0.04)",
-        color:c.st==="testing"?"var(--green)":"var(--text2)",
-        border:"1px solid "+(c.st==="testing"?"var(--green-bd)":"var(--border)")}}>{c.st}</span>
+      <div>
+        <div style={{fontSize:15,fontWeight:700}}>{c.name}</div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
+          <span style={{fontSize:9,padding:"3px 8px",borderRadius:6,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.5px",
+            background:phase.name==="Warmup"?"var(--orange-bg)":"var(--green-bg)",
+            color:phase.color,
+            border:"1px solid "+(phase.name==="Warmup"?"rgba(255,165,2,0.2)":"var(--green-bd)")}}>{phase.name}</span>
+          <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
+        </div>
+      </div>
+      <div style={{textAlign:"right"}}>
+        <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{c.weekly.toLocaleString()}</div>
+        <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>/week</div>
+      </div>
     </div>
     <div style={{display:"flex",borderTop:"1px solid var(--border)"}}>
       {[{v:c.sent,l:"Sent"},{v:c.rep,l:"Replies",c:"var(--green)"},{v:rr+"%",l:"Rate"},{v:c.bnc,l:"Bounced"}].map((s,i)=>
@@ -520,137 +537,70 @@ function App(){
         </div>}
         {D.campaigns.length<=4&&<div style={{marginBottom:32}}/>}
 
-        {/* WARMUP UNLOCK SECTION */}
+        {/* MAILBOX PROGRESS + PHASE EXPLAINER */}
         {(()=>{
           const a=D.account;
           const day=a.daysSinceStart;
-
           const phases=[
-            {id:1,name:"Warmup",range:"Day 1–14",emails:60,weekly:420,unit:"/day",desc:"Building sender reputation",day:0,endDay:14,
-              unlocks:["Domain authentication","Warmup emails active","Reputation monitoring","Deliverability tracking"]},
-            {id:2,name:"Phase 1",range:"Day 15–21",emails:120,weekly:840,unit:"/day",desc:"Initial outreach begins",day:14,endDay:21,
-              unlocks:["Live outreach enabled","A/B copy testing","Lead sourcing active","Reply classification"]},
-            {id:3,name:"Phase 2",range:"Day 22–28",emails:200,weekly:1400,unit:"/day",desc:"Volume ramp-up",day:21,endDay:28,
-              unlocks:["200 emails/day capacity","AI copy optimisation","Advanced targeting","Multi-sequence campaigns"]},
-            {id:4,name:"Full capacity",range:"Day 29+",emails:300,weekly:2100,unit:"+/day",desc:"Maximum performance",day:28,endDay:60,
-              unlocks:["300+ emails/day unlocked","Self-learning copy loop","Predictive send timing","Peak performance analytics"]}
+            {name:"Warmup",range:"Day 1–14",weekly:420,daily:60,day:0,endDay:14},
+            {name:"Phase 1",range:"Day 15–21",weekly:840,daily:120,day:14,endDay:21},
+            {name:"Phase 2",range:"Day 22–28",weekly:"1,400",daily:200,day:21,endDay:28},
+            {name:"Full capacity",range:"Day 29+",weekly:"2,100+",daily:"300+",day:28,endDay:60}
           ];
-
           const currentPhase=phases.reduce((best,p)=>day>=p.day?p:best,phases[0]);
           const nextPhase=phases.find(p=>day<p.day);
           const daysToNext=nextPhase?nextPhase.day-day:0;
 
           return <>
-            {/* Header with progress bar */}
-            <div style={{marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <div style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Mailbox progress</div>
-                {nextPhase&&<div style={{fontSize:12,fontWeight:600,color:"var(--green)",fontFamily:"var(--mono)"}}>
-                  {daysToNext} day{daysToNext!==1?"s":""} until {nextPhase.name}
-                </div>}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+              <div style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Mailbox progress</div>
+              {nextPhase&&<div style={{fontSize:12,fontWeight:600,color:"var(--green)",fontFamily:"var(--mono)"}}>
+                {daysToNext} day{daysToNext!==1?"s":""} until {nextPhase.name}
+              </div>}
+            </div>
+
+            {/* Progress bar */}
+            <Card style={{padding:"16px 20px",display:"flex",alignItems:"center",gap:20,marginBottom:14}}>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                  <span style={{fontSize:11,fontWeight:600,color:"var(--text2)"}}>Full capacity</span>
+                  <span style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--green)",fontWeight:600}}>{Math.round(day/60*100)}%</span>
+                </div>
+                <div style={{height:6,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden"}}>
+                  <div style={{height:"100%",width:Math.round(day/60*100)+"%",borderRadius:3,background:"linear-gradient(90deg,var(--green),#00ff99)",boxShadow:"0 0 12px rgba(0,212,126,0.4)"}}/>
+                </div>
               </div>
-              <Card style={{padding:"16px 20px",display:"flex",alignItems:"center",gap:20}}>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                    <span style={{fontSize:11,fontWeight:600,color:"var(--text2)"}}>Full capacity</span>
-                    <span style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--green)",fontWeight:600}}>{Math.round(day/60*100)}%</span>
-                  </div>
-                  <div style={{height:6,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden"}}>
-                    <div style={{height:"100%",width:Math.round(day/60*100)+"%",borderRadius:3,background:"linear-gradient(90deg,var(--green),#00ff99)",boxShadow:"0 0 12px rgba(0,212,126,0.4)"}}/>
-                  </div>
-                </div>
-                <div style={{textAlign:"right",flexShrink:0}}>
-                  <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{Math.max(0,60-day)}</div>
-                  <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>days left</div>
-                </div>
-                <div style={{borderLeft:"1px solid var(--border)",paddingLeft:20,flexShrink:0}}>
-                  <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Mailboxes</div>
-                  <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{D.mbs.length}</div>
-                  <div onClick={()=>nav("mailboxes")} style={{fontSize:10,color:"var(--green)",cursor:"pointer",marginTop:2,fontWeight:600}}>View details →</div>
-                </div>
-              </Card>
-            </div>
+              <div style={{textAlign:"right",flexShrink:0}}>
+                <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{Math.max(0,60-day)}</div>
+                <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>days left</div>
+              </div>
+              <div style={{borderLeft:"1px solid var(--border)",paddingLeft:20,flexShrink:0}}>
+                <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Mailboxes</div>
+                <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{D.mbs.length}</div>
+                <div onClick={()=>nav("mailboxes")} style={{fontSize:10,color:"var(--green)",cursor:"pointer",marginTop:2,fontWeight:600}}>View details →</div>
+              </div>
+            </Card>
 
-            {/* 4 Phase cards */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
-              {phases.map(p=>{
+            {/* Phase explainer — 4 inline cards */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:32}}>
+              {phases.map((p,i)=>{
                 const done=day>=p.endDay;
-                const active=currentPhase.id===p.id;
+                const active=currentPhase===p;
                 const future=day<p.day;
-                const phaseProgress=active?Math.round(Math.min(100,((day-p.day)/(p.endDay-p.day))*100)):done?100:0;
-
-                return <Card key={p.id} style={{padding:18,position:"relative",overflow:"hidden",
-                  borderColor:active?"var(--green-bd)":done?"var(--green-bd)":"var(--border)",
-                  background:active?"linear-gradient(135deg,rgba(0,212,126,0.06),rgba(0,212,126,0.02))":done?"rgba(0,212,126,0.03)":"var(--glass)",
-                  boxShadow:active?"0 0 24px rgba(0,212,126,0.1)":"none",
-                  opacity:future?0.45:1}}>
-
-                  {/* Phase indicator dot */}
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                    <div style={{width:10,height:10,borderRadius:"50%",
-                      background:done||active?"var(--green)":"var(--text3)",
-                      boxShadow:active?"0 0 10px rgba(0,212,126,0.6)":done?"0 0 6px rgba(0,212,126,0.3)":"none"}}/>
-                    <span style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",
-                      color:active?"var(--green)":done?"var(--green)":"var(--text3)"}}>{p.name}</span>
-                    {active&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:6,background:"var(--green-bg)",color:"var(--green)",fontWeight:700,border:"1px solid var(--green-bd)"}}>NOW</span>}
+                return <div key={i} style={{padding:"12px 14px",borderRadius:10,
+                  background:active?"var(--green-bg)":done?"rgba(0,212,126,0.03)":"rgba(255,255,255,0.02)",
+                  border:"1px solid "+(active?"var(--green-bd)":done?"rgba(0,212,126,0.1)":"var(--border)"),
+                  opacity:future?0.4:1}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                    <div style={{width:8,height:8,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)",
+                      boxShadow:active?"0 0 8px rgba(0,212,126,0.5)":"none"}}/>
+                    <span style={{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.5px",
+                      color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
+                    {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:4,background:"var(--green)",color:"#000",fontWeight:800}}>NOW</span>}
                   </div>
-
-                  {/* Volume — weekly is the hero */}
-                  <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:done||active?"var(--text)":"var(--text3)",lineHeight:1}}>{p.weekly.toLocaleString()}<span style={{fontSize:11,fontWeight:400,color:"var(--text3)"}}>/week</span></div>
-                  <div style={{fontSize:11,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{p.emails}{p.unit}</div>
-
-                  {/* Range */}
-                  <div style={{fontSize:10,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{p.range}</div>
-                  <div style={{fontSize:11,color:active?"var(--text2)":"var(--text3)",marginTop:4}}>{p.desc}</div>
-
-                  {/* Phase progress bar */}
-                  {(active||done)&&<div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,marginTop:12,overflow:"hidden"}}>
-                    <div style={{height:"100%",width:phaseProgress+"%",borderRadius:2,background:"var(--green)",
-                      boxShadow:active?"0 0 8px rgba(0,212,126,0.4)":"none"}}/>
-                  </div>}
-                  {future&&<div style={{height:3,background:"rgba(255,255,255,0.03)",borderRadius:2,marginTop:12}}/>}
-                </Card>;})}
-            </div>
-
-            {/* What current phase unlocks + what next phase brings */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:32}}>
-              {/* Current phase unlocks */}
-              <Card style={{padding:20,borderColor:"var(--green-bd)",background:"var(--green-bg)"}}>
-                <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12}}>
-                  ✓ Unlocked — {currentPhase.name}
-                </div>
-                {currentPhase.unlocks.map((u,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                  <div style={{width:16,height:16,borderRadius:4,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                    <span style={{color:"#000",fontSize:10,fontWeight:800}}>✓</span>
-                  </div>
-                  <span style={{fontSize:12,fontWeight:500,color:"var(--text)"}}>{u}</span>
-                </div>)}
-                {/* Also show all previous phase unlocks */}
-                {phases.filter(p=>p.id<currentPhase.id).map(p=>p.unlocks.map((u,j)=>
-                  <div key={p.id+"-"+j} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                    <div style={{width:16,height:16,borderRadius:4,background:"rgba(0,212,126,0.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      <span style={{color:"#000",fontSize:10,fontWeight:800}}>✓</span>
-                    </div>
-                    <span style={{fontSize:12,fontWeight:400,color:"var(--text2)"}}>{u}</span>
-                  </div>))}
-              </Card>
-
-              {/* Next phase preview */}
-              {nextPhase?<Card style={{padding:20,opacity:0.7}}>
-                <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>
-                  Coming in {daysToNext} day{daysToNext!==1?"s":""} — {nextPhase.name}
-                </div>
-                {nextPhase.unlocks.map((u,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                  <div style={{width:16,height:16,borderRadius:4,border:"1.5px solid var(--text3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}/>
-                  <span style={{fontSize:12,fontWeight:400,color:"var(--text3)"}}>{u}</span>
-                </div>)}
-              </Card>
-              :<Card style={{padding:20,borderColor:"var(--green-bd)",background:"var(--green-bg)"}}>
-                <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12}}>
-                  All features unlocked
-                </div>
-                <div style={{fontSize:13,color:"var(--text2)"}}>Your account is running at maximum capacity with all optimisations active.</div>
-              </Card>}
+                  <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:700,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:9,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
+                  <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{p.range}</div>
+                </div>;})}
             </div>
           </>;
         })()}
