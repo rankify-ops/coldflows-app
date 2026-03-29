@@ -680,6 +680,7 @@ function App(){
   const [lf,setLf]=useState("replied");
   const [showAll,setShowAll]=useState(false);
   const [showAdd,setShowAdd]=useState(false);
+  const [showPhase,setShowPhase]=useState(null);
   const [mb,setMb]=useState(null);
   const [treeFilter,setTreeFilter]=useState("SEO");
   const [dark,setDark]=useState(false);
@@ -817,14 +818,16 @@ function App(){
               </div>
             </div>
 
-            {/* Phase explainer — 4 cells in a row */}
+            {/* Phase explainer — 4 clickable cells */}
             <div style={{display:"flex",borderBottom:"1px solid var(--border)"}}>
               {phases.map((p,i)=>{
                 const done=day>=p.endDay;
                 const active=currentPhase===p;
                 const future=day<p.day;
-                return <div key={i} style={{flex:1,padding:"14px 20px",borderRight:i<3?"1px solid var(--border)":"none",
-                  opacity:future?0.4:1,background:active?"var(--green-bg)":"transparent"}}>
+                const mbsInPhase=D.mbs.filter(m=>{const ph=getPhase(m.day);return ph.name===(done||active?p.name:null)}).length;
+                const activeMbs=active?D.mbs.length:done?0:0;
+                return <div key={i} className="hoverable" onClick={()=>setShowPhase(p)} style={{flex:1,padding:"14px 20px",borderRight:i<3?"1px solid var(--border)":"none",
+                  opacity:future?0.4:1,background:active?"var(--green-bg)":"transparent",cursor:"pointer"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
                     <div style={{width:7,height:7,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)"}}/>
                     <span style={{fontSize:10,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",
@@ -833,6 +836,8 @@ function App(){
                   </div>
                   <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:9,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
                   <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{p.range}</div>
+                  {active&&<div style={{fontSize:9,color:"var(--green)",marginTop:4,fontWeight:500}}>{D.mbs.length} mailbox{D.mbs.length!==1?"es":""} active</div>}
+                  {done&&<div style={{fontSize:9,color:"var(--text3)",marginTop:4}}>✓ Complete</div>}
                 </div>;})}
             </div>
           </>;
@@ -966,6 +971,135 @@ function App(){
 
     {md&&<Modal c={md} onClose={()=>setMd(null)}/>}
     {ld&&<LeadDetail lead={ld} onClose={()=>setLd(null)}/>}
+
+    {/* Phase Detail Modal */}
+    {showPhase&&(()=>{
+      const p=showPhase;
+      const day=D.account.daysSinceStart;
+      const done=day>=p.endDay;
+      const active=day>=p.day&&day<p.endDay;
+      const future=day<p.day;
+      const activeMbs=D.mbs.filter(m=>getPhase(m.day).name===p.name).length;
+
+      const phaseDetails={
+        "Warmup":{
+          title:"Email warmup",
+          desc:"During warmup, your mailboxes send and receive emails between each other and a network of real inboxes. This builds your sender reputation with email providers like Gmail, Outlook, and Yahoo — proving you're a legitimate sender, not a spammer.",
+          whyMatters:"Skipping warmup means your emails land in spam. A properly warmed mailbox achieves 95%+ inbox placement rates. Rushing this process can permanently damage a domain's reputation.",
+          whatHappens:["Mailboxes exchange emails with a warmup network","Open rates and reply rates are simulated naturally","Sender reputation score builds gradually with providers","SPF, DKIM, and DMARC records are validated","Inbox placement is monitored daily"],
+          metrics:[{l:"Target inbox rate",v:"95%+"},{l:"Warmup emails/day",v:"15-20"},{l:"Reputation score",v:"Building"},{l:"Status",v:done?"Complete":active?"In progress":"Pending"}],
+          chartData:[5,8,12,18,25,35,48,58,65,72,78,83,87,90,93],
+          chartLabel:"Sender reputation score over 14 days"
+        },
+        "Phase 1":{
+          title:"Initial outreach",
+          desc:"Your mailboxes are now trusted by email providers. Live outreach begins — real emails to real prospects in your target market. Volume starts at 120 emails per day across all mailboxes, with A/B testing enabled to start finding what copy resonates.",
+          whyMatters:"Starting at moderate volume protects your newly built reputation. Jumping straight to high volume would trigger spam filters. This phase establishes your baseline reply rate.",
+          whatHappens:["Live outreach emails sent to real prospects","A/B copy testing begins — two versions per campaign","Reply classification active (warm, negative, auto-reply)","Lead sourcing pulls fresh contacts matching your ICP","Bounce monitoring protects sender reputation"],
+          metrics:[{l:"Send capacity",v:"120/day"},{l:"A/B testing",v:"Enabled"},{l:"Expected replies",v:"1-2%"},{l:"Campaigns active",v:D.campaigns.length.toString()}],
+          chartData:[0,15,35,52,68,80,95,110,120,120,120,120,120,120],
+          chartLabel:"Daily send volume ramp (emails/day)"
+        },
+        "Phase 2":{
+          title:"Volume ramp-up",
+          desc:"Send volume increases to 200 emails per day. The AI copy optimisation system kicks in — analysing which subject lines, email bodies, and CTAs generate the most replies, then automatically promoting winners and generating new challengers.",
+          whyMatters:"This is where the self-learning system starts compounding. Each A/B test makes the next one smarter. Reply rates typically increase 30-50% during this phase as the system learns what works for your specific market.",
+          whatHappens:["Volume increases to 200 emails/day","AI analyses reply patterns across all experiments","Winning copy promoted automatically","New challenger variations generated by AI","Send timing optimised based on open rate data","Advanced targeting refinements applied"],
+          metrics:[{l:"Send capacity",v:"200/day"},{l:"AI optimisation",v:"Active"},{l:"Expected replies",v:"2-3%"},{l:"Experiments run",v:"4-6"}],
+          chartData:[120,130,145,155,168,175,185,190,195,198,200,200,200,200],
+          chartLabel:"Daily send volume ramp (emails/day)"
+        },
+        "Full capacity":{
+          title:"Maximum performance",
+          desc:"All systems at full power. 300+ emails per day with the self-learning loop running continuously. The AI has enough data to make statistically significant decisions about copy, timing, and targeting. This is peak performance — the system gets better every week.",
+          whyMatters:"At full capacity, the system is generating maximum lead flow while continuously optimising. Clients who reach this phase typically see reply rates 3-4x higher than their starting rate. The longer it runs, the smarter it gets.",
+          whatHappens:["300+ emails per day at full volume","Self-learning copy loop runs continuously","Predictive send timing active","Reply rates compound with each experiment","Warm leads flagged in real-time","Full analytics and reporting available"],
+          metrics:[{l:"Send capacity",v:"300+/day"},{l:"Self-learning",v:"Continuous"},{l:"Expected replies",v:"3-5%"},{l:"Weekly volume",v:"2,100+"}],
+          chartData:[200,220,240,255,265,275,282,290,295,298,300,300,300,300],
+          chartLabel:"Daily send volume ramp (emails/day)"
+        }
+      };
+
+      const d=phaseDetails[p.name]||phaseDetails["Warmup"];
+      const chartH=80;
+      const maxV=Math.max(...d.chartData)*1.1;
+
+      return <div onClick={e=>{if(e.target===e.currentTarget)setShowPhase(null)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:40,overflowY:"auto"}}>
+        <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:8,width:"100%",maxWidth:700,animation:"fadeIn .25s ease"}}>
+
+          {/* Header */}
+          <div style={{padding:"20px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                <div style={{width:8,height:8,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)"}}/>
+                <span style={{fontSize:10,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
+                {active&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:3,background:"var(--green)",color:"#fff",fontWeight:700}}>CURRENT PHASE</span>}
+                {done&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:3,background:"var(--green-bg)",color:"var(--green)",fontWeight:600}}>COMPLETE</span>}
+                {future&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:3,background:"var(--bg3)",color:"var(--text3)",fontWeight:600}}>UPCOMING</span>}
+              </div>
+              <h2 style={{fontSize:20,fontWeight:700}}>{d.title}</h2>
+              <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:4}}>{p.range} · {typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly} emails/week · {activeMbs} mailbox{activeMbs!==1?"es":""} in this phase</div>
+            </div>
+            <button onClick={()=>setShowPhase(null)} style={{width:30,height:30,borderRadius:6,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+          </div>
+
+          <div style={{padding:"24px 28px"}}>
+
+            {/* Description */}
+            <p style={{fontSize:13,lineHeight:1.8,color:"var(--text2)",marginBottom:20}}>{d.desc}</p>
+
+            {/* Metrics row */}
+            <div style={{display:"flex",borderTop:"1px solid var(--border)",borderBottom:"1px solid var(--border)",marginBottom:20}}>
+              {d.metrics.map((m,i)=><div key={i} style={{flex:1,padding:"14px 16px",borderRight:i<d.metrics.length-1?"1px solid var(--border)":"none",textAlign:"center"}}>
+                <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600,color:"var(--text)"}}>{m.v}</div>
+                <div style={{fontSize:9,color:"var(--text3)",marginTop:2}}>{m.l}</div>
+              </div>)}
+            </div>
+
+            {/* Chart */}
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:10}}>{d.chartLabel}</div>
+              <div style={{border:"1px solid var(--border)",borderRadius:6,padding:"16px 20px"}}>
+                <svg width="100%" viewBox={`0 0 600 ${chartH+20}`} style={{overflow:"visible"}}>
+                  {/* Grid lines */}
+                  {[0,0.25,0.5,0.75,1].map((v,i)=><line key={i} x1={0} y1={chartH*(1-v)} x2={600} y2={chartH*(1-v)} stroke="var(--border)" strokeWidth={1}/>)}
+
+                  {/* Area */}
+                  <defs><linearGradient id="phaseGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgba(22,163,74,0.12)"/><stop offset="100%" stopColor="rgba(22,163,74,0)"/>
+                  </linearGradient></defs>
+                  <path d={`M0,${chartH} ${d.chartData.map((v,i)=>`L${i*(600/(d.chartData.length-1))},${chartH-(v/maxV)*chartH}`).join(' ')} L600,${chartH} Z`} fill="url(#phaseGrad)"/>
+
+                  {/* Line */}
+                  <path d={d.chartData.map((v,i)=>`${i===0?'M':'L'}${i*(600/(d.chartData.length-1))},${chartH-(v/maxV)*chartH}`).join(' ')} fill="none" stroke="var(--green)" strokeWidth={2}/>
+
+                  {/* Dots */}
+                  {d.chartData.map((v,i)=><circle key={i} cx={i*(600/(d.chartData.length-1))} cy={chartH-(v/maxV)*chartH} r={2.5} fill="var(--green)"/>)}
+
+                  {/* Day labels */}
+                  {d.chartData.map((v,i)=>i%3===0?<text key={i} x={i*(600/(d.chartData.length-1))} y={chartH+14} fill="var(--text3)" fontSize={8} textAnchor="middle" fontFamily="var(--mono)">D{i+1}</text>:null)}
+                </svg>
+              </div>
+            </div>
+
+            {/* Why this matters */}
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:8}}>Why this matters</div>
+              <p style={{fontSize:12,lineHeight:1.7,color:"var(--text3)"}}>{d.whyMatters}</p>
+            </div>
+
+            {/* What happens */}
+            <div>
+              <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:8}}>What happens during this phase</div>
+              {d.whatHappens.map((item,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0"}}>
+                <div style={{width:5,height:5,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)",flexShrink:0}}/>
+                <span style={{fontSize:12,color:"var(--text2)"}}>{item}</span>
+              </div>)}
+            </div>
+          </div>
+        </div>
+      </div>;
+    })()}
 
     {/* Add Campaign / Purchase Slots Modal */}
     {showAdd&&<div onClick={e=>{if(e.target===e.currentTarget)setShowAdd(false)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
