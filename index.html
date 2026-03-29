@@ -379,7 +379,29 @@ function Reply({r}){
 function Modal({c,onClose}){
   if(!c)return null;
   const [expandedExp,setExpandedExp]=useState(null);
+  const [selectedPhase,setSelectedPhase]=useState(null);
   const cr=D.reps.filter(r=>r.ca===c.name);
+
+  // Per-phase historical experiment data
+  const phaseHistory={
+    "Warmup":{summary:"Reputation building phase — no outreach sent",experiments:[],stats:{sent:0,replies:0,rate:"—",mailboxes:4,inbox:"Building"},desc:"During this phase, mailboxes were warming up with simulated email exchanges. No outreach was sent to prospects. Sender reputation was being established with Gmail, Outlook, and Yahoo."},
+    "Phase 1":{summary:"Initial outreach with first A/B tests",experiments:[
+      {id:"EXP-01",test:"Generic intro vs Pain point opener",baseline:0.8,challenger:1.2,winner:"challenger",learning:"Leading with a specific pain point outperformed generic introductions."},
+      {id:"EXP-02",test:"Pain point vs + Price upfront",baseline:1.2,challenger:1.8,winner:"challenger",learning:"Adding price in the first email pre-qualifies leads and increases reply quality."},
+      {id:"EXP-03",test:"Price upfront vs + Social proof",baseline:1.8,challenger:1.6,winner:"baseline",learning:"Social proof didn't improve rates — prospects prefer directness over testimonials."}
+    ],stats:{sent:2520,replies:38,rate:"1.5%",mailboxes:4,inbox:"97%"},desc:"First live outreach began. A/B testing established baseline copy performance. Three experiments ran during this phase, improving reply rate from 0.8% to 1.8%."},
+    "Phase 2":{summary:"Volume ramp-up with AI copy optimisation",experiments:[
+      {id:"EXP-04",test:"Price upfront vs + Competitor mention",baseline:1.8,challenger:2.3,winner:"challenger",learning:"Mentioning competitors created urgency. Biggest single jump in reply rate."},
+      {id:"EXP-05",test:"Competitor mention vs + Question format",baseline:2.3,challenger:2.1,winner:"baseline",learning:"Direct statements outperform questions in subject lines for this ICP."},
+      {id:"EXP-06",test:"Competitor mention vs + Shorter copy",baseline:2.3,challenger:2.7,winner:"challenger",learning:"Cutting email length by 40% increased replies. Less is more."}
+    ],stats:{sent:5880,replies:147,rate:"2.5%",mailboxes:4,inbox:"98%"},desc:"Volume increased and AI copy optimisation kicked in. Three more experiments ran, pushing reply rate from 1.8% to 2.7%. The system started learning what works for this specific market."},
+    "Full capacity":{summary:"Peak performance with self-learning loop",experiments:[
+      {id:"EXP-07",test:"Short copy vs + Personalised opener",baseline:2.7,challenger:2.5,winner:"baseline",learning:"Generic personalisation tokens didn't help — specificity matters more."},
+      {id:"EXP-08",test:"Short copy vs + Soft CTA",baseline:2.7,challenger:3.1,winner:"challenger",learning:"Soft CTA ('worth a look?') beat hard CTA ('book a call'). Lower commitment = higher reply."},
+      {id:"EXP-09",test:"Soft CTA vs + Send time optimisation",baseline:3.1,challenger:3.4,winner:"challenger",learning:"Tuesday 9am sends outperform all other time slots by 15%."},
+      {id:"EXP-10",test:"Tue 9am vs + Follow-up timing",baseline:3.4,challenger:3.6,winner:"challenger",learning:"3-day follow-up gap beats 2-day. Gives prospects time to think."}
+    ],stats:{sent:14700,replies:529,rate:"3.6%",mailboxes:4,inbox:"99%"},desc:"Full volume achieved. Self-learning loop running continuously. Four experiments pushed reply rate from 2.7% to 3.6%. System now fully optimised for this market."}
+  };
   const phase=getPhase(c.day);
   const phases=[
     {name:"Warmup",weekly:420,day:0,endDay:14},
@@ -434,24 +456,75 @@ function Modal({c,onClose}){
         <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>
           Campaign phase {nextPhase&&<span style={{color:"var(--green)",fontWeight:600,textTransform:"none",letterSpacing:0,marginLeft:8}}>→ {nextPhase.name} in {daysToNext} days</span>}
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:24}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:0}}>
           {phases.map((p,i)=>{
             const done=c.day>=p.endDay;
             const active=c.day>=p.day&&c.day<p.endDay;
             const future=c.day<p.day;
-            return <div key={i} style={{padding:"10px 12px",borderRadius:10,
-              background:active?"var(--green-bg)":done?"rgba(0,212,126,0.03)":"rgba(255,255,255,0.02)",
-              border:"1px solid "+(active?"var(--green-bd)":done?"rgba(0,212,126,0.1)":"var(--border)"),
+            const isSelected=selectedPhase===p.name;
+            return <div key={i} className="hoverable" onClick={()=>!future&&setSelectedPhase(isSelected?null:p.name)} style={{padding:"10px 12px",borderRadius:0,cursor:future?"default":"pointer",
+              background:isSelected?"var(--green-bg)":active?"var(--green-bg)":done?"transparent":"transparent",
+              border:"1px solid "+(isSelected?"var(--green-bd)":active?"var(--green-bd)":done?"var(--border)":"var(--border)"),
+              borderBottom:isSelected?"2px solid var(--green)":"1px solid var(--border)",
               opacity:future?0.35:1}}>
               <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
-                <div style={{width:7,height:7,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)",
-                  boxShadow:"none"}}/>
+                <div style={{width:7,height:7,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)"}}/>
                 <span style={{fontSize:9,fontWeight:700,textTransform:"uppercase",color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
                 {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:4,background:"var(--green)",color:"#000",fontWeight:800}}>NOW</span>}
               </div>
               <div style={{fontFamily:"var(--mono)",fontSize:15,fontWeight:700,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:8,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
+              {(done||active)&&<div style={{fontSize:8,color:"var(--green)",marginTop:3}}>View history →</div>}
             </div>;})}
         </div>
+
+        {/* Phase history panel — shows when a phase card is clicked */}
+        {selectedPhase&&phaseHistory[selectedPhase]&&(()=>{
+          const ph=phaseHistory[selectedPhase];
+          return <div style={{border:"1px solid var(--green-bd)",borderTop:"none",padding:20,marginBottom:24,background:"var(--green-bg)",borderRadius:"0 0 6px 6px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+              <div>
+                <div style={{fontSize:12,fontWeight:700,color:"var(--green)"}}>{selectedPhase} — Historical data</div>
+                <div style={{fontSize:11,color:"var(--text2)",marginTop:2}}>{ph.summary}</div>
+              </div>
+              <button onClick={()=>setSelectedPhase(null)} style={{fontSize:10,color:"var(--text3)",background:"none",border:"none",cursor:"pointer"}}>✕ close</button>
+            </div>
+            <p style={{fontSize:11,color:"var(--text2)",lineHeight:1.6,marginBottom:14}}>{ph.desc}</p>
+
+            {/* Phase stats */}
+            <div style={{display:"flex",borderTop:"1px solid var(--border)",borderBottom:"1px solid var(--border)",marginBottom:14}}>
+              {[{l:"Emails sent",v:ph.stats.sent.toLocaleString()},{l:"Replies",v:ph.stats.replies},{l:"Reply rate",v:ph.stats.rate,c:"var(--green)"},{l:"Mailboxes",v:ph.stats.mailboxes},{l:"Inbox rate",v:ph.stats.inbox}].map((s,i,a)=>
+                <div key={i} style={{flex:1,padding:"10px 12px",textAlign:"center",borderRight:i<a.length-1?"1px solid var(--border)":"none"}}>
+                  <div style={{fontFamily:"var(--mono)",fontSize:14,fontWeight:600,color:s.c||"var(--text)"}}>{s.v}</div>
+                  <div style={{fontSize:8,color:"var(--text3)",marginTop:2}}>{s.l}</div>
+                </div>)}
+            </div>
+
+            {/* Phase experiments */}
+            {ph.experiments.length>0?<>
+              <div style={{fontSize:10,fontWeight:600,color:"var(--text2)",marginBottom:8}}>Experiments during this phase ({ph.experiments.length})</div>
+              {ph.experiments.map((e,i)=>{
+                const won=e.winner==="challenger";
+                return <div key={i} style={{display:"flex",gap:10,paddingBottom:8,marginBottom:8,borderBottom:i<ph.experiments.length-1?"1px solid var(--border)":"none"}}>
+                  <div style={{width:20,height:20,borderRadius:6,background:won?"var(--green-bg)":"transparent",border:"1px solid "+(won?"var(--green-bd)":"var(--border)"),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
+                    <span style={{fontSize:8,fontWeight:700,color:won?"var(--green)":"var(--text3)"}}>{won?"↑":"="}</span>
+                  </div>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <span style={{fontSize:11,fontWeight:600}}>{e.id}: {e.test}</span>
+                      <div style={{display:"flex",alignItems:"center",gap:4}}>
+                        <span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>{e.baseline}%</span>
+                        <span style={{fontSize:10,color:won?"var(--green)":"var(--text3)"}}>→</span>
+                        <span style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600,color:won?"var(--green)":"var(--text3)"}}>{e.challenger}%</span>
+                      </div>
+                    </div>
+                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{e.learning}</div>
+                  </div>
+                </div>;})}
+            </>:<div style={{fontSize:11,color:"var(--text3)",fontStyle:"italic"}}>No outreach experiments during this phase — mailboxes were building reputation.</div>}
+          </div>;
+        })()}
+
+        {!selectedPhase&&<div style={{marginBottom:24}}/>}
 
         {/* REPLY RATE CHART — visual improvement over time */}
         <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>
