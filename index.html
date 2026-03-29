@@ -223,47 +223,46 @@ function getPhase(day){
 function CampaignCard({c,onClick}){
   const rr=c.sent>0?(c.rep/c.sent*100).toFixed(1):"0.0";
   const phase=getPhase(c.day);
-  return <Card onClick={onClick} style={{cursor:"pointer",overflow:"hidden",padding:0}}>
-    <div style={{padding:"20px 24px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+  return <div onClick={onClick} style={{cursor:"pointer"}}>
+    <div style={{padding:"14px 24px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
       <div>
-        <div style={{fontSize:15,fontWeight:700}}>{c.name}</div>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
-          <span style={{fontSize:9,padding:"3px 8px",borderRadius:6,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.5px",
+        <div style={{fontSize:14,fontWeight:600}}>{c.name}</div>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
+          <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,fontWeight:600,
             background:phase.name==="Warmup"?"var(--orange-bg)":"var(--green-bg)",
-            color:phase.color,
-            border:"1px solid "+(phase.name==="Warmup"?"rgba(255,165,2,0.2)":"var(--green-bd)")}}>{phase.name}</span>
+            color:phase.color}}>{phase.name}</span>
           <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
         </div>
       </div>
       <div style={{textAlign:"right"}}>
-        <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{c.weekly.toLocaleString()}</div>
-        <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>/week</div>
+        <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:600,color:"var(--text)"}}>{c.weekly.toLocaleString()}</div>
+        <div style={{fontSize:9,color:"var(--text3)"}}>/week</div>
       </div>
     </div>
     <div style={{display:"flex",borderTop:"1px solid var(--border)"}}>
       {[{v:c.sent,l:"Sent"},{v:c.rep,l:"Replies",c:"var(--green)"},{v:rr+"%",l:"Rate"},{v:c.bnc,l:"Bounced"}].map((s,i)=>
-        <div key={i} style={{flex:1,padding:"14px 8px",textAlign:"center",borderRight:i<3?"1px solid var(--border)":"none"}}>
-          <div style={{fontFamily:"var(--mono)",fontSize:17,fontWeight:600,color:s.c||"var(--text)"}}>{s.v}</div>
-          <div style={{fontSize:9,color:"var(--text3)",marginTop:3,textTransform:"uppercase",letterSpacing:"0.8px"}}>{s.l}</div>
+        <div key={i} style={{flex:1,padding:"10px 8px",textAlign:"center",borderRight:i<3?"1px solid var(--border)":"none"}}>
+          <div style={{fontFamily:"var(--mono)",fontSize:15,fontWeight:600,color:s.c||"var(--text)"}}>{s.v}</div>
+          <div style={{fontSize:9,color:"var(--text3)",marginTop:2}}>{s.l}</div>
         </div>)}
     </div>
     <div style={{display:"flex",borderTop:"1px solid var(--border)"}}>
       {[{side:c.a,label:"A",color:"var(--blue)"},{side:c.b,label:"B",color:"var(--green)"}].map(({side,label,color},i)=>
-        <div key={i} style={{flex:1,padding:"14px 20px",borderRight:i===0?"1px solid var(--border)":"none"}}>
-          <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,color,marginBottom:5}}>{side.l}</div>
-          <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>{side.rate}%</div>
+        <div key={i} style={{flex:1,padding:"10px 20px",borderRight:i===0?"1px solid var(--border)":"none"}}>
+          <div style={{fontSize:9,letterSpacing:"1px",fontWeight:600,color,marginBottom:3}}>{side.l}</div>
+          <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600}}>{side.rate}%</div>
           <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{side.rep}/{side.sent}</div>
         </div>)}
     </div>
-    <div style={{padding:"14px 24px",borderTop:"1px solid var(--border)"}}>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text3)",marginBottom:6}}>
+    <div style={{padding:"10px 24px",borderTop:"1px solid var(--border)"}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text3)",marginBottom:4}}>
         <span>Test progress</span><span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
       </div>
-      <div style={{height:3,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
-        <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",}}/>
+      <div style={{height:2,background:"var(--border)",borderRadius:1,overflow:"hidden"}}>
+        <div style={{height:"100%",width:c.prog+"%",borderRadius:1,background:"var(--green)"}}/>
       </div>
     </div>
-  </Card>;
+  </div>;
 }
 
 function Reply({r}){
@@ -690,7 +689,7 @@ function App(){
 
   return <div style={{minHeight:"100vh",display:"flex"}}>
     {/* Sidebar */}
-    <nav style={{width:220,borderRight:"1px solid var(--border)",padding:"28px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"var(--sidebar-bg)",zIndex:10,transition:"background .3s"}}>
+    <nav style={{width:220,padding:"24px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"var(--sidebar-bg)",zIndex:10}}>
       <div style={{fontSize:17,fontWeight:700,letterSpacing:"-0.3px",padding:"0 14px",marginBottom:32,display:"flex",alignItems:"center",gap:8}}>
         <div style={{width:22,height:22,borderRadius:6,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center"}}>
           <span style={{fontSize:11,color:"#000",fontWeight:800}}>⚡</span>
@@ -960,6 +959,7 @@ function App(){
             </div>
           </div>)}
       </div>}
+      </div>
     </main>
 
     {md&&<Modal c={md} onClose={()=>setMd(null)}/>}
