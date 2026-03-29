@@ -836,8 +836,12 @@ function App(){
                   </div>
                   <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:9,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
                   <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{p.range}</div>
-                  {active&&<div style={{fontSize:9,color:"var(--green)",marginTop:4,fontWeight:500}}>{D.mbs.length} mailbox{D.mbs.length!==1?"es":""} active</div>}
-                  {done&&<div style={{fontSize:9,color:"var(--text3)",marginTop:4}}>✓ Complete</div>}
+                  {active&&<div style={{fontSize:9,color:"var(--green)",marginTop:6,fontWeight:500,display:"flex",alignItems:"center",gap:4}}>
+                    <span style={{width:4,height:4,borderRadius:"50%",background:"var(--green)",display:"inline-block"}}/>{D.mbs.length} mailbox{D.mbs.length!==1?"es":""} active
+                  </div>}
+                  {done&&<div style={{fontSize:9,color:"var(--green)",marginTop:6}}>✓ Complete · {D.mbs.length} mailboxes</div>}
+                  {future&&<div style={{fontSize:9,color:"var(--text3)",marginTop:6}}>0 mailboxes · unlocks Day {p.day}</div>}
+                  <div style={{fontSize:9,color:"var(--green)",marginTop:4,fontWeight:500}}>Click for details →</div>
                 </div>;})}
             </div>
           </>;
