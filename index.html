@@ -359,6 +359,7 @@ function Reply({r}){
 
 function Modal({c,onClose}){
   if(!c)return null;
+  const [expandedExp,setExpandedExp]=useState(null);
   const cr=D.reps.filter(r=>r.ca===c.name);
   const phase=getPhase(c.day);
   const phases=[
@@ -467,49 +468,9 @@ function Modal({c,onClose}){
           </svg>
         </Card>
 
-        {/* A/B TEST HISTORY TREE */}
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>
-          Optimisation history — {testHistory.length} experiments
-        </div>
-        <div style={{maxHeight:300,overflowY:"auto",marginBottom:24}}>
-          {testHistory.map((t,i)=>{
-            const isLast=i===testHistory.length-1;
-            const won=t.winner==="challenger";
-            const lost=t.winner==="baseline";
-            return <div key={i} style={{display:"flex",gap:12,paddingBottom:isLast?0:0,position:"relative"}}>
-              {/* Timeline line */}
-              {!isLast&&<div style={{position:"absolute",left:11,top:24,bottom:0,width:2,
-                background:t.active?"var(--green)":"rgba(0,212,126,0.15)"}}/>}
-              {/* Dot */}
-              <div style={{width:24,height:24,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
-                background:t.active?"var(--green-bg)":won?"var(--green-bg)":"rgba(255,255,255,0.03)",
-                border:"1px solid "+(t.active?"var(--green-bd)":won?"rgba(0,212,126,0.15)":"var(--border)"),
-                boxShadow:"none",marginTop:2}}>
-                <span style={{fontSize:9,fontWeight:700,color:t.active?"var(--green)":won?"var(--green)":"var(--text3)"}}>{t.active?"▶":won?"↑":"="}</span>
-              </div>
-              {/* Content */}
-              <div style={{flex:1,paddingBottom:12,borderBottom:isLast?"none":"1px solid rgba(255,255,255,0.03)"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontSize:12,fontWeight:600}}>{t.id}</span>
-                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{t.month} {t.week}</span>
-                  </div>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>{t.baseline.rate}%</span>
-                    <span style={{fontSize:10,color:won?"var(--green)":lost?"var(--red)":"var(--text3)"}}>→</span>
-                    <span style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600,color:won?"var(--green)":lost?"var(--text3)":"var(--text)"}}>{t.challenger.rate}%</span>
-                    {won&&<span style={{fontSize:8,padding:"1px 5px",borderRadius:4,background:"var(--green-bg)",color:"var(--green)",fontWeight:700}}>↑</span>}
-                    {t.active&&<span style={{fontSize:8,padding:"1px 5px",borderRadius:4,background:"var(--green-bg)",color:"var(--green)",fontWeight:700,border:"1px solid var(--green-bd)"}}>LIVE</span>}
-                  </div>
-                </div>
-                <div style={{fontSize:11,color:"var(--text3)",marginTop:3,lineHeight:1.5}}>{t.learning}</div>
-              </div>
-            </div>;})}
-        </div>
-
-        {/* CURRENT A/B TEST */}
+        {/* CURRENT A/B TEST — sits above history */}
         <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>Current A/B test</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:20}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:12}}>
           {[c.a,c.b].map((s,i)=><Card key={i} style={{padding:18,borderColor:i===0?"rgba(79,172,254,0.15)":"var(--green-bd)",background:i===0?"rgba(79,172,254,0.04)":"var(--green-bg)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <span style={{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,padding:"3px 8px",borderRadius:6,background:i===0?"var(--blue-bg)":"var(--green-bg)",color:i===0?"var(--blue)":"var(--green)"}}>{s.l} ({i===0?"A":"B"})</span>
@@ -528,14 +489,73 @@ function Modal({c,onClose}){
         </div>
 
         {/* Test progress */}
-        <div style={{marginBottom:20}}>
+        <div style={{marginBottom:24}}>
           <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text3)",marginBottom:6}}>
             <span>Test progress — evaluates at {c.tgt} sends</span>
             <span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
           </div>
           <div style={{height:4,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
-            <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",}}/>
+            <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)"}}/>
           </div>
+        </div>
+
+        {/* A/B TEST HISTORY — most recent first, clickable */}
+        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>
+          Optimisation history — {testHistory.filter(t=>!t.active).length} past experiments
+        </div>
+        <div style={{maxHeight:400,overflowY:"auto",marginBottom:24}}>
+          {[...testHistory].filter(t=>!t.active).reverse().map((t,i,arr)=>{
+            const isLast=i===arr.length-1;
+            const won=t.winner==="challenger";
+            const lost=t.winner==="baseline";
+            const isExpanded=expandedExp===t.id;
+            return <div key={t.id}>
+              <div className="hoverable" onClick={()=>setExpandedExp(isExpanded?null:t.id)} style={{display:"flex",gap:12,position:"relative",cursor:"pointer",padding:"4px 0",borderRadius:4}}>
+              {/* Timeline line */}
+              {!isLast&&<div style={{position:"absolute",left:11,top:28,bottom:-4,width:2,
+                background:"var(--border)"}}/>}
+              {/* Dot */}
+              <div style={{width:24,height:24,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
+                background:won?"var(--green-bg)":"rgba(255,255,255,0.03)",
+                border:"1px solid "+(won?"rgba(0,212,126,0.15)":"var(--border)"),
+                marginTop:2}}>
+                <span style={{fontSize:9,fontWeight:700,color:won?"var(--green)":"var(--text3)"}}>{won?"↑":"="}</span>
+              </div>
+              {/* Content */}
+              <div style={{flex:1,paddingBottom:8,borderBottom:isLast?"none":"1px solid var(--border)"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <span style={{fontSize:12,fontWeight:600}}>{t.id}</span>
+                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{t.month} {t.week}</span>
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>{t.baseline.rate}%</span>
+                    <span style={{fontSize:10,color:won?"var(--green)":"var(--text3)"}}>→</span>
+                    <span style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600,color:won?"var(--green)":"var(--text3)"}}>{t.challenger.rate}%</span>
+                    {won&&<span style={{fontSize:8,padding:"1px 5px",borderRadius:4,background:"var(--green-bg)",color:"var(--green)",fontWeight:700}}>↑</span>}
+                    <span style={{fontSize:10,color:"var(--text3)",transform:isExpanded?"rotate(180deg)":"rotate(0)",transition:"transform .2s"}}>▾</span>
+                  </div>
+                </div>
+                <div style={{fontSize:11,color:"var(--text3)",marginTop:3,lineHeight:1.5}}>{t.learning}</div>
+              </div>
+              </div>
+
+              {/* Expanded A/B copy detail */}
+              {isExpanded&&<div style={{marginLeft:36,marginBottom:12,padding:16,border:"1px solid var(--border)",borderRadius:6,background:"var(--bg)"}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                  <div style={{padding:12,borderRadius:6,background:"var(--blue-bg)",border:"1px solid rgba(79,172,254,0.1)"}}>
+                    <div style={{fontSize:9,fontWeight:700,color:"var(--blue)",marginBottom:6}}>BASELINE (A) {!won&&lost?"— WINNER":""}</div>
+                    <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:4}}>Subject: {t.baseline.sub}</div>
+                    <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:600,marginTop:8}}>{t.baseline.rate}%<span style={{fontSize:10,color:"var(--text3)",fontWeight:400}}> reply rate</span></div>
+                  </div>
+                  <div style={{padding:12,borderRadius:6,background:won?"var(--green-bg)":"rgba(255,255,255,0.02)",border:"1px solid "+(won?"var(--green-bd)":"var(--border)")}}>
+                    <div style={{fontSize:9,fontWeight:700,color:won?"var(--green)":"var(--text3)",marginBottom:6}}>CHALLENGER (B) {won?"— WINNER":""}</div>
+                    <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:4}}>Subject: {t.challenger.sub}</div>
+                    <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:600,marginTop:8}}>{t.challenger.rate}%<span style={{fontSize:10,color:"var(--text3)",fontWeight:400}}> reply rate</span></div>
+                  </div>
+                </div>
+              </div>}
+            </div>;})}
         </div>
 
         {/* REPLIES */}
