@@ -470,7 +470,7 @@ function Modal({c,onClose}){
 
         {/* CURRENT A/B TEST — sits above history */}
         <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>Current A/B test</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:12}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:14,marginBottom:12}}>
           {[c.a,c.b].map((s,i)=><Card key={i} style={{padding:18,borderColor:i===0?"rgba(79,172,254,0.15)":"var(--green-bd)",background:i===0?"rgba(79,172,254,0.04)":"var(--green-bg)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <span style={{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,padding:"3px 8px",borderRadius:6,background:i===0?"var(--blue-bg)":"var(--green-bg)",color:i===0?"var(--blue)":"var(--green)"}}>{s.l} ({i===0?"A":"B"})</span>
@@ -542,7 +542,7 @@ function Modal({c,onClose}){
 
               {/* Expanded A/B copy detail */}
               {isExpanded&&<div style={{marginLeft:36,marginBottom:12,padding:16,border:"1px solid var(--border)",borderRadius:6,background:"var(--bg)"}}>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12}}>
                   <div style={{padding:12,borderRadius:6,background:"var(--blue-bg)",border:"1px solid rgba(79,172,254,0.1)"}}>
                     <div style={{fontSize:9,fontWeight:700,color:"var(--blue)",marginBottom:6}}>BASELINE (A) {!won&&lost?"— WINNER":""}</div>
                     <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:4}}>Subject: {t.baseline.sub}</div>
@@ -861,8 +861,8 @@ function App(){
             </div>
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr"}}>
-          {(showAll?D.campaigns:D.campaigns.slice(0,4)).map((c,i,arr)=><div key={c.id} style={{borderRight:i%2===0?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr"}}>
+          {(showAll?D.campaigns:D.campaigns.slice(0,4)).map((c,i,arr)=><div key={c.id} style={{borderRight:i%4!==3?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
         </div>
         {D.campaigns.length>4&&<div onClick={()=>setShowAll(!showAll)} style={{padding:"12px 24px",borderBottom:"1px solid var(--border)",cursor:"pointer",fontSize:12,fontWeight:500,color:"var(--green)"}}>
           {showAll?"Show less":"View all "+D.campaigns.length+" campaigns →"}
@@ -941,8 +941,8 @@ function App(){
           <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>All campaigns</div>
           <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/12 slots</div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr"}}>
-          {D.campaigns.map((c,i)=><div key={c.id} style={{borderRight:i%2===0?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr"}}>
+          {D.campaigns.map((c,i)=><div key={c.id} style={{borderRight:i%4!==3?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
         </div>
       </div>}
 
