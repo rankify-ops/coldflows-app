@@ -69,7 +69,9 @@ function LiveCountdown({targetDay,currentDay,phaseName}){
 
   // Calculate precise time remaining
   // Assume each "day" started at account creation, mock: March 15 2026
-  const startDate=new Date('2026-03-15T00:00:00');
+  // Account started March 22 2026 — warmup (14 days) ends April 5
+  // Today is March 30, so we're on day 8 of 14 — about 57% through warmup
+  const startDate=new Date('2026-03-22T06:00:00');
   const phaseEndDate=new Date(startDate.getTime()+targetDay*24*60*60*1000);
   const phaseStartDate=new Date(startDate.getTime()+currentDay*24*60*60*1000);
   const totalMs=phaseEndDate.getTime()-phaseStartDate.getTime();
@@ -114,13 +116,13 @@ function LiveCountdown({targetDay,currentDay,phaseName}){
 const D = {
   sentToday:47,cap:120,totalSent:1847,replies:38,bounces:22,warm:5,warmup:4200,rr:2.1,
   account:{
-    daysSinceStart:12,warmupDays:28,
+    daysSinceStart:8,warmupDays:28,
     plan:"Growth",planPrice:"$2,500/mo",
     milestones:[
       {day:0,label:"Account setup",desc:"Domains, mailboxes, targeting configured",done:true,icon:"⚡"},
       {day:1,label:"Warmup started",desc:"Sending reputation building",done:true,icon:"🔥"},
       {day:7,label:"First emails sent",desc:"Initial outreach to first leads",done:true,icon:"📧"},
-      {day:14,label:"Ramp up phase 1",desc:"Volume increases to 120 emails/day",done:false,icon:"📈",current:true},
+      {day:14,label:"Ramp up phase 1",desc:"Volume increases to 840 emails/week",done:false,icon:"📈",current:true},
       {day:21,label:"Ramp up phase 2",desc:"Volume increases to 200 emails/day",done:false,icon:"🚀"},
       {day:28,label:"Full volume unlocked",desc:"300+ emails/day · A/B testing active",done:false,icon:"⚡"},
       {day:42,label:"AI optimisation active",desc:"Self-learning copy improvements begin",done:false,icon:"🧠"},
@@ -134,16 +136,16 @@ const D = {
     ]
   },
   campaigns:[
-    {id:1,name:"SEO services",st:"testing",sent:412,rep:9,bnc:4,leads:220,prog:41,tgt:1000,day:12,weekly:840,
+    {id:1,name:"SEO services",st:"testing",sent:412,rep:9,bnc:4,leads:220,prog:41,tgt:1000,day:8,weekly:420,
       a:{l:"Baseline",sub:"{{company_name}} + SEO",body:"Hey {{first_name}},\n\nQuick question — is {{company_name}} getting leads from Google, or is most of your business coming from referrals?\n\nIf Google isn't pulling its weight, that's usually fixable. I run SEO campaigns starting at $1,500/mo.\n\nWorth a 15 min chat?",sent:206,rep:3,rate:1.5},
       b:{l:"Challenger",sub:"quick question about {{company_name}}",body:"Hey {{first_name}},\n\nI searched for what {{company_name}} does on Google and you're not showing up in the first few results.\n\nThat means potential customers are finding your competitors instead. I fix that — typically 3-4 months to page 1.\n\nInterested?",sent:206,rep:6,rate:2.9,w:true}},
-    {id:2,name:"Website builds",st:"testing",sent:389,rep:11,bnc:6,leads:200,prog:39,tgt:1000,day:12,weekly:840,
+    {id:2,name:"Website builds",st:"testing",sent:389,rep:11,bnc:6,leads:200,prog:39,tgt:1000,day:8,weekly:420,
       a:{l:"Baseline",sub:"website for {{company_name}}",body:"Hey {{first_name}},\n\nIs {{company_name}}'s website working the way you want it to? If it's outdated, slow, or just not converting — I build fast, modern websites.\n\n$5,999 flat rate. 3-4 weeks.\n\nBook a call?",sent:195,rep:4,rate:2.1},
       b:{l:"Challenger",sub:"{{first_name}}, quick one",body:"Hey {{first_name}},\n\nI looked at {{company_name}}'s website. Honestly — you're losing customers.\n\nSlow load, not mobile-friendly, dated design. I can rebuild it in 3 weeks.\n\nWant to see recent builds?",sent:194,rep:7,rate:3.6,w:true}},
-    {id:3,name:"Logo & branding",st:"active",sent:580,rep:12,bnc:7,leads:300,prog:58,tgt:1000,day:12,weekly:840,
+    {id:3,name:"Logo & branding",st:"active",sent:580,rep:12,bnc:7,leads:300,prog:58,tgt:1000,day:8,weekly:420,
       a:{l:"Baseline",sub:"branding for {{company_name}}",body:"Hey {{first_name}},\n\nAre you happy with {{company_name}}'s logo and branding?\n\n$499, 48-hour delivery, 100% money-back guarantee. Real designers, not AI.",sent:290,rep:8,rate:2.8,w:true},
       b:{l:"Challenger",sub:"{{company_name}}'s brand",body:"Hey {{first_name}},\n\nI noticed {{company_name}}'s branding could use a refresh.\n\nProfessional logo + full brand identity for $499. 48 hours. Money-back if you're not happy.",sent:290,rep:4,rate:1.4}},
-    {id:4,name:"Shopify dev",st:"active",sent:466,rep:6,bnc:5,leads:250,prog:47,tgt:1000,day:12,weekly:840,
+    {id:4,name:"Shopify dev",st:"active",sent:466,rep:6,bnc:5,leads:250,prog:47,tgt:1000,day:8,weekly:420,
       a:{l:"Baseline",sub:"shopify dev for {{company_name}}",body:"Hey {{first_name}},\n\nDo you have a developer for your Shopify store?\n\nMonthly retainer starting at $249/mo — submit requests, I build them. No lock-in.",sent:233,rep:4,rate:1.7,w:true},
       b:{l:"Challenger",sub:"re: {{company_name}} shopify",body:"Hey {{first_name}},\n\nWhat's on your Shopify store's to-do list right now?\n\nCustom layouts, speed fixes, app integrations — $249/mo. No contracts.",sent:233,rep:2,rate:0.9}}
   ],
@@ -190,10 +192,10 @@ const D = {
     {nm:"Karen White",co:"White Accounting",em:"karen@white.com.au",ca:"Logo & branding",cat:"unsubscribe",txt:"Please remove me from your mailing list.",t:"3d ago"}
   ],
   mbs:[
-    {em:"thomas@outreach.studio",s:12,lim:30,rep:100,inb:98,ws:"Active",wt:1100,day:12},
-    {em:"tom@outreach.studio",s:15,lim:30,rep:100,inb:97,ws:"Active",wt:1050,day:12},
-    {em:"tom@reach.au",s:11,lim:30,rep:98,inb:96,ws:"Active",wt:1020,day:12},
-    {em:"tflood@reach.au",s:9,lim:30,rep:100,inb:99,ws:"Active",wt:1030,day:12}
+    {em:"thomas@outreach.studio",s:12,lim:30,rep:100,inb:98,ws:"Active",wt:1100,day:8},
+    {em:"tom@outreach.studio",s:15,lim:30,rep:100,inb:97,ws:"Active",wt:1050,day:8},
+    {em:"tom@reach.au",s:11,lim:30,rep:98,inb:96,ws:"Active",wt:1020,day:8},
+    {em:"tflood@reach.au",s:9,lim:30,rep:100,inb:99,ws:"Active",wt:1030,day:8}
   ],
   exps:[
     {id:"EXP-007",svc:"SEO",hyp:"Mentioning they're not showing up creates urgency",st:"active",b:"1.5%",c:"2.9%",s:412},
