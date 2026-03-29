@@ -12,7 +12,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#fafafa;--bg2:#ffffff;--bg3:#f4f4f5;
+  --bg:#ffffff;--bg2:#ffffff;--bg3:#f9f9f9;
   --glass:#ffffff;--glass-h:#ffffff;
   --border:#e5e5e5;--border-h:#d4d4d4;
   --text:#171717;--text2:#525252;--text3:#a3a3a3;
@@ -21,7 +21,7 @@
   --blue:#2563eb;--blue-bg:rgba(37,99,235,0.06);
   --orange:#f59e0b;--orange-bg:rgba(245,158,11,0.06);
   --mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif;
-  --r:8px;--dot-grid:none;
+  --r:6px;--dot-grid:none;
   --sidebar-bg:#ffffff;--chart-grid:#e5e5e5;
   --chart-text:#a3a3a3;--chart-dot:rgba(22,163,74,0.7);
   --scroll-thumb:#d4d4d4;
@@ -191,10 +191,15 @@ const D = {
 const cc={warm:"var(--green)",negative:"var(--red)",auto_reply:"var(--blue)",unsubscribe:"var(--text3)"};
 const cb={warm:"var(--green-bg)",negative:"var(--red-bg)",auto_reply:"var(--blue-bg)",unsubscribe:"rgba(255,255,255,0.03)"};
 
-const G={background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--r)"};
+const G={background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:0};
 
 function Card({children,style,className,onClick}){
-  return <div onClick={onClick} className={className} style={{...G,transition:"all .2s",...style}}>{children}</div>;
+  return <div onClick={onClick} className={className} style={{...G,transition:"all .15s",...style}}>{children}</div>;
+}
+
+// Grid cell style — borders extend edge to edge
+function Cell({children,style,border,span}){
+  return <div style={{padding:"20px 24px",borderBottom:border!==false?"1px solid var(--border)":"none",...style}}>{children}</div>;
 }
 
 function Stat({label,val,sub,color,bar,pct}){
@@ -202,7 +207,7 @@ function Stat({label,val,sub,color,bar,pct}){
     <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:"1.5px",color:"var(--text3)",fontWeight:600,marginBottom:10}}>{label}</div>
     <div style={{fontFamily:"var(--mono)",fontSize:30,fontWeight:700,color:color||"var(--text)",lineHeight:1}}>{val}</div>
     {sub&&<div style={{fontSize:11,color:"var(--text2)",marginTop:6,fontFamily:"var(--mono)"}}>{sub}</div>}
-    {bar&&<div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,marginTop:14,overflow:"hidden"}}>
+    {bar&&<div style={{height:3,background:"var(--bg3)",borderRadius:2,marginTop:14,overflow:"hidden"}}>
       <div style={{height:"100%",width:Math.min(pct,100)+"%",borderRadius:2,background:"var(--green)",}}/>
     </div>}
   </Card>;
@@ -254,7 +259,7 @@ function CampaignCard({c,onClick}){
       <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text3)",marginBottom:6}}>
         <span>Test progress</span><span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
       </div>
-      <div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}}>
+      <div style={{height:3,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
         <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",}}/>
       </div>
     </div>
@@ -452,7 +457,7 @@ function Modal({c,onClose}){
             <span>Test progress — evaluates at {c.tgt} sends</span>
             <span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
           </div>
-          <div style={{height:4,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}}>
+          <div style={{height:4,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
             <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",}}/>
           </div>
         </div>
@@ -483,7 +488,7 @@ function WarmupProgress({compact}){
         <div style={{fontSize:10,color:"var(--text3)"}}>→ 300/day at full ramp</div>
       </div>
     </div>
-    <div style={{height:6,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden",marginBottom:16}}>
+    <div style={{height:6,background:"var(--bg3)",borderRadius:3,overflow:"hidden",marginBottom:16}}>
       <div style={{height:"100%",width:pct+"%",borderRadius:3,background:"var(--green)",transition:"width 1s ease"}}/>
     </div>
     <div style={{display:"flex",gap:0}}>
@@ -516,7 +521,7 @@ function WarmupProgress({compact}){
           <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:"var(--green)"}}>{pct}%</div>
         </div>
       </div>
-      <div style={{height:8,background:"rgba(255,255,255,0.04)",borderRadius:4,overflow:"hidden"}}>
+      <div style={{height:8,background:"var(--bg3)",borderRadius:4,overflow:"hidden"}}>
         <div style={{height:"100%",width:pct+"%",borderRadius:4,background:"var(--green)",transition:"width 1s ease"}}/>
       </div>
     </Card>
@@ -557,7 +562,7 @@ function WarmupProgress({compact}){
             {w.upcoming?w.max.toLocaleString():w.emails.toLocaleString()}<span style={{fontSize:11,fontWeight:400,color:"var(--text3)"}}> /{w.max.toLocaleString()}</span>
           </div>
           <div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>{w.label}{w.unlocked?" ✨":""}</div>
-          {!w.upcoming&&<div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,marginTop:8,overflow:"hidden"}}>
+          {!w.upcoming&&<div style={{height:3,background:"var(--bg3)",borderRadius:2,marginTop:8,overflow:"hidden"}}>
             <div style={{height:"100%",width:Math.round(w.emails/w.max*100)+"%",borderRadius:2,background:"var(--green)",}}/>
           </div>}
         </div>)}
@@ -723,41 +728,48 @@ function App(){
     </nav>
 
     {/* Main */}
-    <main style={{flex:1,marginLeft:220,padding:"36px 44px"}}>
+    <main style={{flex:1,marginLeft:220,borderLeft:"1px solid var(--border)"}}>
+
+      <div>
 
       {pg==="overview"&&<div className="fade-in">
-        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800,letterSpacing:"-0.5px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Last updated 3 minutes ago</p></div>
+        <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)"}}><h1 style={{fontSize:22,fontWeight:600,letterSpacing:"-0.3px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Last updated 3 minutes ago</p></div>
 
-        {wc>0&&<div style={{padding:"12px 18px",borderRadius:12,marginBottom:20,fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:600,background:"var(--green-bg)",color:"var(--green)",border:"1px solid var(--green-bd)"}}>
-          <div style={{width:8,height:8,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>{wc} warm lead{wc>1?"s":""} waiting for follow-up
+        {wc>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--green)",borderBottom:"1px solid var(--border)"}}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>{wc} warm lead{wc>1?"s":""} waiting for follow-up
         </div>}
 
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:12,marginBottom:32}}>
-          <Stat label="Sent today" val={<>{D.sentToday}<span style={{fontSize:14,color:"var(--text3)",fontWeight:400}}>/{D.cap}</span></>} bar pct={pct}/>
-          <Stat label="Total sent" val={D.totalSent.toLocaleString()} sub="lifetime"/>
-          <Stat label="Replies" val={D.replies} color="var(--green)" sub={D.rr+"% rate"}/>
-          <Stat label="Warm leads" val={D.warm} color="var(--green)" sub="need follow-up"/>
-          <Stat label="Bounces" val={D.bounces} sub={(D.bounces/D.totalSent*100).toFixed(1)+"% rate"}/>
-          <Stat label="Warmup" val={(D.warmup/1000).toFixed(1)+"k"} sub="emails sent"/>
+        {/* Stats row — grid cells with right borders */}
+        <div style={{display:"flex",borderBottom:"1px solid var(--border)"}}>
+          {[
+            {l:"Sent today",v:D.sentToday+"/"+D.cap},
+            {l:"Total sent",v:D.totalSent.toLocaleString()},
+            {l:"Replies",v:D.replies,c:"var(--green)"},
+            {l:"Warm leads",v:D.warm,c:"var(--green)"},
+            {l:"Bounces",v:D.bounces},
+            {l:"Warmup",v:(D.warmup/1000).toFixed(1)+"k"}
+          ].map((s,i,a)=><div key={i} style={{flex:1,padding:"20px 24px",borderRight:i<a.length-1?"1px solid var(--border)":"none"}}>
+            <div style={{fontSize:11,color:"var(--text3)",marginBottom:8}}>{s.l}</div>
+            <div style={{fontFamily:"var(--mono)",fontSize:24,fontWeight:600,color:s.c||"var(--text)"}}>{s.v}</div>
+          </div>)}
         </div>
 
-        {/* CAMPAIGNS FIRST */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <div style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Active campaigns</div>
+        {/* CAMPAIGNS */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 24px",borderBottom:"1px solid var(--border)"}}>
+          <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>Active campaigns</div>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/4 slots</div>
-            <div onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",borderRadius:8,background:"var(--green-bg)",border:"1px solid var(--green-bd)",color:"var(--green)",fontSize:11,fontWeight:700,cursor:"pointer",transition:"all .15s"}}>
-              <span style={{fontSize:14,lineHeight:1}}>+</span> Add campaign
+            <div onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 12px",borderRadius:6,border:"1px solid var(--border)",color:"var(--green)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
+              <span style={{fontSize:13,lineHeight:1}}>+</span> Add campaign
             </div>
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14,marginBottom:showAll?14:0}}>
-          {(showAll?D.campaigns:D.campaigns.slice(0,4)).map(c=><CampaignCard key={c.id} c={c} onClick={()=>setMd(c)}/>)}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
+          {(showAll?D.campaigns:D.campaigns.slice(0,4)).map((c,i)=><div key={c.id} style={{borderRight:(i%2===0&&i<D.campaigns.length-1)?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
         </div>
-        {D.campaigns.length>4&&<div onClick={()=>setShowAll(!showAll)} style={{textAlign:"center",padding:"14px",cursor:"pointer",fontSize:12,fontWeight:600,color:"var(--green)",marginBottom:32}}>
+        {D.campaigns.length>4&&<div onClick={()=>setShowAll(!showAll)} style={{padding:"12px 24px",borderBottom:"1px solid var(--border)",cursor:"pointer",fontSize:12,fontWeight:500,color:"var(--green)"}}>
           {showAll?"Show less":"View all "+D.campaigns.length+" campaigns →"}
         </div>}
-        {D.campaigns.length<=4&&<div style={{marginBottom:32}}/>}
 
         {/* MAILBOX PROGRESS + PHASE EXPLAINER */}
         {(()=>{
@@ -774,53 +786,51 @@ function App(){
           const daysToNext=nextPhase?nextPhase.day-day:0;
 
           return <>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <div style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Mailbox progress</div>
-              {nextPhase&&<div style={{fontSize:12,fontWeight:600,color:"var(--green)",fontFamily:"var(--mono)"}}>
+            {/* Mailbox progress section header */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 24px",borderBottom:"1px solid var(--border)"}}>
+              <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>Mailbox progress</div>
+              {nextPhase&&<div style={{fontSize:12,fontWeight:500,color:"var(--green)",fontFamily:"var(--mono)"}}>
                 {daysToNext} day{daysToNext!==1?"s":""} until {nextPhase.name}
               </div>}
             </div>
 
-            {/* Progress bar */}
-            <Card style={{padding:"16px 20px",display:"flex",alignItems:"center",gap:20,marginBottom:14}}>
-              <div style={{flex:1}}>
+            {/* Progress bar row */}
+            <div style={{display:"flex",alignItems:"center",borderBottom:"1px solid var(--border)"}}>
+              <div style={{flex:1,padding:"16px 24px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                  <span style={{fontSize:11,fontWeight:600,color:"var(--text2)"}}>Full capacity</span>
+                  <span style={{fontSize:11,fontWeight:500,color:"var(--text2)"}}>Full capacity</span>
                   <span style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--green)",fontWeight:600}}>{Math.round(day/60*100)}%</span>
                 </div>
-                <div style={{height:6,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:Math.round(day/60*100)+"%",borderRadius:3,background:"var(--green)",}}/>
+                <div style={{height:4,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
+                  <div style={{height:"100%",width:Math.round(day/60*100)+"%",borderRadius:2,background:"var(--green)"}}/>
                 </div>
               </div>
-              <div style={{textAlign:"right",flexShrink:0}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{Math.max(0,60-day)}</div>
-                <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>days left</div>
+              <div style={{borderLeft:"1px solid var(--border)",padding:"16px 24px",textAlign:"center",minWidth:80}}>
+                <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:600,color:"var(--text)",lineHeight:1}}>{Math.max(0,60-day)}</div>
+                <div style={{fontSize:9,color:"var(--text3)",marginTop:2}}>days left</div>
               </div>
-              <div style={{borderLeft:"1px solid var(--border)",paddingLeft:20,flexShrink:0}}>
-                <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Mailboxes</div>
-                <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:700,color:"var(--text)",lineHeight:1}}>{D.mbs.length}</div>
-                <div onClick={()=>nav("mailboxes")} style={{fontSize:10,color:"var(--green)",cursor:"pointer",marginTop:2,fontWeight:600}}>View details →</div>
+              <div style={{borderLeft:"1px solid var(--border)",padding:"16px 24px",minWidth:100}}>
+                <div style={{fontSize:9,color:"var(--text3)"}}>Mailboxes</div>
+                <div style={{fontFamily:"var(--mono)",fontSize:22,fontWeight:600,color:"var(--text)",lineHeight:1,marginTop:2}}>{D.mbs.length}</div>
+                <div onClick={()=>nav("mailboxes")} style={{fontSize:10,color:"var(--green)",cursor:"pointer",marginTop:2,fontWeight:500}}>View details →</div>
               </div>
-            </Card>
+            </div>
 
-            {/* Phase explainer — 4 inline cards */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:32}}>
+            {/* Phase explainer — 4 cells in a row */}
+            <div style={{display:"flex",borderBottom:"1px solid var(--border)"}}>
               {phases.map((p,i)=>{
                 const done=day>=p.endDay;
                 const active=currentPhase===p;
                 const future=day<p.day;
-                return <div key={i} style={{padding:"12px 14px",borderRadius:10,
-                  background:active?"var(--green-bg)":done?"rgba(0,212,126,0.03)":"rgba(255,255,255,0.02)",
-                  border:"1px solid "+(active?"var(--green-bd)":done?"rgba(0,212,126,0.1)":"var(--border)"),
-                  opacity:future?0.4:1}}>
+                return <div key={i} style={{flex:1,padding:"14px 20px",borderRight:i<3?"1px solid var(--border)":"none",
+                  opacity:future?0.4:1,background:active?"var(--green-bg)":"transparent"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
-                    <div style={{width:8,height:8,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)",
-                      boxShadow:"none"}}/>
-                    <span style={{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.5px",
+                    <div style={{width:7,height:7,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)"}}/>
+                    <span style={{fontSize:10,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",
                       color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
-                    {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:4,background:"var(--green)",color:"#000",fontWeight:800}}>NOW</span>}
+                    {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:3,background:"var(--green)",color:"#fff",fontWeight:700}}>NOW</span>}
                   </div>
-                  <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:700,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:9,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
+                  <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:9,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
                   <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{p.range}</div>
                 </div>;})}
             </div>
@@ -828,8 +838,10 @@ function App(){
         })()}
 
         {/* RECENT REPLIES */}
-        <div style={{fontSize:13,fontWeight:700,marginBottom:14,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Recent replies</div>
-        {D.reps.slice(0,4).map((r,i)=><Reply key={i} r={r}/>)}
+        <div style={{padding:"16px 24px",borderBottom:"1px solid var(--border)",fontSize:13,fontWeight:600,color:"var(--text2)"}}>Recent replies</div>
+        <div style={{padding:"0 24px"}}>
+          {D.reps.slice(0,4).map((r,i)=><Reply key={i} r={r}/>)}
+        </div>
       </div>}
 
       {pg==="campaigns"&&<div className="fade-in">
@@ -917,7 +929,7 @@ function App(){
                 <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text3)",marginBottom:4}}>
                   <span>Reputation</span><span style={{color:rc,fontFamily:"var(--mono)",fontWeight:600}}>{m.rep}/100</span>
                 </div>
-                <div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}}>
+                <div style={{height:3,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
                   <div style={{height:"100%",width:m.rep+"%",borderRadius:2,background:rc,boxShadow:"none"}}/>
                 </div>
               </div>
