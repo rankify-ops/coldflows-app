@@ -52,6 +52,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .fade-in{animation:fadeIn .4s ease both}
 .hoverable{transition:background .12s ease}
 .hoverable:hover{background:var(--bg3)!important}
+.campaign-cell{transition:all .15s ease;border-top:2px solid transparent}
+.campaign-cell:hover{background:var(--bg3)!important;border-top-color:var(--green)!important}
+.campaign-cell:hover .camp-border{border-color:var(--green)!important}
+.campaign-cell .camp-arrow{opacity:0;transform:translateX(-4px);transition:all .15s ease}
+.campaign-cell:hover .camp-arrow{opacity:1;transform:translateX(0)}
+.campaign-cell .camp-icon{transition:transform .3s ease}
+.campaign-cell:hover .camp-icon{transform:rotate(15deg)}
+@keyframes sendPulse{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
 </style>
 </head>
 <body>
@@ -300,15 +308,26 @@ function getPhase(day){
 function CampaignCard({c,onClick}){
   const rr=c.sent>0?(c.rep/c.sent*100).toFixed(1):"0.0";
   const phase=getPhase(c.day);
-  return <div onClick={onClick} className="hoverable" style={{cursor:"pointer"}}>
-    <div style={{padding:"14px 24px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <div>
-        <div style={{fontSize:14,fontWeight:600}}>{c.name}</div>
-        <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
-          <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,fontWeight:600,
-            background:phase.name==="Warmup"?"var(--orange-bg)":"var(--green-bg)",
-            color:phase.color}}>{phase.name}</span>
-          <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
+  return <div onClick={onClick} className="campaign-cell" style={{cursor:"pointer",position:"relative"}}>
+    <div style={{padding:"14px 20px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        {/* Animated campaign icon */}
+        <div className="camp-icon" style={{width:28,height:28,borderRadius:6,background:"var(--green-bg)",border:"1px solid var(--green-bd)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+          </svg>
+        </div>
+        <div>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontSize:14,fontWeight:600}}>{c.name}</span>
+            <span className="camp-arrow" style={{color:"var(--green)",fontSize:12,fontWeight:600}}>→</span>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3}}>
+            <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,fontWeight:600,
+              background:phase.name==="Warmup"?"var(--orange-bg)":"var(--green-bg)",
+              color:phase.color}}>{phase.name}</span>
+            <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
+          </div>
         </div>
       </div>
       <div style={{textAlign:"right"}}>
@@ -325,13 +344,13 @@ function CampaignCard({c,onClick}){
     </div>
     <div style={{display:"flex",borderTop:"1px solid var(--border)"}}>
       {[{side:c.a,label:"A",color:"var(--blue)"},{side:c.b,label:"B",color:"var(--green)"}].map(({side,label,color},i)=>
-        <div key={i} style={{flex:1,padding:"10px 20px",borderRight:i===0?"1px solid var(--border)":"none"}}>
+        <div key={i} style={{flex:1,padding:"10px 16px",borderRight:i===0?"1px solid var(--border)":"none"}}>
           <div style={{fontSize:9,letterSpacing:"1px",fontWeight:600,color,marginBottom:3}}>{side.l}</div>
-          <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600}}>{side.rate}%</div>
+          <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:600}}>{side.rate}%</div>
           <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{side.rep}/{side.sent}</div>
         </div>)}
     </div>
-    <div style={{padding:"10px 24px",borderTop:"1px solid var(--border)"}}>
+    <div style={{padding:"10px 20px",borderTop:"1px solid var(--border)"}}>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text3)",marginBottom:4}}>
         <span>Test progress</span><span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
       </div>
