@@ -12,8 +12,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#ffffff;--bg2:#ffffff;--bg3:#f9f9f9;
-  --glass:#ffffff;--glass-h:#ffffff;
+  --bg:#f5f5f5;--bg2:#ffffff;--bg3:#f0f0f0;
+  --glass:#ffffff;--glass-h:#f9f9f9;
   --border:#e5e5e5;--border-h:#d4d4d4;
   --text:#171717;--text2:#525252;--text3:#a3a3a3;
   --green:#16a34a;--green2:#22c55e;--green-bg:rgba(22,163,74,0.06);--green-bd:rgba(22,163,74,0.2);
@@ -49,6 +49,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(0,212,126,0.15)}50%{box-shadow:0 0 40px rgba(0,212,126,0.25)}}
 .fade-in{animation:fadeIn .4s ease both}
+.hoverable{transition:background .12s ease}
+.hoverable:hover{background:var(--bg3)!important}
 </style>
 </head>
 <body>
@@ -223,7 +225,7 @@ function getPhase(day){
 function CampaignCard({c,onClick}){
   const rr=c.sent>0?(c.rep/c.sent*100).toFixed(1):"0.0";
   const phase=getPhase(c.day);
-  return <div onClick={onClick} style={{cursor:"pointer"}}>
+  return <div onClick={onClick} className="hoverable" style={{cursor:"pointer"}}>
     <div style={{padding:"14px 24px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
       <div>
         <div style={{fontSize:14,fontWeight:600}}>{c.name}</div>
@@ -266,7 +268,7 @@ function CampaignCard({c,onClick}){
 }
 
 function Reply({r}){
-  return <div style={{display:"flex",gap:14,padding:"16px 0",borderBottom:"1px solid var(--border)"}}>
+  return <div className="hoverable" style={{display:"flex",gap:14,padding:"16px 4px",borderBottom:"1px solid var(--border)",marginLeft:-4,marginRight:-4,borderRadius:4}}>
     <div style={{width:36,height:36,borderRadius:10,background:cb[r.cat],color:cc[r.cat],display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,flexShrink:0}}>{r.nm[0]}</div>
     <div style={{flex:1,minWidth:0}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -698,7 +700,7 @@ function App(){
       </div>
 
       {[{id:"overview",l:"Overview"},{id:"campaigns",l:"Campaigns"},{id:"replies",l:"Replies"},{id:"leads",l:"Leads"}].map(n=>
-        <a key={n.id} onClick={()=>nav(n.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderRadius:6,color:pg===n.id?"var(--green)":"var(--text2)",fontSize:13,fontWeight:pg===n.id?600:400,cursor:"pointer",marginBottom:1,
+        <a key={n.id} onClick={()=>nav(n.id)} className="hoverable" style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderRadius:6,color:pg===n.id?"var(--green)":"var(--text2)",fontSize:13,fontWeight:pg===n.id?600:400,cursor:"pointer",marginBottom:1,
           background:"transparent",border:"1px solid transparent"}}>
           {n.l}
           {n.id==="replies"&&wc>0&&<span style={{marginLeft:"auto",fontSize:9,fontFamily:"var(--mono)",color:"var(--green)",background:"var(--green-bg)",padding:"2px 6px",borderRadius:10,fontWeight:700}}>{wc}</span>}
@@ -706,7 +708,7 @@ function App(){
 
       <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:"1.5px",color:"var(--text3)",padding:"24px 14px 8px",fontWeight:600}}>System</div>
       {[{id:"mailboxes",l:"Mailboxes"},{id:"experiments",l:"Experiments"}].map(n=>
-        <a key={n.id} onClick={()=>nav(n.id)} style={{display:"flex",alignItems:"center",padding:"8px 14px",borderRadius:6,color:pg===n.id?"var(--green)":"var(--text2)",fontSize:13,fontWeight:pg===n.id?600:400,cursor:"pointer",marginBottom:1,
+        <a key={n.id} onClick={()=>nav(n.id)} className="hoverable" style={{display:"flex",alignItems:"center",padding:"8px 14px",borderRadius:6,color:pg===n.id?"var(--green)":"var(--text2)",fontSize:13,fontWeight:pg===n.id?600:400,cursor:"pointer",marginBottom:1,
           background:"transparent",border:"1px solid transparent"}}>
           {n.l}
         </a>)}
@@ -727,7 +729,7 @@ function App(){
     </nav>
 
     {/* Main */}
-    <main style={{flex:1,marginLeft:220,borderLeft:"1px solid var(--border)"}}>
+    <main style={{flex:1,marginLeft:220,background:"var(--bg2)",borderLeft:"1px solid var(--border)",minHeight:"100vh"}}>
 
       <div>
 
@@ -894,7 +896,7 @@ function App(){
             <table style={{width:"100%",borderCollapse:"collapse",minWidth:600}}>
               <thead><tr>{["Lead","Company","Campaign","Status","Seq"].map(h=><th key={h} style={{textAlign:"left",fontSize:9,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",fontWeight:600,padding:"14px 16px",borderBottom:"1px solid var(--border)"}}>{h}</th>)}</tr></thead>
               <tbody>
-                {filtered.map((l,i)=><tr key={i} onClick={()=>setLd(l)} style={{cursor:"pointer",transition:"background .15s"}}>
+                {filtered.map((l,i)=><tr key={i} onClick={()=>setLd(l)} className="hoverable" style={{cursor:"pointer"}}>
                   <td style={{padding:"12px 16px",borderBottom:"1px solid var(--border)"}}>
                     <div style={{fontWeight:600,fontSize:13}}>{l.n}</div>
                     <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{l.e}</div>
