@@ -12,40 +12,25 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#f8f8f8;--bg2:#ffffff;--bg3:#f2f2f4;
-  --glass:rgba(255,255,255,0.8);--glass-h:rgba(255,255,255,0.95);
-  --border:#e8e8ec;--border-h:#d4d4d8;
-  --text:#1a1a1e;--text2:#52525b;--text3:#a1a1aa;
-  --green:#00a86b;--green2:#00c77b;--green-bg:rgba(0,168,107,0.06);--green-bd:rgba(0,168,107,0.18);
+  --bg:#fafafa;--bg2:#ffffff;--bg3:#f4f4f5;
+  --glass:#ffffff;--glass-h:#ffffff;
+  --border:#e5e5e5;--border-h:#d4d4d4;
+  --text:#171717;--text2:#525252;--text3:#a3a3a3;
+  --green:#16a34a;--green2:#22c55e;--green-bg:rgba(22,163,74,0.06);--green-bd:rgba(22,163,74,0.2);
   --red:#dc2626;--red-bg:rgba(220,38,38,0.06);
   --blue:#2563eb;--blue-bg:rgba(37,99,235,0.06);
   --orange:#f59e0b;--orange-bg:rgba(245,158,11,0.06);
   --mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif;
-  --r:12px;--dot-grid:none;
-  --sidebar-bg:#ffffff;--chart-grid:#e8e8ec;
-  --chart-text:#a1a1aa;--chart-dot:rgba(0,168,107,0.7);
-  --scroll-thumb:#d4d4d8;
-  --card-shadow:0 1px 3px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02);
-}
-.light{
-  --bg:#f8f8f8;--bg2:#ffffff;--bg3:#f2f2f4;
-  --glass:rgba(255,255,255,0.8);--glass-h:rgba(255,255,255,0.95);
-  --border:#e8e8ec;--border-h:#d4d4d8;
-  --text:#1a1a1e;--text2:#52525b;--text3:#a1a1aa;
-  --green:#00a86b;--green2:#00c77b;--green-bg:rgba(0,168,107,0.06);--green-bd:rgba(0,168,107,0.18);
-  --red:#dc2626;--red-bg:rgba(220,38,38,0.06);
-  --blue:#2563eb;--blue-bg:rgba(37,99,235,0.06);
-  --orange:#f59e0b;--orange-bg:rgba(245,158,11,0.06);
-  --dot-grid:none;
-  --sidebar-bg:#ffffff;--chart-grid:#e8e8ec;
-  --chart-text:#a1a1aa;--chart-dot:rgba(0,168,107,0.7);
-  --scroll-thumb:#d4d4d8;
-  --card-shadow:0 1px 3px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02);
+  --r:8px;--dot-grid:none;
+  --sidebar-bg:#ffffff;--chart-grid:#e5e5e5;
+  --chart-text:#a3a3a3;--chart-dot:rgba(22,163,74,0.7);
+  --scroll-thumb:#d4d4d4;
+  --card-shadow:none;
 }
 .dark{
   --bg:#0a0a0c;--bg2:#111114;--bg3:#161619;
   --glass:rgba(255,255,255,0.03);--glass-h:rgba(255,255,255,0.05);
-  --border:rgba(255,255,255,0.06);--border-h:rgba(255,255,255,0.1);
+  --border:rgba(255,255,255,0.08);--border-h:rgba(255,255,255,0.12);
   --text:#f0f0f2;--text2:#a0a0a8;--text3:#5a5a64;
   --green:#00d47e;--green2:#00ff99;--green-bg:rgba(0,212,126,0.08);--green-bd:rgba(0,212,126,0.2);
   --red:#ff4757;--red-bg:rgba(255,71,87,0.08);
@@ -55,10 +40,10 @@
   --sidebar-bg:rgba(10,10,12,0.95);--chart-grid:rgba(255,255,255,0.04);
   --chart-text:rgba(255,255,255,0.2);--chart-dot:rgba(0,212,126,0.6);
   --scroll-thumb:rgba(255,255,255,0.06);
-  --card-shadow:0 1px 3px rgba(0,0,0,0.2);
+  --card-shadow:none;
 }
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
-  background-image:var(--dot-grid);background-size:24px 24px;transition:background .3s,color .3s}
+  background-image:var(--dot-grid);background-size:24px 24px;transition:background .2s,color .2s}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:3px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -206,7 +191,7 @@ const D = {
 const cc={warm:"var(--green)",negative:"var(--red)",auto_reply:"var(--blue)",unsubscribe:"var(--text3)"};
 const cb={warm:"var(--green-bg)",negative:"var(--red-bg)",auto_reply:"var(--blue-bg)",unsubscribe:"rgba(255,255,255,0.03)"};
 
-const G={background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--r)",boxShadow:"var(--card-shadow)"};
+const G={background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--r)"};
 
 function Card({children,style,className,onClick}){
   return <div onClick={onClick} className={className} style={{...G,transition:"all .2s",...style}}>{children}</div>;
@@ -701,26 +686,24 @@ function App(){
   return <div style={{minHeight:"100vh",display:"flex"}}>
     {/* Sidebar */}
     <nav style={{width:220,borderRight:"1px solid var(--border)",padding:"28px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"var(--sidebar-bg)",zIndex:10,transition:"background .3s"}}>
-      <div style={{fontSize:18,fontWeight:800,letterSpacing:"-0.5px",padding:"0 10px",marginBottom:40,display:"flex",alignItems:"center",gap:10}}>
-        <div style={{width:26,height:26,borderRadius:7,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div style={{fontSize:17,fontWeight:700,letterSpacing:"-0.3px",padding:"0 14px",marginBottom:32,display:"flex",alignItems:"center",gap:8}}>
+        <div style={{width:22,height:22,borderRadius:6,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center"}}>
           <span style={{fontSize:11,color:"#000",fontWeight:800}}>⚡</span>
         </div>
         <span>coldflows</span>
       </div>
 
       {[{id:"overview",l:"Overview"},{id:"campaigns",l:"Campaigns"},{id:"replies",l:"Replies"},{id:"leads",l:"Leads"}].map(n=>
-        <a key={n.id} onClick={()=>nav(n.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderRadius:10,color:pg===n.id?"var(--text)":"var(--text3)",fontSize:13,fontWeight:pg===n.id?600:500,cursor:"pointer",marginBottom:2,
-          background:pg===n.id?"var(--green-bg)":"transparent",
-          border:pg===n.id?"1px solid var(--green-bd)":"1px solid transparent"}}>
+        <a key={n.id} onClick={()=>nav(n.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderRadius:6,color:pg===n.id?"var(--green)":"var(--text2)",fontSize:13,fontWeight:pg===n.id?600:400,cursor:"pointer",marginBottom:1,
+          background:"transparent",border:"1px solid transparent"}}>
           {n.l}
           {n.id==="replies"&&wc>0&&<span style={{marginLeft:"auto",fontSize:9,fontFamily:"var(--mono)",color:"var(--green)",background:"var(--green-bg)",padding:"2px 6px",borderRadius:10,fontWeight:700}}>{wc}</span>}
         </a>)}
 
-      <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"1.5px",color:"var(--text3)",padding:"24px 14px 8px",fontWeight:700}}>System</div>
+      <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:"1.5px",color:"var(--text3)",padding:"24px 14px 8px",fontWeight:600}}>System</div>
       {[{id:"mailboxes",l:"Mailboxes"},{id:"experiments",l:"Experiments"}].map(n=>
-        <a key={n.id} onClick={()=>nav(n.id)} style={{display:"flex",alignItems:"center",padding:"10px 14px",borderRadius:10,color:pg===n.id?"var(--text)":"var(--text3)",fontSize:13,fontWeight:pg===n.id?600:500,cursor:"pointer",marginBottom:2,
-          background:pg===n.id?"var(--green-bg)":"transparent",
-          border:pg===n.id?"1px solid var(--green-bd)":"1px solid transparent"}}>
+        <a key={n.id} onClick={()=>nav(n.id)} style={{display:"flex",alignItems:"center",padding:"8px 14px",borderRadius:6,color:pg===n.id?"var(--green)":"var(--text2)",fontSize:13,fontWeight:pg===n.id?600:400,cursor:"pointer",marginBottom:1,
+          background:"transparent",border:"1px solid transparent"}}>
           {n.l}
         </a>)}
 
