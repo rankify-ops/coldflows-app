@@ -114,10 +114,10 @@ function LiveCountdown({targetDay,currentDay,phaseName}){
 }
 
 const D = {
-  sentToday:47,cap:120,totalSent:1847,replies:38,bounces:22,warm:5,warmup:4200,rr:2.1,
+  sentToday:187,cap:480,totalSent:14820,replies:312,bounces:89,warm:12,warmup:4200,rr:2.1,
   account:{
     daysSinceStart:8,warmupDays:28,
-    plan:"Growth",planPrice:"$2,500/mo",
+    plan:"Scale",planPrice:"$5,000/mo",
     milestones:[
       {day:0,label:"Account setup",desc:"Domains, mailboxes, targeting configured",done:true,icon:"⚡"},
       {day:1,label:"Warmup started",desc:"Sending reputation building",done:true,icon:"🔥"},
@@ -147,7 +147,19 @@ const D = {
       b:{l:"Challenger",sub:"{{company_name}}'s brand",body:"Hey {{first_name}},\n\nI noticed {{company_name}}'s branding could use a refresh.\n\nProfessional logo + full brand identity for $499. 48 hours. Money-back if you're not happy.",sent:290,rep:4,rate:1.4}},
     {id:4,name:"Shopify dev",st:"active",sent:466,rep:6,bnc:5,leads:250,prog:47,tgt:1000,day:8,weekly:420,
       a:{l:"Baseline",sub:"shopify dev for {{company_name}}",body:"Hey {{first_name}},\n\nDo you have a developer for your Shopify store?\n\nMonthly retainer starting at $249/mo — submit requests, I build them. No lock-in.",sent:233,rep:4,rate:1.7,w:true},
-      b:{l:"Challenger",sub:"re: {{company_name}} shopify",body:"Hey {{first_name}},\n\nWhat's on your Shopify store's to-do list right now?\n\nCustom layouts, speed fixes, app integrations — $249/mo. No contracts.",sent:233,rep:2,rate:0.9}}
+      b:{l:"Challenger",sub:"re: {{company_name}} shopify",body:"Hey {{first_name}},\n\nWhat's on your Shopify store's to-do list right now?\n\nCustom layouts, speed fixes, app integrations — $249/mo. No contracts.",sent:233,rep:2,rate:0.9}},
+    {id:5,name:"Google Ads mgmt",st:"active",sent:1840,rep:42,bnc:12,leads:600,prog:92,tgt:2000,day:18,weekly:840,
+      a:{l:"Baseline",sub:"Google Ads for {{company_name}}",body:"Hey {{first_name}},\n\nAre you running Google Ads? Most businesses I audit are wasting 30-40% of their ad spend.\n\nI manage campaigns starting at $999/mo — real results, transparent reporting.",sent:920,rep:28,rate:3.0,w:true},
+      b:{l:"Challenger",sub:"wasting money on ads?",body:"Hey {{first_name}},\n\nI looked at {{company_name}}'s Google Ads. You're probably overpaying for clicks that don't convert.\n\nI can cut your cost per lead in half. $999/mo, no lock-in.",sent:920,rep:14,rate:1.5}},
+    {id:6,name:"Social media",st:"testing",sent:1620,rep:38,bnc:9,leads:500,prog:81,tgt:2000,day:16,weekly:840,
+      a:{l:"Baseline",sub:"social media for {{company_name}}",body:"Hey {{first_name}},\n\nIs {{company_name}} active on social media? Most businesses know they should be but don't have the time.\n\nWe handle everything — content, posting, engagement. $799/mo.",sent:810,rep:22,rate:2.7,w:true},
+      b:{l:"Challenger",sub:"{{company_name}} on Instagram",body:"Hey {{first_name}},\n\nI noticed {{company_name}} hasn't posted on Instagram in a while. Your competitors are posting 3-4x per week.\n\nWe can fix that. $799/mo, fully managed.",sent:810,rep:16,rate:2.0}},
+    {id:7,name:"Email marketing",st:"active",sent:3200,rep:86,bnc:18,leads:800,prog:80,tgt:4000,day:25,weekly:1400,
+      a:{l:"Baseline",sub:"email marketing for {{company_name}}",body:"Hey {{first_name}},\n\nDo you have an email list? Most businesses sit on a goldmine of past customers and never email them.\n\nI set up automated email flows starting at $699/mo.",sent:1600,rep:52,rate:3.3,w:true},
+      b:{l:"Challenger",sub:"your customers are forgetting you",body:"Hey {{first_name}},\n\nWhen was the last time {{company_name}} emailed its customers? If it's been more than 30 days, you're leaving money on the table.\n\nAutomated flows, $699/mo.",sent:1600,rep:34,rate:2.1}},
+    {id:8,name:"Lead gen — tradies",st:"active",sent:8400,rep:218,bnc:42,leads:2000,prog:84,tgt:10000,day:42,weekly:2100,
+      a:{l:"Baseline",sub:"more jobs for {{company_name}}",body:"Hey {{first_name}},\n\nNeed more jobs? I fill the calendar for tradies like you — plumbers, electricians, builders.\n\nGuaranteed 10+ qualified leads per month or your money back.",sent:4200,rep:142,rate:3.4,w:true},
+      b:{l:"Challenger",sub:"{{first_name}}, quick one about leads",body:"Hey {{first_name}},\n\nI got a {{company_name}} customer a quote request last week. Want me to do the same for you?\n\n10+ leads/month guaranteed. No lock-in.",sent:4200,rep:76,rate:1.8}}
   ],
   leads:[
     {id:1,n:"Sarah Chen",e:"sarah@bloomstudio.com.au",co:"Bloom Studio",ca:"Logo & branding",s:"replied",sq:"2/3",
@@ -195,7 +207,15 @@ const D = {
     {em:"thomas@outreach.studio",s:12,lim:30,rep:100,inb:98,ws:"Active",wt:1100,day:8},
     {em:"tom@outreach.studio",s:15,lim:30,rep:100,inb:97,ws:"Active",wt:1050,day:8},
     {em:"tom@reach.au",s:11,lim:30,rep:98,inb:96,ws:"Active",wt:1020,day:8},
-    {em:"tflood@reach.au",s:9,lim:30,rep:100,inb:99,ws:"Active",wt:1030,day:8}
+    {em:"tflood@reach.au",s:9,lim:30,rep:100,inb:99,ws:"Active",wt:1030,day:8},
+    {em:"hello@sendfast.studio",s:28,lim:50,rep:100,inb:99,ws:"Active",wt:4200,day:18},
+    {em:"james@sendfast.studio",s:32,lim:50,rep:100,inb:98,ws:"Active",wt:4100,day:18},
+    {em:"contact@coldmail.au",s:45,lim:50,rep:100,inb:97,ws:"Active",wt:3800,day:16},
+    {em:"info@coldmail.au",s:40,lim:50,rep:99,inb:96,ws:"Active",wt:3600,day:16},
+    {em:"alex@mailflow.io",s:68,lim:75,rep:100,inb:99,ws:"Active",wt:8400,day:25},
+    {em:"support@mailflow.io",s:72,lim:75,rep:100,inb:98,ws:"Active",wt:8200,day:25},
+    {em:"outreach@maxlead.au",s:75,lim:75,rep:100,inb:99,ws:"Active",wt:12600,day:42},
+    {em:"send@maxlead.au",s:74,lim:75,rep:100,inb:98,ws:"Active",wt:12400,day:42}
   ],
   exps:[
     {id:"EXP-007",svc:"SEO",hyp:"Mentioning they're not showing up creates urgency",st:"active",b:"1.5%",c:"2.9%",s:412},
@@ -780,7 +800,7 @@ function App(){
           </div>
         </div>
         <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"1px"}}>Plan</div>
-        <div style={{fontSize:13,fontWeight:700,color:"var(--green)",marginTop:3}}>Growth — $2,500/mo</div>
+        <div style={{fontSize:13,fontWeight:700,color:"var(--green)",marginTop:3}}>Scale — $5,000/mo</div>
       </div>
     </nav>
 
@@ -815,7 +835,7 @@ function App(){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 24px",borderBottom:"1px solid var(--border)"}}>
           <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>Active campaigns</div>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/4 slots</div>
+            <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/12 slots</div>
             <div onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 12px",borderRadius:6,border:"1px solid var(--border)",color:"var(--green)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
               <span style={{fontSize:13,lineHeight:1}}>+</span> Add campaign
             </div>
@@ -864,7 +884,7 @@ function App(){
                 const done=day>=p.endDay;
                 const active=currentPhase===p;
                 const future=day<p.day;
-                const mbsInPhase=D.mbs.filter(m=>{const ph=getPhase(m.day);return ph.name===(done||active?p.name:null)}).length;
+                const mbsInPhase=D.mbs.filter(m=>getPhase(m.day).name===p.name).length;
                 const activeMbs=active?D.mbs.length:done?0:0;
                 return <div key={i} className="hoverable" onClick={()=>setShowPhase(p)} style={{flex:1,padding:"14px 20px",borderRight:i<3?"1px solid var(--border)":"none",
                   opacity:future?0.4:1,background:active?"var(--green-bg)":"transparent",cursor:"pointer"}}>
@@ -877,9 +897,9 @@ function App(){
                   <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:9,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
                   <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{p.range}</div>
                   {active&&<div style={{fontSize:9,color:"var(--green)",marginTop:6,fontWeight:500,display:"flex",alignItems:"center",gap:4}}>
-                    <span style={{width:4,height:4,borderRadius:"50%",background:"var(--green)",display:"inline-block"}}/>{D.mbs.length} mailbox{D.mbs.length!==1?"es":""} active
+                    <span style={{width:4,height:4,borderRadius:"50%",background:"var(--green)",display:"inline-block"}}/>{mbsInPhase} mailbox{mbsInPhase!==1?"es":""} active
                   </div>}
-                  {done&&<div style={{fontSize:9,color:"var(--green)",marginTop:6}}>✓ Complete · {D.mbs.length} mailboxes</div>}
+                  {done&&<div style={{fontSize:9,color:"var(--green)",marginTop:6}}>✓ Complete · {mbsInPhase} mailbox{mbsInPhase!==1?"es":""}</div>}
                   {future&&<div style={{fontSize:9,color:"var(--text3)",marginTop:6}}>0 mailboxes · unlocks Day {p.day}</div>}
                   <div style={{fontSize:9,color:"var(--green)",marginTop:4,fontWeight:500}}>Click for details →</div>
                 </div>;})}
@@ -1154,7 +1174,7 @@ function App(){
         </div>
         <div style={{padding:"24px 28px"}}>
           <div style={{fontSize:12,color:"var(--text2)",marginBottom:20,lineHeight:1.6}}>
-            You're currently using <span style={{color:"var(--text)",fontWeight:600}}>{D.campaigns.length} of 4</span> campaign slots on your Growth plan. Add more slots to run additional campaigns simultaneously.
+            You're currently using <span style={{color:"var(--text)",fontWeight:600}}>{D.campaigns.length} of 12</span> campaign slots on your Scale plan. Add more slots to run additional campaigns simultaneously.
           </div>
 
           {/* Slot options */}
