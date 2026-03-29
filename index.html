@@ -12,6 +12,37 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
+  --bg:#f8f8f8;--bg2:#ffffff;--bg3:#f2f2f4;
+  --glass:rgba(255,255,255,0.8);--glass-h:rgba(255,255,255,0.95);
+  --border:#e8e8ec;--border-h:#d4d4d8;
+  --text:#1a1a1e;--text2:#52525b;--text3:#a1a1aa;
+  --green:#00a86b;--green2:#00c77b;--green-bg:rgba(0,168,107,0.06);--green-bd:rgba(0,168,107,0.18);
+  --red:#dc2626;--red-bg:rgba(220,38,38,0.06);
+  --blue:#2563eb;--blue-bg:rgba(37,99,235,0.06);
+  --orange:#f59e0b;--orange-bg:rgba(245,158,11,0.06);
+  --mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif;
+  --r:12px;--dot-grid:none;
+  --sidebar-bg:#ffffff;--chart-grid:#e8e8ec;
+  --chart-text:#a1a1aa;--chart-dot:rgba(0,168,107,0.7);
+  --scroll-thumb:#d4d4d8;
+  --card-shadow:0 1px 3px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02);
+}
+.light{
+  --bg:#f8f8f8;--bg2:#ffffff;--bg3:#f2f2f4;
+  --glass:rgba(255,255,255,0.8);--glass-h:rgba(255,255,255,0.95);
+  --border:#e8e8ec;--border-h:#d4d4d8;
+  --text:#1a1a1e;--text2:#52525b;--text3:#a1a1aa;
+  --green:#00a86b;--green2:#00c77b;--green-bg:rgba(0,168,107,0.06);--green-bd:rgba(0,168,107,0.18);
+  --red:#dc2626;--red-bg:rgba(220,38,38,0.06);
+  --blue:#2563eb;--blue-bg:rgba(37,99,235,0.06);
+  --orange:#f59e0b;--orange-bg:rgba(245,158,11,0.06);
+  --dot-grid:none;
+  --sidebar-bg:#ffffff;--chart-grid:#e8e8ec;
+  --chart-text:#a1a1aa;--chart-dot:rgba(0,168,107,0.7);
+  --scroll-thumb:#d4d4d8;
+  --card-shadow:0 1px 3px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02);
+}
+.dark{
   --bg:#0a0a0c;--bg2:#111114;--bg3:#161619;
   --glass:rgba(255,255,255,0.03);--glass-h:rgba(255,255,255,0.05);
   --border:rgba(255,255,255,0.06);--border-h:rgba(255,255,255,0.1);
@@ -20,25 +51,11 @@
   --red:#ff4757;--red-bg:rgba(255,71,87,0.08);
   --blue:#4facfe;--blue-bg:rgba(79,172,254,0.08);
   --orange:#ffa502;--orange-bg:rgba(255,165,2,0.08);
-  --mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif;
-  --r:14px;--dot-grid:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);
+  --dot-grid:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);
   --sidebar-bg:rgba(10,10,12,0.95);--chart-grid:rgba(255,255,255,0.04);
   --chart-text:rgba(255,255,255,0.2);--chart-dot:rgba(0,212,126,0.6);
   --scroll-thumb:rgba(255,255,255,0.06);
-}
-.light{
-  --bg:#f5f5f7;--bg2:#ffffff;--bg3:#eaeaee;
-  --glass:rgba(0,0,0,0.03);--glass-h:rgba(0,0,0,0.05);
-  --border:rgba(0,0,0,0.08);--border-h:rgba(0,0,0,0.12);
-  --text:#1a1a1e;--text2:#5a5a64;--text3:#9a9aa4;
-  --green:#00b86e;--green2:#00d47e;--green-bg:rgba(0,184,110,0.08);--green-bd:rgba(0,184,110,0.2);
-  --red:#e84050;--red-bg:rgba(232,64,80,0.08);
-  --blue:#3a8fd4;--blue-bg:rgba(58,143,212,0.08);
-  --orange:#e69500;--orange-bg:rgba(230,149,0,0.08);
-  --dot-grid:radial-gradient(rgba(0,0,0,0.06) 1px,transparent 1px);
-  --sidebar-bg:rgba(255,255,255,0.97);--chart-grid:rgba(0,0,0,0.06);
-  --chart-text:rgba(0,0,0,0.3);--chart-dot:rgba(0,184,110,0.7);
-  --scroll-thumb:rgba(0,0,0,0.08);
+  --card-shadow:0 1px 3px rgba(0,0,0,0.2);
 }
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
   background-image:var(--dot-grid);background-size:24px 24px;transition:background .3s,color .3s}
@@ -189,7 +206,7 @@ const D = {
 const cc={warm:"var(--green)",negative:"var(--red)",auto_reply:"var(--blue)",unsubscribe:"var(--text3)"};
 const cb={warm:"var(--green-bg)",negative:"var(--red-bg)",auto_reply:"var(--blue-bg)",unsubscribe:"rgba(255,255,255,0.03)"};
 
-const G={background:"var(--glass)",border:"1px solid var(--border)",borderRadius:"var(--r)",backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)"};
+const G={background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--r)",boxShadow:"var(--card-shadow)"};
 
 function Card({children,style,className,onClick}){
   return <div onClick={onClick} className={className} style={{...G,transition:"all .2s",...style}}>{children}</div>;
@@ -201,7 +218,7 @@ function Stat({label,val,sub,color,bar,pct}){
     <div style={{fontFamily:"var(--mono)",fontSize:30,fontWeight:700,color:color||"var(--text)",lineHeight:1}}>{val}</div>
     {sub&&<div style={{fontSize:11,color:"var(--text2)",marginTop:6,fontFamily:"var(--mono)"}}>{sub}</div>}
     {bar&&<div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,marginTop:14,overflow:"hidden"}}>
-      <div style={{height:"100%",width:Math.min(pct,100)+"%",borderRadius:2,background:"var(--green)",boxShadow:"0 0 12px rgba(0,212,126,0.4)"}}/>
+      <div style={{height:"100%",width:Math.min(pct,100)+"%",borderRadius:2,background:"var(--green)",}}/>
     </div>}
   </Card>;
 }
@@ -253,7 +270,7 @@ function CampaignCard({c,onClick}){
         <span>Test progress</span><span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
       </div>
       <div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}}>
-        <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",boxShadow:"0 0 8px rgba(0,212,126,0.3)"}}/>
+        <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",}}/>
       </div>
     </div>
   </Card>;
@@ -342,7 +359,7 @@ function Modal({c,onClose}){
               opacity:future?0.35:1}}>
               <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
                 <div style={{width:7,height:7,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)",
-                  boxShadow:active?"0 0 6px rgba(0,212,126,0.5)":"none"}}/>
+                  boxShadow:"none"}}/>
                 <span style={{fontSize:9,fontWeight:700,textTransform:"uppercase",color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
                 {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:4,background:"var(--green)",color:"#000",fontWeight:800}}>NOW</span>}
               </div>
@@ -401,7 +418,7 @@ function Modal({c,onClose}){
               <div style={{width:24,height:24,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
                 background:t.active?"var(--green-bg)":won?"var(--green-bg)":"rgba(255,255,255,0.03)",
                 border:"1px solid "+(t.active?"var(--green-bd)":won?"rgba(0,212,126,0.15)":"var(--border)"),
-                boxShadow:t.active?"0 0 8px rgba(0,212,126,0.3)":"none",marginTop:2}}>
+                boxShadow:"none",marginTop:2}}>
                 <span style={{fontSize:9,fontWeight:700,color:t.active?"var(--green)":won?"var(--green)":"var(--text3)"}}>{t.active?"▶":won?"↑":"="}</span>
               </div>
               {/* Content */}
@@ -451,7 +468,7 @@ function Modal({c,onClose}){
             <span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
           </div>
           <div style={{height:4,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}}>
-            <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",boxShadow:"0 0 8px rgba(0,212,126,0.3)"}}/>
+            <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)",}}/>
           </div>
         </div>
 
@@ -482,7 +499,7 @@ function WarmupProgress({compact}){
       </div>
     </div>
     <div style={{height:6,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden",marginBottom:16}}>
-      <div style={{height:"100%",width:pct+"%",borderRadius:3,background:"linear-gradient(90deg,var(--green),#00ff99)",boxShadow:"0 0 16px rgba(0,212,126,0.4)",transition:"width 1s ease"}}/>
+      <div style={{height:"100%",width:pct+"%",borderRadius:3,background:"var(--green)",,transition:"width 1s ease"}}/>
     </div>
     <div style={{display:"flex",gap:0}}>
       {a.milestones.map((m,i)=>{
@@ -490,7 +507,7 @@ function WarmupProgress({compact}){
         return <div key={i} style={{flex:1,textAlign:"center",position:"relative"}}>
           <div style={{width:m.current?14:10,height:m.current?14:10,borderRadius:"50%",margin:"0 auto 6px",
             background:m.done?"var(--green)":m.current?"var(--green)":"var(--border)",
-            boxShadow:m.done||m.current?"0 0 8px rgba(0,212,126,0.4)":"none",
+            boxShadow:"none",
             border:m.current?"2px solid var(--green2)":"none",
             opacity:m.done?1:m.current?1:0.4}}/>
           <div style={{fontSize:9,color:m.done||m.current?"var(--text2)":"var(--text3)",fontWeight:m.current?700:400,lineHeight:1.3}}>{m.label}</div>
@@ -515,7 +532,7 @@ function WarmupProgress({compact}){
         </div>
       </div>
       <div style={{height:8,background:"rgba(255,255,255,0.04)",borderRadius:4,overflow:"hidden"}}>
-        <div style={{height:"100%",width:pct+"%",borderRadius:4,background:"linear-gradient(90deg,var(--green),#00ff99)",boxShadow:"0 0 20px rgba(0,212,126,0.4)",transition:"width 1s ease"}}/>
+        <div style={{height:"100%",width:pct+"%",borderRadius:4,background:"var(--green)",transition:"width 1s ease"}}/>
       </div>
     </Card>
 
@@ -527,11 +544,11 @@ function WarmupProgress({compact}){
         return <div key={i} style={{display:"flex",gap:14,paddingBottom:isLast?0:16,position:"relative"}}>
           {!isLast&&<div style={{position:"absolute",left:11,top:24,bottom:0,width:2,
             background:m.done?"var(--green)":"var(--border)",
-            boxShadow:m.done?"0 0 6px rgba(0,212,126,0.2)":"none"}}/>}
+            boxShadow:"none"}}/>}
           <div style={{width:24,height:24,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,
             background:m.done?"var(--green-bg)":m.current?"var(--green-bg)":"rgba(255,255,255,0.03)",
             border:m.current?"1px solid var(--green-bd)":"1px solid "+(m.done?"var(--green-bd)":"var(--border)"),
-            boxShadow:m.current?"0 0 12px rgba(0,212,126,0.3)":"none"}}>{m.done?"✓":m.icon}</div>
+            boxShadow:"none"}}>{m.done?"✓":m.icon}</div>
           <div style={{flex:1}}>
             <div style={{fontSize:13,fontWeight:m.current?700:500,color:m.done||m.current?"var(--text)":"var(--text3)"}}>{m.label}
               {m.current&&<span style={{fontSize:9,marginLeft:8,padding:"2px 6px",borderRadius:6,background:"var(--green-bg)",color:"var(--green)",fontWeight:700}}>CURRENT</span>}
@@ -556,7 +573,7 @@ function WarmupProgress({compact}){
           </div>
           <div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>{w.label}{w.unlocked?" ✨":""}</div>
           {!w.upcoming&&<div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,marginTop:8,overflow:"hidden"}}>
-            <div style={{height:"100%",width:Math.round(w.emails/w.max*100)+"%",borderRadius:2,background:"var(--green)",boxShadow:"0 0 6px rgba(0,212,126,0.3)"}}/>
+            <div style={{height:"100%",width:Math.round(w.emails/w.max*100)+"%",borderRadius:2,background:"var(--green)",}}/>
           </div>}
         </div>)}
       </div>
@@ -603,7 +620,7 @@ function LeadDetail({lead,onClose}){
               {/* Vertical connecting line */}
               {!isLast&&<div style={{position:"absolute",left:15,top:32,bottom:0,width:2,
                 background:isActive?"var(--green)":"var(--border)",
-                boxShadow:isActive?"0 0 8px rgba(0,212,126,0.3)":"none"}}/>}
+                boxShadow:"none"}}/>}
 
               {/* Node dot */}
               <div style={{position:"absolute",left:8,top:8,width:16,height:16,borderRadius:"50%",
@@ -640,7 +657,7 @@ function LeadDetail({lead,onClose}){
               {/* Reply card with green accent */}
               {hasReply&&<div style={{marginTop:12,marginLeft:20,position:"relative"}}>
                 {/* Reply connector line */}
-                <div style={{position:"absolute",left:-20,top:0,width:20,height:20,borderLeft:"2px solid var(--green)",borderBottom:"2px solid var(--green)",borderBottomLeftRadius:8,boxShadow:"-2px 2px 6px rgba(0,212,126,0.15)"}}/>
+                <div style={{position:"absolute",left:-20,top:0,width:20,height:20,borderLeft:"2px solid var(--green)",borderBottom:"2px solid var(--green)",borderBottomLeftRadius:8,boxShadow:"none"}}/>
 
                 <Card style={{padding:14,borderColor:"var(--green-bd)",background:"var(--green-bg)"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
@@ -656,7 +673,7 @@ function LeadDetail({lead,onClose}){
 
         {/* Reply action */}
         {lead.s==="replied"&&<div style={{marginTop:24,display:"flex",gap:10}}>
-          <a href={"mailto:"+lead.e} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 20px",borderRadius:10,background:"var(--green)",color:"#000",fontSize:12,fontWeight:700,textDecoration:"none",cursor:"pointer",boxShadow:"0 0 20px rgba(0,212,126,0.3)"}}>Reply to {lead.n.split(" ")[0]}</a>
+          <a href={"mailto:"+lead.e} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 20px",borderRadius:10,background:"var(--green)",color:"#000",fontSize:12,fontWeight:700,textDecoration:"none",cursor:"pointer",}}>Reply to {lead.n.split(" ")[0]}</a>
           <button style={{padding:"10px 20px",borderRadius:10,background:"var(--glass)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12,fontWeight:600,cursor:"pointer"}}>Copy email</button>
         </div>}
       </div>
@@ -674,8 +691,8 @@ function App(){
   const [showAdd,setShowAdd]=useState(false);
   const [mb,setMb]=useState(null);
   const [treeFilter,setTreeFilter]=useState("SEO");
-  const [dark,setDark]=useState(true);
-  const toggleTheme=()=>{const next=!dark;setDark(next);document.body.classList.toggle('light',!next);};
+  const [dark,setDark]=useState(false);
+  const toggleTheme=()=>{const next=!dark;setDark(next);document.body.classList.toggle('dark',next);document.body.classList.toggle('light',!next);};
   const nav=p=>{setPg(p);setMd(null);setLd(null)};
   const pct=Math.round(D.sentToday/D.cap*100);
   const wc=D.reps.filter(r=>r.cat==="warm").length;
@@ -683,9 +700,9 @@ function App(){
 
   return <div style={{minHeight:"100vh",display:"flex"}}>
     {/* Sidebar */}
-    <nav style={{width:220,borderRight:"1px solid var(--border)",padding:"28px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"var(--sidebar-bg)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",zIndex:10,transition:"background .3s"}}>
+    <nav style={{width:220,borderRight:"1px solid var(--border)",padding:"28px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"var(--sidebar-bg)",zIndex:10,transition:"background .3s"}}>
       <div style={{fontSize:18,fontWeight:800,letterSpacing:"-0.5px",padding:"0 10px",marginBottom:40,display:"flex",alignItems:"center",gap:10}}>
-        <div style={{width:26,height:26,borderRadius:7,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 16px rgba(0,212,126,0.3)"}}>
+        <div style={{width:26,height:26,borderRadius:7,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center"}}>
           <span style={{fontSize:11,color:"#000",fontWeight:800}}>⚡</span>
         </div>
         <span>coldflows</span>
@@ -728,7 +745,7 @@ function App(){
       {pg==="overview"&&<div className="fade-in">
         <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800,letterSpacing:"-0.5px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Last updated 3 minutes ago</p></div>
 
-        {wc>0&&<div style={{padding:"12px 18px",borderRadius:12,marginBottom:20,fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:600,background:"var(--green-bg)",color:"var(--green)",border:"1px solid var(--green-bd)",animation:"glow 3s ease infinite"}}>
+        {wc>0&&<div style={{padding:"12px 18px",borderRadius:12,marginBottom:20,fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:600,background:"var(--green-bg)",color:"var(--green)",border:"1px solid var(--green-bd)"}}>
           <div style={{width:8,height:8,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>{wc} warm lead{wc>1?"s":""} waiting for follow-up
         </div>}
 
@@ -789,7 +806,7 @@ function App(){
                   <span style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--green)",fontWeight:600}}>{Math.round(day/60*100)}%</span>
                 </div>
                 <div style={{height:6,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:Math.round(day/60*100)+"%",borderRadius:3,background:"linear-gradient(90deg,var(--green),#00ff99)",boxShadow:"0 0 12px rgba(0,212,126,0.4)"}}/>
+                  <div style={{height:"100%",width:Math.round(day/60*100)+"%",borderRadius:3,background:"var(--green)",}}/>
                 </div>
               </div>
               <div style={{textAlign:"right",flexShrink:0}}>
@@ -815,7 +832,7 @@ function App(){
                   opacity:future?0.4:1}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
                     <div style={{width:8,height:8,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)",
-                      boxShadow:active?"0 0 8px rgba(0,212,126,0.5)":"none"}}/>
+                      boxShadow:"none"}}/>
                     <span style={{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.5px",
                       color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
                     {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:4,background:"var(--green)",color:"#000",fontWeight:800}}>NOW</span>}
@@ -918,7 +935,7 @@ function App(){
                   <span>Reputation</span><span style={{color:rc,fontFamily:"var(--mono)",fontWeight:600}}>{m.rep}/100</span>
                 </div>
                 <div style={{height:3,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:m.rep+"%",borderRadius:2,background:rc,boxShadow:m.rep>=95?"0 0 8px rgba(0,212,126,0.3)":"none"}}/>
+                  <div style={{height:"100%",width:m.rep+"%",borderRadius:2,background:rc,boxShadow:"none"}}/>
                 </div>
               </div>
             </Card>;})}
@@ -930,7 +947,7 @@ function App(){
         <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>Active</div>
         {D.exps.filter(e=>e.st==="active").map((e,i)=>
           <div key={i} style={{display:"flex",gap:14,padding:"14px 0",borderBottom:"1px solid var(--border)"}}>
-            <div style={{width:8,height:8,borderRadius:"50%",background:"var(--green)",marginTop:6,flexShrink:0,boxShadow:"0 0 8px rgba(0,212,126,0.4)"}}/>
+            <div style={{width:8,height:8,borderRadius:"50%",background:"var(--green)",marginTop:6,flexShrink:0,}}/>
             <div>
               <div style={{fontSize:13,fontWeight:600}}>{e.id} — {e.svc}</div>
               <div style={{fontSize:11,color:"var(--text3)",marginTop:3}}>{e.hyp}</div>
@@ -992,7 +1009,7 @@ function App(){
           </div>
 
           <div style={{marginTop:20,display:"flex",gap:10}}>
-            <div style={{flex:1,padding:"12px",borderRadius:10,background:"var(--green)",color:"#000",fontSize:13,fontWeight:700,textAlign:"center",cursor:"pointer",boxShadow:"0 0 20px rgba(0,212,126,0.3)"}}>Purchase slots</div>
+            <div style={{flex:1,padding:"12px",borderRadius:10,background:"var(--green)",color:"#000",fontSize:13,fontWeight:700,textAlign:"center",cursor:"pointer",}}>Purchase slots</div>
             <div onClick={()=>setShowAdd(false)} style={{padding:"12px 20px",borderRadius:10,background:"var(--glass)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",textAlign:"center"}}>Cancel</div>
           </div>
         </div>
