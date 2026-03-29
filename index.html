@@ -861,8 +861,8 @@ function App(){
             </div>
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
-          {(showAll?D.campaigns:D.campaigns.slice(0,4)).map((c,i)=><div key={c.id} style={{borderRight:(i%2===0&&i<D.campaigns.length-1)?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr"}}>
+          {(showAll?D.campaigns:D.campaigns.slice(0,4)).map((c,i,arr)=><div key={c.id} style={{borderRight:i%2===0?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
         </div>
         {D.campaigns.length>4&&<div onClick={()=>setShowAll(!showAll)} style={{padding:"12px 24px",borderBottom:"1px solid var(--border)",cursor:"pointer",fontSize:12,fontWeight:500,color:"var(--green)"}}>
           {showAll?"Show less":"View all "+D.campaigns.length+" campaigns →"}
@@ -937,9 +937,12 @@ function App(){
       {pg==="campaigns"&&<div className="fade-in">
         <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Campaigns</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Click to view A/B test details</p></div>
         <WarmupProgress/>
-        <div style={{fontSize:13,fontWeight:700,marginBottom:14,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Active campaigns</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:14}}>
-          {D.campaigns.map(c=><CampaignCard key={c.id} c={c} onClick={()=>setMd(c)}/>)}
+        <div style={{padding:"16px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>All campaigns</div>
+          <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/12 slots</div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr"}}>
+          {D.campaigns.map((c,i)=><div key={c.id} style={{borderRight:i%2===0?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
         </div>
       </div>}
 
