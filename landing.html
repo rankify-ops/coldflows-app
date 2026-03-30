@@ -84,7 +84,10 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 .ftl{font-size:11px;color:var(--text3)}.ftr{display:flex;gap:20px}.ftr a{font-size:11px;color:var(--text3);transition:color .1s}.ftr a:hover{color:var(--text)}
 .tg{display:inline-block;padding:3px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--text3);font-weight:500;margin:0 4px}
 .tgg{border-color:var(--green-bd);color:var(--green);background:var(--green-bg)}
-.rv{opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s}.rv.v{opacity:1;transform:translateY(0)}
+/* SCRAMBLE TEXT */
+.scramble{font-family:var(--mono);display:inline-block;color:var(--green);font-weight:500}
+.scramble-tag{position:absolute;font-family:var(--mono);font-size:11px;color:rgba(0,105,73,0.2);font-weight:500;letter-spacing:1px;pointer-events:none;white-space:nowrap}
+.scramble-tag.active{color:var(--green);opacity:0.4}
 </style>
 </head>
 <body>
@@ -94,9 +97,16 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
   <div class="nr"><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><button class="nc" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started</button></div>
 </div></nav>
 
-<section class="hero"><div class="ctn">
+<section class="hero"><div class="ctn" style="position:relative">
+  <!-- Floating scramble tags like Firecrawl -->
+  <div class="scramble-tag" style="top:20px;right:60px" data-scramble="[ 2,100/WK ]"></div>
+  <div class="scramble-tag" style="top:80px;right:20px" data-scramble="[ A/B TEST ]"></div>
+  <div class="scramble-tag" style="top:160px;right:80px" data-scramble="[ .REPLY ]"></div>
+  <div class="scramble-tag" style="bottom:120px;right:40px" data-scramble="[ AI COPY ]"></div>
+  <div class="scramble-tag" style="top:40px;left:calc(100% - 200px)" data-scramble="[ WARMUP ]"></div>
+
   <div class="hb"><div class="hd"></div>Now accepting clients</div>
-  <h1>Cold email that<br>runs itself</h1>
+  <h1>Cold email that<br>runs <span class="scramble" data-scramble="itself">itself</span></h1>
   <p class="hs">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> We handle everything else — forever.</p>
   <div class="hc">
     <button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
@@ -262,6 +272,60 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 <script>
 const o=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('v')})},{threshold:.1});
 document.querySelectorAll('.rv').forEach(e=>o.observe(e));
+
+// SCRAMBLE TEXT ANIMATION
+const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/~`';
+function scrambleText(el){
+  const target=el.dataset.scramble;
+  if(!target)return;
+  const len=target.length;
+  let iteration=0;
+  const interval=setInterval(()=>{
+    el.textContent=target.split('').map((ch,i)=>{
+      if(i<iteration)return target[i];
+      return chars[Math.floor(Math.random()*chars.length)];
+    }).join('');
+    if(iteration>=len)clearInterval(interval);
+    iteration+=1/2;
+  },30);
+}
+
+// Run scramble on all elements with data-scramble
+function initScramble(){
+  document.querySelectorAll('[data-scramble]').forEach((el,i)=>{
+    const target=el.dataset.scramble;
+    // Start with random chars
+    el.textContent=target.split('').map(()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+    // Stagger the animation start
+    setTimeout(()=>scrambleText(el),300+i*200);
+  });
+}
+
+// Re-scramble floating tags periodically
+function loopScrambleTags(){
+  document.querySelectorAll('.scramble-tag').forEach((el,i)=>{
+    setInterval(()=>{
+      const target=el.dataset.scramble;
+      const len=target.length;
+      let iteration=0;
+      el.style.color='rgba(0,105,73,0.35)';
+      const interval=setInterval(()=>{
+        el.textContent=target.split('').map((ch,idx)=>{
+          if(idx<iteration)return target[idx];
+          return chars[Math.floor(Math.random()*chars.length)];
+        }).join('');
+        if(iteration>=len){
+          clearInterval(interval);
+          setTimeout(()=>{el.style.color='rgba(0,105,73,0.15)'},1500);
+        }
+        iteration+=1/3;
+      },25);
+    },4000+i*2000);
+  });
+}
+
+initScramble();
+setTimeout(loopScrambleTags,2000);
 </script>
 </body>
 </html>
