@@ -15,7 +15,7 @@
 :root{
   --bg:#f5f5f5;--bg2:#ffffff;--bg3:#ebebeb;
   --glass:#ffffff;--glass-h:#f9f9f9;
-  --border:#e5e5e5;--border-h:#d4d4d4;
+  --border:#dedede;--border-h:#d0d0d0;
   --text:#171717;--text2:#525252;--text3:#a3a3a3;
   --green:#006949;--green2:#008f5d;--green-bg:rgba(0,105,73,0.05);--green-bd:rgba(0,105,73,0.15);
   --red:#dc2626;--red-bg:rgba(220,38,38,0.06);
@@ -23,7 +23,7 @@
   --orange:#d97706;--orange-bg:rgba(217,119,6,0.06);
   --mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif;
   --r:6px;--dot-grid:none;
-  --sidebar-bg:#ffffff;--chart-grid:#e5e5e5;
+  --sidebar-bg:#ffffff;--chart-grid:#dedede;
   --chart-text:#a3a3a3;--chart-dot:rgba(0,105,73,0.7);
   --scroll-thumb:#d4d4d4;
   --card-shadow:none;
@@ -917,11 +917,11 @@ function App(){
     </nav>
 
     {/* Main */}
-    <main style={{flex:1,marginLeft:220,background:"var(--bg2)",borderLeft:"1px solid var(--border)",minHeight:"100vh"}}>
+    <main style={{flex:1,marginLeft:220,background:"var(--bg)",borderLeft:"1px solid var(--border)",minHeight:"100vh"}}>
 
       <div>
 
-      {pg==="overview"&&<div className="fade-in">
+      {pg==="overview"&&<div className="fade-in" style={{background:"var(--bg2)"}}>
         <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)"}}><h1 style={{fontSize:22,fontWeight:600,letterSpacing:"-0.3px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Last updated 3 minutes ago</p></div>
 
         {wc>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--green)",borderBottom:"1px solid var(--border)"}}>
@@ -1026,7 +1026,7 @@ function App(){
         </div>
       </div>}
 
-      {pg==="campaigns"&&<div className="fade-in">
+      {pg==="campaigns"&&<div className="fade-in" style={{background:"var(--bg2)"}}>
         <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Campaigns</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Click to view A/B test details</p></div>
         <WarmupProgress/>
         <div style={{padding:"16px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -1038,7 +1038,7 @@ function App(){
         </div>
       </div>}
 
-      {pg==="replies"&&<div className="fade-in">
+      {pg==="replies"&&<div className="fade-in" style={{background:"var(--bg2)"}}>
         <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Replies</h1></div>
         <div style={{display:"flex",gap:4,marginBottom:20}}>
           {[{id:"all",l:"All",n:D.reps.length},{id:"warm",l:"Warm",n:D.reps.filter(r=>r.cat==="warm").length},{id:"negative",l:"Negative",n:D.reps.filter(r=>r.cat==="negative").length},{id:"auto_reply",l:"Auto",n:D.reps.filter(r=>r.cat==="auto_reply").length}].map(t=>
@@ -1052,7 +1052,7 @@ function App(){
         {fl.map((r,i)=><Reply key={i} r={r}/>)}
       </div>}
 
-      {pg==="leads"&&<div className="fade-in">
+      {pg==="leads"&&<div className="fade-in" style={{background:"var(--bg2)"}}>
         <div style={{marginBottom:28}}>
           <h1 style={{fontSize:26,fontWeight:800}}>Leads</h1>
           <p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Click a lead to view their email sequence flow</p>
@@ -1099,7 +1099,7 @@ function App(){
         })()}
       </div>}
 
-      {pg==="mailboxes"&&<div className="fade-in">
+      {pg==="mailboxes"&&<div className="fade-in" style={{background:"var(--bg2)"}}>
         <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Mailboxes</h1></div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:12}}>
           {D.mbs.map((m,i)=>{
@@ -1122,7 +1122,7 @@ function App(){
         </div>
       </div>}
 
-      {pg==="experiments"&&<div className="fade-in">
+      {pg==="experiments"&&<div className="fade-in" style={{background:"var(--bg2)"}}>
         <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Experiments</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Self-learning optimisation</p></div>
         <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>Active</div>
         {D.exps.filter(e=>e.st==="active").map((e,i)=>
