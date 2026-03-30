@@ -347,8 +347,8 @@ function loopScrambleTags(){
 initScramble();
 setTimeout(loopScrambleTags,2000);
 
-// ASCII FLOW — diagonal river (hero) + upward flow (bottom)
-function createFlow(canvasId,speed,diagonal){
+// ONE BIG RIVER — snakes from top-left to bottom-right with bends
+function createRiver(canvasId,speed){
   const c=document.getElementById(canvasId);
   if(!c)return;
   const ctx=c.getContext('2d');
@@ -359,53 +359,74 @@ function createFlow(canvasId,speed,diagonal){
   const ascii=' .·:;+=*#@'.split('');
   let tick=0;
 
+  // Define the river path as a series of control points (normalized 0-1)
+  // Snakes from top-left to bottom-right with bends
+  const path=[
+    {x:0.05,y:0.0},{x:0.15,y:0.12},{x:0.35,y:0.15},{x:0.50,y:0.25},
+    {x:0.40,y:0.38},{x:0.25,y:0.42},{x:0.30,y:0.55},{x:0.50,y:0.58},
+    {x:0.65,y:0.52},{x:0.75,y:0.60},{x:0.70,y:0.72},{x:0.55,y:0.78},
+    {x:0.65,y:0.85},{x:0.80,y:0.88},{x:0.92,y:0.95},{x:1.0,y:1.0}
+  ];
+
+  // Interpolate along the path using catmull-rom-ish smoothing
+  function getPathPoint(t){
+    const n=path.length-1;
+    const i=Math.min(Math.floor(t*n),n-1);
+    const f=(t*n)-i;
+    const p0=path[Math.max(i-1,0)];
+    const p1=path[i];
+    const p2=path[Math.min(i+1,n)];
+    const p3=path[Math.min(i+2,n)];
+    // Catmull-rom
+    const f2=f*f,f3=f2*f;
+    const x=0.5*((2*p1.x)+(p2.x-p0.x)*f+(2*p0.x-5*p1.x+4*p2.x-p3.x)*f2+(3*p1.x-p0.x-3*p2.x+p3.x)*f3);
+    const y=0.5*((2*p1.y)+(p2.y-p0.y)*f+(2*p0.y-5*p1.y+4*p2.y-p3.y)*f2+(3*p1.y-p0.y-3*p2.y+p3.y)*f3);
+    return{x,y};
+  }
+
   function step(){
     tick++;
     field.fill(0);
-    if(diagonal){
-      // DIAGONAL RIVER: multiple streams flowing top-left to bottom-right
-      for(let s=0;s<5;s++){
-        const off=s*7-10;
-        const phase=tick*0.005+s*1.4;
-        const amp=2.5+Math.sin(tick*0.0015+s)*1.5;
-        for(let t=0;t<cols+rows;t++){
-          const p=t/(cols+rows);
-          const bx=Math.floor(t*0.65);
-          const by=Math.floor(t*0.5)+off;
-          const wave=Math.sin(phase+t*0.06)*amp;
-          const x=Math.floor(bx+wave*0.6);
-          const y=Math.floor(by+wave*0.6);
-          const ef=Math.min(p*4,1)*Math.min((1-p)*4,1);
-          if(x>=0&&x<cols&&y>=0&&y<rows){
-            const sc=1-Math.abs(wave/amp)*0.5;
-            field[y*cols+x]=Math.max(field[y*cols+x],sc*0.65*ef);
-          }
-          for(let w=-2;w<=2;w++){
-            const wx=x+Math.floor(w*0.4);
-            const wy=y+Math.floor(w*0.6);
-            if(wx>=0&&wx<cols&&wy>=0&&wy<rows){
-              field[wy*cols+wx]=Math.max(field[wy*cols+wx],(1-Math.abs(w)/3)*0.35*ef);
-            }
-          }
-        }
-      }
-    } else {
-      // UPWARD FLOW for bottom CTA
-      for(let x=0;x<cols;x++){
-        const idx=(rows-1)*cols+x;
-        const w=Math.sin(tick*0.003+x*0.12)*0.5+0.5;
-        const w2=Math.sin(tick*0.002+x*0.06+1.5)*0.5+0.5;
-        field[idx]=w*w2*0.45;
-      }
-      for(let y=0;y<rows-1;y++){
-        for(let x=0;x<cols;x++){
-          const idx=y*cols+x;
-          const below=(y+1)*cols+x;
-          const bl=x>0?(y+1)*cols+(x-1):below;
-          const br=x<cols-1?(y+1)*cols+(x+1):below;
-          field[idx]=(field[below]*0.45+field[bl]*0.2+field[br]*0.2)*0.97;
-          field[idx]+=Math.sin(tick*0.002+y*0.08+x*0.05)*0.005;
-          if(field[idx]<0)field[idx]=0;
+
+    // Draw the river along the path
+    const steps=200;
+    for(let i=0;i<steps;i++){
+      // t moves along the river — add time offset so it flows
+      const baseT=i/steps;
+
+      // Flow: particles travel along the river over time
+      const flowOffset=(tick*0.0008)%1;
+      const intensity=Math.sin((baseT+flowOffset)*Math.PI*6)*0.3+0.5;
+      const pulse=Math.sin(tick*0.004+baseT*12)*0.15+0.85;
+
+      const pt=getPathPoint(baseT);
+      const cx=pt.x*cols;
+      const cy=pt.y*rows;
+
+      // River width varies — wider in the middle, narrower at edges
+      const widthMult=1+Math.sin(baseT*Math.PI)*0.6;
+      const riverWidth=3.5*widthMult;
+
+      // Paint the river cross-section
+      for(let w=-Math.ceil(riverWidth);w<=Math.ceil(riverWidth);w++){
+        // Perpendicular direction — approximate from path tangent
+        const tNext=Math.min(baseT+0.01,1);
+        const ptNext=getPathPoint(tNext);
+        const dx=ptNext.x*cols-cx;
+        const dy=ptNext.y*rows-cy;
+        const len=Math.sqrt(dx*dx+dy*dy)||1;
+        // Perpendicular
+        const px=-dy/len;
+        const py=dx/len;
+
+        const fx=Math.round(cx+px*w);
+        const fy=Math.round(cy+py*w);
+        if(fx>=0&&fx<cols&&fy>=0&&fy<rows){
+          const dist=Math.abs(w)/riverWidth;
+          const falloff=Math.max(0,1-dist*dist); // Gaussian-ish
+          const val=falloff*intensity*pulse*0.75;
+          const idx=fy*cols+fx;
+          field[idx]=Math.max(field[idx],val);
         }
       }
     }
@@ -420,8 +441,8 @@ function createFlow(canvasId,speed,diagonal){
         const h=Math.min(field[y*cols+x],1);
         if(h<0.03)continue;
         const ci=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
-        const a=Math.min(h*0.6,0.5);
-        ctx.fillStyle=`rgba(0,${Math.floor(40+h*65)},${Math.floor(22+h*48)},${a})`;
+        const a=Math.min(h*0.65,0.55);
+        ctx.fillStyle=`rgba(0,${Math.floor(40+h*70)},${Math.floor(22+h*50)},${a})`;
         ctx.fillText(ascii[ci],x*cellW+cellW/2,y*cellH+cellH-2);
       }
     }
@@ -436,8 +457,56 @@ function createFlow(canvasId,speed,diagonal){
   requestAnimationFrame(go);
 }
 
-createFlow('heroFlow',130,true);
-createFlow('flameCanvas',160,false);
+// Upward flow for bottom CTA
+function createUpflow(canvasId,speed){
+  const c=document.getElementById(canvasId);
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const cellW=10,cellH=15;
+  const cols=Math.floor(W/cellW),rows=Math.floor(H/cellH);
+  const heat=new Float32Array(cols*rows);
+  const ascii=' .·:;+=*#@'.split('');
+  let tick=0;
+  function step(){
+    tick++;
+    for(let x=0;x<cols;x++){
+      const idx=(rows-1)*cols+x;
+      heat[idx]=Math.sin(tick*0.003+x*0.12)*0.25+0.25;
+    }
+    for(let y=0;y<rows-1;y++){
+      for(let x=0;x<cols;x++){
+        const idx=y*cols+x;
+        const below=(y+1)*cols+x;
+        const bl=x>0?(y+1)*cols+(x-1):below;
+        const br=x<cols-1?(y+1)*cols+(x+1):below;
+        heat[idx]=(heat[below]*0.45+heat[bl]*0.2+heat[br]*0.2)*0.97;
+        if(heat[idx]<0)heat[idx]=0;
+      }
+    }
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.font='11px JetBrains Mono,monospace';
+    ctx.textAlign='center';
+    for(let y=0;y<rows;y++){
+      for(let x=0;x<cols;x++){
+        const h=Math.min(heat[y*cols+x],1);
+        if(h<0.03)continue;
+        const ci=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
+        const a=Math.min(h*0.55,0.45);
+        ctx.fillStyle=`rgba(0,${Math.floor(40+h*65)},${Math.floor(22+h*48)},${a})`;
+        ctx.fillText(ascii[ci],x*cellW+cellW/2,y*cellH+cellH-2);
+      }
+    }
+  }
+  let last=0;
+  function go(ts){if(ts-last>speed){step();draw();last=ts;}requestAnimationFrame(go);}
+  requestAnimationFrame(go);
+}
+
+createRiver('heroFlow',120);
+createUpflow('flameCanvas',160);
 </script>
 </body>
 </html>
