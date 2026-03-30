@@ -265,7 +265,16 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
   <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Is there a contract?<span>+</span></div><div class="fa">No contracts. Cancel anytime. We recommend 3 months to see the full benefit of the self-learning AI.</div></div>
 </div></section>
 
-<section class="fc"><div class="ctn"><h2>Stop doing cold email<br>manually</h2><p>Purchase a package. Tell us what you do. We take it from there.</p><button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button></div></section>
+<section class="fc" style="position:relative;overflow:hidden">
+  <div class="ctn" style="position:relative;z-index:2">
+    <div style="font-family:var(--mono);font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-2px;color:var(--green);margin-bottom:4px">coldflows</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:32px">The easiest way to fill your pipeline</div>
+    <canvas id="flameCanvas" width="700" height="180" style="display:block;margin:0 auto 32px;max-width:100%"></canvas>
+    <h2>Stop doing cold email<br>manually</h2>
+    <p>Purchase a package. Tell us what you do. We take it from there.</p>
+    <button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
+  </div>
+</section>
 
 <footer><div class="ctn fti"><div class="ftl">© 2026 Coldflows</div><div class="ftr"><a href="#">Privacy</a><a href="#">Terms</a><a href="./index.html">Dashboard</a></div></div></footer>
 
@@ -326,6 +335,90 @@ function loopScrambleTags(){
 
 initScramble();
 setTimeout(loopScrambleTags,2000);
+
+// ASCII FLAME EFFECT — green flowing characters like Firecrawl
+(function(){
+  const c=document.getElementById('flameCanvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const cols=Math.floor(W/8),rows=Math.floor(H/12);
+  const grid=[];
+  const heat=[];
+  const ascii=' .·:;+=*#@$'.split('');
+
+  // Init grid
+  for(let i=0;i<cols*rows;i++){grid[i]=0;heat[i]=0;}
+
+  // Seed heat at bottom
+  function seedHeat(){
+    for(let x=0;x<cols;x++){
+      const idx=(rows-1)*cols+x;
+      heat[idx]=Math.random()>0.4?Math.random()*1.2:0;
+      if(Math.random()>0.85)heat[idx]=1.5;
+    }
+  }
+
+  function step(){
+    // Propagate heat upward with cooling + spread
+    for(let y=0;y<rows-1;y++){
+      for(let x=0;x<cols;x++){
+        const idx=y*cols+x;
+        const below=(y+1)*cols+x;
+        const bl=x>0?(y+1)*cols+(x-1):below;
+        const br=x<cols-1?(y+1)*cols+(x+1):below;
+        // Average of below neighbors with cooling
+        heat[idx]=(heat[below]*0.4+heat[bl]*0.25+heat[br]*0.25)*0.92;
+        // Add slight random turbulence
+        heat[idx]+=Math.random()*0.02-0.01;
+        if(heat[idx]<0)heat[idx]=0;
+        // Wind drift
+        if(Math.random()>0.7&&x<cols-1){
+          heat[idx]+=heat[below+1]*0.05;
+        }
+      }
+    }
+    seedHeat();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.font='10px JetBrains Mono, monospace';
+    ctx.textAlign='center';
+
+    for(let y=0;y<rows;y++){
+      for(let x=0;x<cols;x++){
+        const idx=y*cols+x;
+        const h=Math.min(heat[idx],1.2);
+        if(h<0.05)continue;
+
+        // Map heat to ASCII character
+        const charIdx=Math.min(Math.floor(h*ascii.length),ascii.length-1);
+        const ch=ascii[charIdx];
+
+        // Color: green with varying opacity based on heat
+        const alpha=Math.min(h*0.85,0.9);
+        // Hotter = brighter green, cooler = darker
+        const g=Math.floor(105+h*80);
+        const r=Math.floor(h*20);
+        const b=Math.floor(73-h*30);
+        ctx.fillStyle=`rgba(${r},${g},${Math.max(b,40)},${alpha})`;
+
+        // Slight position jitter for organic feel
+        const jx=(Math.random()-0.5)*1.5;
+        const jy=(Math.random()-0.5)*1;
+        ctx.fillText(ch,x*8+4+jx,y*12+10+jy);
+      }
+    }
+  }
+
+  function animate(){
+    step();
+    draw();
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
 </script>
 </body>
 </html>
