@@ -5,425 +5,200 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Coldflows — Cold email that runs itself</title>
-<meta name="description" content="Purchase a package. Tell us your service. We handle everything. AI-powered cold email that runs, optimises, and improves itself — forever.">
+<meta name="description" content="Purchase a package. Tell us your service. We handle everything. AI-powered cold email that runs, optimises, and improves itself.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#09090b;--bg2:#111113;--bg3:#18181b;
-  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
-  --text:#fafafa;--text2:#a1a1aa;--text3:#52525b;
-  --green:#22c55e;--green2:#16a34a;--green-bg:rgba(34,197,94,0.08);--green-bd:rgba(34,197,94,0.2);
-  --sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;
-}
+:root{--bg:#f9f9f9;--bg2:#fff;--bg3:#f0f0f0;--border:#ededed;--border2:#e0e0e0;--text:#171717;--text2:#525252;--text3:#a3a3a3;--green:#16a34a;--green2:#22c55e;--green-bg:rgba(22,163,74,0.06);--green-bd:rgba(22,163,74,0.15);--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;--mw:1088px}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);background:rgba(9,9,11,0.8)}
-.nav-inner{max-width:1200px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between}
-.nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:-0.3px}
-.nav-logo-icon{width:24px;height:24px;border-radius:6px;background:var(--green);display:flex;align-items:center;justify-content:center}
-.nav-logo-icon svg{width:12px;height:12px}
-.nav-links{display:flex;align-items:center;gap:32px}
-.nav-links a{font-size:13px;color:var(--text2);font-weight:500;transition:color .15s}
-.nav-links a:hover{color:var(--text)}
-.nav-cta{padding:8px 20px;border-radius:8px;background:var(--green);color:#000;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
-.nav-cta:hover{background:#4ade80;transform:translateY(-1px)}
-
-/* HERO */
-.hero{padding:140px 32px 80px;text-align:center;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:600px;
-  background:radial-gradient(ellipse,rgba(34,197,94,0.06) 0%,transparent 70%);pointer-events:none}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;
-  border:1px solid var(--green-bd);background:var(--green-bg);font-size:12px;font-weight:600;color:var(--green);margin-bottom:32px}
-.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero h1{font-size:clamp(48px,6vw,76px);font-weight:800;letter-spacing:-2.5px;line-height:1.05;margin-bottom:24px;
-  background:linear-gradient(180deg,#fff 40%,rgba(255,255,255,0.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:18px;color:var(--text2);max-width:540px;margin:0 auto 48px;line-height:1.7;font-weight:400}
-.hero-sub strong{color:var(--text);font-weight:600}
-.hero-ctas{display:flex;gap:16px;justify-content:center;align-items:center}
-.btn-primary{padding:14px 32px;border-radius:10px;background:var(--green);color:#000;font-size:15px;font-weight:700;
-  cursor:pointer;border:none;font-family:var(--sans);transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.btn-primary:hover{background:#4ade80;transform:translateY(-2px);box-shadow:0 8px 30px rgba(34,197,94,0.2)}
-.btn-secondary{padding:14px 32px;border-radius:10px;background:transparent;color:var(--text);font-size:15px;font-weight:600;
-  cursor:pointer;border:1px solid var(--border2);font-family:var(--sans);transition:all .15s}
-.btn-secondary:hover{border-color:var(--text2);background:var(--bg2)}
-
-/* DASHBOARD PREVIEW */
-.preview{max-width:1100px;margin:-20px auto 0;padding:0 32px;position:relative;z-index:2}
-.preview-frame{border-radius:16px;border:1px solid var(--border2);overflow:hidden;background:var(--bg2);
-  box-shadow:0 20px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.03)}
-.preview-bar{height:40px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:8px}
-.preview-dot{width:10px;height:10px;border-radius:50%;background:var(--border2)}
-.preview img{width:100%;display:block}
-.preview-placeholder{height:420px;background:var(--bg3);display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:12px;color:var(--text3)}
-
-/* LOGOS */
-.logos{padding:80px 32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.logos-inner{max-width:1200px;margin:0 auto;text-align:center}
-.logos-label{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--text3);font-weight:600;margin-bottom:32px}
-
-/* COMPARISON */
-.comparison{padding:100px 32px;position:relative}
-.comparison::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:400px;
-  background:radial-gradient(ellipse,rgba(34,197,94,0.04) 0%,transparent 70%);pointer-events:none}
-.comparison-inner{max-width:1000px;margin:0 auto}
-.section-label{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--green);font-weight:700;margin-bottom:12px}
-.section-title{font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1}
-.section-desc{font-size:16px;color:var(--text2);margin-bottom:48px;max-width:600px;line-height:1.7}
-.compare-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.compare-col{padding:40px}
-.compare-col:first-child{border-right:1px solid var(--border);background:var(--bg2)}
-.compare-col:last-child{background:var(--green-bg);border:1px solid var(--green-bd);border-radius:0 12px 12px 0}
-.compare-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:20px}
-.compare-label-other{color:var(--text3)}
-.compare-label-us{color:var(--green)}
-.compare-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;font-size:14px;color:var(--text2);line-height:1.5}
-.compare-item-x{color:var(--text3);font-size:14px;font-weight:600;flex-shrink:0;margin-top:1px}
-.compare-item-check{color:var(--green);font-size:14px;font-weight:700;flex-shrink:0;margin-top:1px}
-
-/* STEPS */
-.steps{padding:100px 32px;border-top:1px solid var(--border)}
-.steps-inner{max-width:1200px;margin:0 auto}
-.steps-grid{display:grid;grid-template-columns:repeat(3,1fr)}
-.step{padding:40px;border-right:1px solid var(--border);position:relative}
-.step:last-child{border-right:none}
-.step-num{font-family:var(--mono);font-size:48px;font-weight:700;color:var(--green);opacity:0.2;margin-bottom:16px;line-height:1}
-.step-title{font-size:20px;font-weight:700;margin-bottom:12px;letter-spacing:-0.3px}
-.step-desc{font-size:14px;color:var(--text2);line-height:1.7}
-
-/* PHASES */
-.phases{padding:100px 32px;border-top:1px solid var(--border)}
-.phases-inner{max-width:1200px;margin:0 auto}
-.phases-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.phase{padding:32px;border-right:1px solid var(--border);position:relative}
-.phase:last-child{border-right:none}
-.phase-week{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);font-weight:600;margin-bottom:12px}
-.phase-vol{font-family:var(--mono);font-size:32px;font-weight:700;letter-spacing:-1px;margin-bottom:4px}
-.phase-label{font-size:12px;color:var(--text3);margin-bottom:16px}
-.phase-name{font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px}
-.phase-desc{font-size:12px;color:var(--text2);line-height:1.6}
-.phase-line{height:3px;background:var(--border);border-radius:2px;margin-bottom:16px;overflow:hidden}
-.phase-line-fill{height:100%;background:var(--green);border-radius:2px}
-
-/* PRICING */
-.pricing{padding:100px 32px;border-top:1px solid var(--border)}
-.pricing-inner{max-width:1200px;margin:0 auto}
-.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.price-card{padding:40px;border-right:1px solid var(--border);position:relative}
-.price-card:last-child{border-right:none}
-.price-card.featured{background:var(--green-bg);border-top:2px solid var(--green)}
-.price-badge{display:inline-block;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;
-  padding:4px 10px;border-radius:4px;background:var(--green);color:#000;margin-bottom:16px}
-.price-name{font-size:18px;font-weight:700;margin-bottom:4px}
-.price-desc{font-size:12px;color:var(--text3);margin-bottom:20px}
-.price-amount{font-family:var(--mono);font-size:40px;font-weight:700;letter-spacing:-2px;margin-bottom:4px}
-.price-period{font-size:12px;color:var(--text3);margin-bottom:24px}
-.price-features{list-style:none;margin-bottom:32px}
-.price-features li{padding:8px 0;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
-.price-features li:last-child{border-bottom:none}
-.price-features li span{color:var(--green);font-weight:700;font-size:12px}
-.price-cta{width:100%;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .15s;text-align:center;display:block}
-.price-cta-primary{background:var(--green);color:#000;border:none}
-.price-cta-primary:hover{background:#4ade80}
-.price-cta-secondary{background:transparent;color:var(--text);border:1px solid var(--border2)}
-.price-cta-secondary:hover{border-color:var(--text2)}
-
-/* FAQ */
-.faq{padding:100px 32px;border-top:1px solid var(--border)}
-.faq-inner{max-width:800px;margin:0 auto}
-.faq-item{border-bottom:1px solid var(--border);padding:24px 0;cursor:pointer}
-.faq-q{font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
-.faq-q span{color:var(--text3);font-size:18px;transition:transform .2s}
-.faq-a{font-size:14px;color:var(--text2);line-height:1.8;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
-.faq-item.open .faq-a{max-height:200px;padding-top:12px}
-.faq-item.open .faq-q span{transform:rotate(45deg)}
-
-/* CTA */
-.final-cta{padding:120px 32px;text-align:center;position:relative;border-top:1px solid var(--border)}
-.final-cta::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:400px;
-  background:radial-gradient(ellipse,rgba(34,197,94,0.06) 0%,transparent 70%);pointer-events:none}
-.final-cta h2{font-size:clamp(36px,5vw,56px);font-weight:800;letter-spacing:-2px;margin-bottom:16px}
-.final-cta p{font-size:16px;color:var(--text2);margin-bottom:40px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7}
-
-/* FOOTER */
-footer{padding:40px 32px;border-top:1px solid var(--border)}
-.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
-.footer-left{font-size:12px;color:var(--text3)}
-.footer-links{display:flex;gap:24px}
-.footer-links a{font-size:12px;color:var(--text3);transition:color .15s}
-.footer-links a:hover{color:var(--text)}
-
-/* ANIMATIONS */
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp .6s ease both}
-.delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}.delay-4{animation-delay:.4s}
+.ctn{max-width:var(--mw);margin:0 auto;padding:0 32px;position:relative}
+.gl{position:fixed;top:0;left:50%;transform:translateX(-50%);width:var(--mw);height:100vh;pointer-events:none;z-index:0}
+.gl::before,.gl::after{content:'';position:absolute;top:0;bottom:0;width:1px;background:var(--border)}.gl::before{left:0}.gl::after{right:0}
+.gl i{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--border)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);background:rgba(249,249,249,0.85)}
+.ni{max-width:var(--mw);margin:0 auto;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nl{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:-.3px}
+.nli{width:22px;height:22px;border-radius:5px;background:var(--green);display:flex;align-items:center;justify-content:center}
+.nli svg{width:11px;height:11px}
+.nr{display:flex;align-items:center;gap:28px}
+.nr a{font-size:13px;color:var(--text2);font-weight:500;transition:color .15s}.nr a:hover{color:var(--text)}
+.nc{padding:7px 18px;border-radius:6px;background:var(--text);color:var(--bg);font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:opacity .15s}.nc:hover{opacity:.8}
+.sn{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:12px}.sn::after{content:'';flex:1;height:1px;background:var(--border)}
+.hero{padding:130px 0 60px;position:relative}
+.hb{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;border:1px solid var(--green-bd);background:var(--green-bg);font-size:11px;font-weight:600;color:var(--green);margin-bottom:28px;font-family:var(--mono)}
+.hd{width:5px;height:5px;border-radius:50%;background:var(--green);animation:bk 2s infinite}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(42px,5.5vw,64px);font-weight:500;letter-spacing:-2px;line-height:1.08;margin-bottom:20px}
+.hs{font-size:16px;color:var(--text2);max-width:480px;line-height:1.7;margin-bottom:40px}.hs strong{color:var(--text);font-weight:600}
+.hc{display:flex;gap:12px;align-items:center;margin-bottom:64px}
+.bp{padding:12px 28px;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .15s;display:inline-flex;align-items:center;gap:6px}.bp:hover{background:#15803d}
+.bg{padding:12px 28px;border-radius:8px;background:transparent;color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);font-family:var(--sans);transition:all .15s}.bg:hover{border-color:var(--text3);color:var(--text)}
+.cb{border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:580px}
+.cbb{height:32px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 12px;background:var(--bg)}
+.cbd{width:8px;height:8px;border-radius:50%;background:var(--border2)}
+.cbo{padding:16px 20px;font-family:var(--mono);font-size:12px;line-height:1.8;background:var(--bg2);color:var(--text2)}
+.cbo .g{color:var(--green);font-weight:600}.cbo .d{color:var(--text3)}
+@keyframes curBk{0%,100%{opacity:1}50%{opacity:0}}
+.cur{display:inline-block;width:2px;height:1em;background:var(--green);margin-left:2px;animation:curBk 1s infinite;vertical-align:text-bottom}
+.pv{border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;background:var(--bg2)}
+.pv iframe{width:100%;height:480px;border:none;pointer-events:none;display:block}
+.sc{padding:80px 0;border-bottom:1px solid var(--border);position:relative;z-index:1}
+.sl{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--green);font-weight:700;font-family:var(--mono);margin-bottom:8px}
+.st{font-size:clamp(28px,3.5vw,42px);font-weight:500;letter-spacing:-1.5px;margin-bottom:12px;line-height:1.1}
+.sd{font-size:14px;color:var(--text2);max-width:500px;line-height:1.7;margin-bottom:40px}
+.cg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);overflow:hidden}
+.cc{padding:36px}.cc:first-child{border-right:1px solid var(--border)}
+.cl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:20px;font-family:var(--mono)}
+.clo{color:var(--text3)}.clu{color:var(--green)}
+.ci{display:flex;align-items:flex-start;gap:8px;padding:8px 0;font-size:13px;color:var(--text2);line-height:1.5}
+.cx{color:var(--text3);font-weight:600;flex-shrink:0}.ck{color:var(--green);font-weight:700;flex-shrink:0}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border)}
+.sp{padding:32px;border-right:1px solid var(--border)}.sp:last-child{border-right:none}
+.spn{font-family:var(--mono);font-size:11px;color:var(--green);font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:6px}.spn::before{content:'';width:16px;height:1px;background:var(--green)}
+.spt{font-size:18px;font-weight:600;margin-bottom:8px;letter-spacing:-.3px}.spd{font-size:13px;color:var(--text2);line-height:1.7}
+.pg{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border)}
+.ph{padding:28px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}.ph:last-child{border-right:none}
+.phn{font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px}.phw{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:14px}
+.phl{height:2px;background:var(--border);border-radius:1px;margin-bottom:14px;overflow:hidden}.phlf{height:100%;background:var(--green);border-radius:1px}
+.phv{font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-1px;margin-bottom:2px}.php{font-size:10px;color:var(--text3);margin-bottom:12px}.phd{font-size:12px;color:var(--text2);line-height:1.6}
+.prg{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border)}
+.prc{padding:36px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}.prc:last-child{border-right:none}
+.prc.ft{background:var(--green-bg);border-top:2px solid var(--green)}
+.prb{display:inline-block;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-family:var(--mono);padding:3px 8px;border-radius:3px;background:var(--green);color:#fff;margin-bottom:14px}
+.prn{font-size:17px;font-weight:600;margin-bottom:2px}.prd{font-size:11px;color:var(--text3);margin-bottom:20px}
+.pra{font-family:var(--mono);font-size:36px;font-weight:700;letter-spacing:-2px;margin-bottom:2px}.prp{font-size:11px;color:var(--text3);margin-bottom:24px}
+.prf{list-style:none;margin-bottom:28px}.prf li{padding:7px 0;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}.prf li:last-child{border-bottom:none}.prf li span{color:var(--green);font-weight:700;font-size:11px}
+.prcta{width:100%;padding:10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .12s;text-align:center;display:block}
+.pcp{background:var(--green);color:#fff;border:none}.pcp:hover{background:#15803d}
+.pcs{background:transparent;color:var(--text);border:1px solid var(--border2)}.pcs:hover{border-color:var(--text3)}
+.fi{border-bottom:1px solid var(--border);padding:20px 0;cursor:pointer;transition:background .1s}.fi:hover{background:rgba(0,0,0,.01)}
+.fq{font-size:15px;font-weight:500;display:flex;justify-content:space-between;align-items:center}.fq span{color:var(--text3);font-size:16px;transition:transform .2s;font-weight:300}
+.fa{font-size:13px;color:var(--text2);line-height:1.8;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
+.fi.open .fa{max-height:200px;padding-top:10px}.fi.open .fq span{transform:rotate(45deg)}
+.fc{padding:100px 0;text-align:center;border-bottom:1px solid var(--border)}
+.fc h2{font-size:clamp(32px,4vw,48px);font-weight:500;letter-spacing:-1.5px;margin-bottom:12px}
+.fc p{font-size:14px;color:var(--text2);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.7}
+footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-items:center}
+.ftl{font-size:11px;color:var(--text3)}.ftr{display:flex;gap:20px}.ftr a{font-size:11px;color:var(--text3);transition:color .1s}.ftr a:hover{color:var(--text)}
+.tg{display:inline-block;padding:3px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--text3);font-weight:500;margin:0 4px}
+.tgg{border-color:var(--green-bd);color:var(--green);background:var(--green-bg)}
+.rv{opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s}.rv.v{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
+<div class="gl"><i></i></div>
+<nav><div class="ni">
+  <div class="nl"><div class="nli"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></div>coldflows</div>
+  <div class="nr"><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><button class="nc" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started</button></div>
+</div></nav>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-inner">
-    <div class="nav-logo">
-      <div class="nav-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></div>
-      coldflows
-    </div>
-    <div class="nav-links">
-      <a href="#how">How it works</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#faq">FAQ</a>
-      <a href="./index.html">Dashboard</a>
-      <button class="nav-cta">Get started</button>
+<section class="hero"><div class="ctn">
+  <div class="hb"><div class="hd"></div>Now accepting clients</div>
+  <h1>Cold email that<br>runs itself</h1>
+  <p class="hs">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> We handle everything else — forever.</p>
+  <div class="hc">
+    <button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
+    <button class="bg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
+  </div>
+  <div class="cb"><div class="cbb"><div class="cbd"></div><div class="cbd"></div><div class="cbd"></div></div>
+    <div class="cbo">
+      <div><span class="d">$</span> <span class="g">coldflows</span> setup --service <span class="d">"SEO services"</span></div>
+      <div><span class="d">$</span> <span class="g">coldflows</span> target --icp <span class="d">"SMB owners, Gold Coast"</span></div>
+      <div><span class="d">$</span> <span class="g">coldflows</span> start</div>
+      <div style="margin-top:8px"><span class="g">✓</span> 4 domains purchased</div>
+      <div><span class="g">✓</span> 12 mailboxes created</div>
+      <div><span class="g">✓</span> DNS configured (SPF, DKIM, DMARC)</div>
+      <div><span class="g">✓</span> Warmup started — Phase 1 in 14 days</div>
+      <div><span class="g">✓</span> AI copy generated — A/B testing enabled</div>
+      <div style="margin-top:8px"><span class="d">→</span> Dashboard: <span class="g">https://app.coldflows.ai/dash</span><span class="cur"></span></div>
     </div>
   </div>
-</nav>
+</div></section>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-badge fade-up"><div class="hero-badge-dot"></div>Now accepting clients</div>
-  <h1 class="fade-up delay-1">Cold email that<br>runs itself</h1>
-  <p class="hero-sub fade-up delay-2">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> Our AI handles domains, mailboxes, copy, A/B testing, and optimisation — automatically.</p>
-  <div class="hero-ctas fade-up delay-3">
-    <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">View pricing →</button>
-    <button class="btn-secondary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
-  </div>
-</section>
+<div class="pv"><iframe src="./index.html" loading="lazy"></iframe></div>
 
-<!-- DASHBOARD PREVIEW -->
-<div class="preview fade-up delay-4">
-  <div class="preview-frame">
-    <div class="preview-bar"><div class="preview-dot"></div><div class="preview-dot"></div><div class="preview-dot"></div></div>
-    <div class="preview-placeholder">
-      <iframe src="./index.html" style="width:100%;height:520px;border:none;pointer-events:none" loading="lazy"></iframe>
+<section class="sc" id="why"><div class="ctn rv">
+  <div class="sn">[ 01 / 05 ] · Why Coldflows</div>
+  <div class="st">Other tools make you<br>do all the work</div>
+  <div class="sd">Smartlead, Instantly, Lemlist — they hand you a tool and wish you luck. Coldflows does the actual work.</div>
+  <div class="cg">
+    <div class="cc"><div class="cl clo">Other cold email tools</div>
+      <div class="ci"><span class="cx">✕</span> You buy domains</div><div class="ci"><span class="cx">✕</span> You set up DNS manually</div>
+      <div class="ci"><span class="cx">✕</span> You create mailboxes</div><div class="ci"><span class="cx">✕</span> You write email copy</div>
+      <div class="ci"><span class="cx">✕</span> You run A/B tests</div><div class="ci"><span class="cx">✕</span> You monitor deliverability</div>
+      <div class="ci"><span class="cx">✕</span> You source leads</div><div class="ci"><span class="cx">✕</span> You figure out what works</div>
+    </div>
+    <div class="cc" style="background:var(--green-bg)"><div class="cl clu">Coldflows <span class="tg tgg">AI</span></div>
+      <div class="ci"><span class="ck">✓</span> We purchase domains</div><div class="ci"><span class="ck">✓</span> We configure DNS</div>
+      <div class="ci"><span class="ck">✓</span> We create & warm mailboxes</div><div class="ci"><span class="ck">✓</span> AI generates copy</div>
+      <div class="ci"><span class="ck">✓</span> AI runs A/B tests</div><div class="ci"><span class="ck">✓</span> We monitor 24/7</div>
+      <div class="ci"><span class="ck">✓</span> We source ICP-matched leads</div><div class="ci"><span class="ck">✓</span> AI learns & improves forever</div>
     </div>
   </div>
-</div>
+</div></section>
 
-<!-- COMPARISON -->
-<section class="comparison" id="why">
-  <div class="comparison-inner">
-    <div class="section-label">Why Coldflows</div>
-    <div class="section-title">Other tools make<br>you do the work</div>
-    <div class="section-desc">Smartlead, Instantly, Lemlist — they give you the tool and wish you luck. Coldflows does the actual work for you.</div>
-
-    <div class="compare-grid">
-      <div class="compare-col">
-        <div class="compare-label compare-label-other">Other cold email tools</div>
-        <div class="compare-item"><span class="compare-item-x">✕</span> You buy your own domains</div>
-        <div class="compare-item"><span class="compare-item-x">✕</span> You set up DNS records manually</div>
-        <div class="compare-item"><span class="compare-item-x">✕</span> You create mailboxes yourself</div>
-        <div class="compare-item"><span class="compare-item-x">✕</span> You write all the email copy</div>
-        <div class="compare-item"><span class="compare-item-x">✕</span> You run A/B tests manually</div>
-        <div class="compare-item"><span class="compare-item-x">✕</span> You monitor deliverability</div>
-        <div class="compare-item"><span class="compare-item-x">✕</span> You source your own leads</div>
-        <div class="compare-item"><span class="compare-item-x">✕</span> You figure out what works</div>
-      </div>
-      <div class="compare-col">
-        <div class="compare-label compare-label-us">Coldflows</div>
-        <div class="compare-item"><span class="compare-item-check">✓</span> We purchase domains for you</div>
-        <div class="compare-item"><span class="compare-item-check">✓</span> We configure all DNS records</div>
-        <div class="compare-item"><span class="compare-item-check">✓</span> We create and warm mailboxes</div>
-        <div class="compare-item"><span class="compare-item-check">✓</span> AI generates your email copy</div>
-        <div class="compare-item"><span class="compare-item-check">✓</span> AI runs A/B tests automatically</div>
-        <div class="compare-item"><span class="compare-item-check">✓</span> We monitor everything 24/7</div>
-        <div class="compare-item"><span class="compare-item-check">✓</span> We source leads matching your ICP</div>
-        <div class="compare-item"><span class="compare-item-check">✓</span> AI learns what works and improves</div>
-      </div>
-    </div>
+<section class="sc" id="how"><div class="ctn rv">
+  <div class="sn">[ 02 / 05 ] · How it works</div>
+  <div class="st">Three steps. That's it.</div><div class="sd" style="margin-bottom:0"></div>
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+  <div class="sg"><div class="sp"><div class="spn">01 Purchase</div><div class="spt">Pick a plan</div><div class="spd">Stripe checkout takes 30 seconds. Your system starts provisioning immediately.</div></div>
+    <div class="sp"><div class="spn">02 Configure</div><div class="spt">Tell us your service</div><div class="spd">What you do, who your ideal customer is, and where they are. 2 minute form.</div></div>
+    <div class="sp"><div class="spn">03 Done</div><div class="spt">We handle everything</div><div class="spd">Domains, mailboxes, warmup, copy, A/B testing, leads, optimisation. You log in and see warm leads.</div></div>
   </div>
-</section>
+</div></section>
 
-<!-- HOW IT WORKS -->
-<section class="steps" id="how">
-  <div class="steps-inner">
-    <div class="section-label">How it works</div>
-    <div class="section-title" style="margin-bottom:48px">Three steps. That's it.</div>
-
-    <div class="steps-grid">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-title">Purchase a package</div>
-        <div class="step-desc">Pick a plan that matches your outreach goals. Stripe checkout takes 30 seconds. Your system starts provisioning immediately.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-title">Tell us your service</div>
-        <div class="step-desc">What do you do, who's your ideal customer, and where are they? A simple form — takes 2 minutes. Our AI does the rest.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-title">We handle everything</div>
-        <div class="step-desc">Domains, mailboxes, warmup, copy, A/B testing, lead sourcing, optimisation. You log in and see warm leads. That's it.</div>
-      </div>
-    </div>
+<section class="sc"><div class="ctn rv">
+  <div class="sn">[ 03 / 05 ] · The system</div>
+  <div class="st">Volume that scales itself</div>
+  <div class="sd">Every account progresses through four phases automatically.</div>
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+  <div class="pg">
+    <div class="ph"><div class="phn">Warmup</div><div class="phw">Week 1–2</div><div class="phl"><div class="phlf" style="width:25%"></div></div><div class="phv">420</div><div class="php">emails / week</div><div class="phd">Mailboxes build sender reputation. No outreach yet.</div></div>
+    <div class="ph"><div class="phn">Phase 1</div><div class="phw">Week 3</div><div class="phl"><div class="phlf" style="width:50%"></div></div><div class="phv">840</div><div class="php">emails / week</div><div class="phd">Live outreach begins. A/B testing enabled.</div></div>
+    <div class="ph"><div class="phn">Phase 2</div><div class="phw">Week 4</div><div class="phl"><div class="phlf" style="width:75%"></div></div><div class="phv">1,400</div><div class="php">emails / week</div><div class="phd">AI copy optimisation. Reply rates compound.</div></div>
+    <div class="ph"><div class="phn">Full capacity</div><div class="phw">Week 5+</div><div class="phl"><div class="phlf" style="width:100%"></div></div><div class="phv">2,100+</div><div class="php">emails / week</div><div class="phd">Self-learning loop. Gets better every week.</div></div>
   </div>
-</section>
+</div></section>
 
-<!-- PHASES -->
-<section class="phases">
-  <div class="phases-inner">
-    <div class="section-label">The system</div>
-    <div class="section-title" style="margin-bottom:16px">Volume that scales itself</div>
-    <div class="section-desc">Every account progresses through four phases. Volume increases automatically as your mailboxes build reputation.</div>
-
-    <div class="phases-grid">
-      <div class="phase">
-        <div class="phase-name">Warmup</div>
-        <div class="phase-week">Week 1–2</div>
-        <div class="phase-line"><div class="phase-line-fill" style="width:25%"></div></div>
-        <div class="phase-vol">420</div>
-        <div class="phase-label">emails / week</div>
-        <div class="phase-desc">Mailboxes build sender reputation with email providers. No outreach yet — the system is proving you're legitimate.</div>
-      </div>
-      <div class="phase">
-        <div class="phase-name">Phase 1</div>
-        <div class="phase-week">Week 3</div>
-        <div class="phase-line"><div class="phase-line-fill" style="width:50%"></div></div>
-        <div class="phase-vol">840</div>
-        <div class="phase-label">emails / week</div>
-        <div class="phase-desc">First live outreach begins. A/B testing enabled. The system starts learning what copy resonates with your market.</div>
-      </div>
-      <div class="phase">
-        <div class="phase-name">Phase 2</div>
-        <div class="phase-week">Week 4</div>
-        <div class="phase-line"><div class="phase-line-fill" style="width:75%"></div></div>
-        <div class="phase-vol">1,400</div>
-        <div class="phase-label">emails / week</div>
-        <div class="phase-desc">AI copy optimisation kicks in. Winning copy promoted, new challengers generated. Reply rates start compounding.</div>
-      </div>
-      <div class="phase">
-        <div class="phase-name">Full capacity</div>
-        <div class="phase-week">Week 5+</div>
-        <div class="phase-line"><div class="phase-line-fill" style="width:100%"></div></div>
-        <div class="phase-vol">2,100+</div>
-        <div class="phase-label">emails / week</div>
-        <div class="phase-desc">Maximum performance. Self-learning loop running continuously. The system gets better every single week.</div>
-      </div>
-    </div>
+<section class="sc" id="pricing"><div class="ctn rv">
+  <div class="sn">[ 04 / 05 ] · Pricing</div>
+  <div class="st">Simple. No hidden fees.</div>
+  <div class="sd">Everything included — domains, mailboxes, warmup, copy, leads, optimisation.</div>
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+  <div class="prg">
+    <div class="prc"><div class="prn">Starter</div><div class="prd">Test the waters</div><div class="pra">$1,000</div><div class="prp">per month</div>
+      <ul class="prf"><li><span>✓</span> 2 mailboxes</li><li><span>✓</span> 2 campaigns</li><li><span>✓</span> ~600 emails/week</li><li><span>✓</span> A/B testing</li><li><span>✓</span> Lead sourcing</li><li><span>✓</span> Dashboard access</li></ul>
+      <button class="prcta pcs">Get started</button></div>
+    <div class="prc ft"><div class="prb">Most popular</div><div class="prn">Growth</div><div class="prd">Serious outbound</div><div class="pra">$2,500</div><div class="prp">per month</div>
+      <ul class="prf"><li><span>✓</span> 4 mailboxes</li><li><span>✓</span> 4 campaigns</li><li><span>✓</span> ~2,100 emails/week</li><li><span>✓</span> AI copy optimisation</li><li><span>✓</span> Priority leads</li><li><span>✓</span> API access</li></ul>
+      <button class="prcta pcp">Get started →</button></div>
+    <div class="prc"><div class="prn">Scale</div><div class="prd">Maximum lead flow</div><div class="pra">$5,000</div><div class="prp">per month</div>
+      <ul class="prf"><li><span>✓</span> 10 mailboxes</li><li><span>✓</span> 10 campaigns</li><li><span>✓</span> ~5,250 emails/week</li><li><span>✓</span> Self-learning AI</li><li><span>✓</span> Dedicated support</li><li><span>✓</span> Full API + webhooks</li></ul>
+      <button class="prcta pcs">Get started</button></div>
   </div>
-</section>
+</div></section>
 
-<!-- PRICING -->
-<section class="pricing" id="pricing">
-  <div class="pricing-inner">
-    <div class="section-label">Pricing</div>
-    <div class="section-title" style="margin-bottom:16px">Simple. No hidden fees.</div>
-    <div class="section-desc">Everything included — domains, mailboxes, warmup, copy, leads, optimisation. You pay one price.</div>
+<section class="sc" id="faq"><div class="ctn rv">
+  <div class="sn">[ 05 / 05 ] · FAQ</div>
+  <div class="st" style="margin-bottom:32px">Questions</div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">What happens after I purchase?<span>+</span></div><div class="fa">We immediately provision your system — purchase domains, create mailboxes, configure DNS, start warmup. Dashboard login within minutes. Warmup takes ~14 days, then outreach begins automatically.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Do I need to write any email copy?<span>+</span></div><div class="fa">No. Our AI generates all copy based on your service and target market. It A/B tests variations and promotes winners automatically.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Where do the leads come from?<span>+</span></div><div class="fa">We source leads matching your ICP — industry, company size, job title, location. Fresh contacts delivered into your campaigns.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Why does warmup take 14 days?<span>+</span></div><div class="fa">Email providers need to see your mailboxes are legitimate. Skipping warmup means spam. We build reputation properly — 95%+ inbox placement.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">What results can I expect?<span>+</span></div><div class="fa">At full capacity, 2-4% reply rates — 40-80+ warm leads per month on Growth. The AI improves over time. 3+ month clients see significantly higher performance.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Can I connect via API?<span>+</span></div><div class="fa">Yes. Every account includes API access. Read campaign data, metrics, leads. Growth and Scale include write access plus webhooks.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Is there a contract?<span>+</span></div><div class="fa">No contracts. Cancel anytime. We recommend 3 months to see the full benefit of the self-learning AI.</div></div>
+</div></section>
 
-    <div class="pricing-grid">
-      <div class="price-card">
-        <div class="price-name">Starter</div>
-        <div class="price-desc">For testing the waters</div>
-        <div class="price-amount">$1,000</div>
-        <div class="price-period">per month</div>
-        <ul class="price-features">
-          <li><span>✓</span> 2 mailboxes</li>
-          <li><span>✓</span> 2 campaigns</li>
-          <li><span>✓</span> ~600 emails/week</li>
-          <li><span>✓</span> A/B testing</li>
-          <li><span>✓</span> Lead sourcing</li>
-          <li><span>✓</span> Dashboard access</li>
-        </ul>
-        <button class="price-cta price-cta-secondary">Get started</button>
-      </div>
+<section class="fc"><div class="ctn"><h2>Stop doing cold email<br>manually</h2><p>Purchase a package. Tell us what you do. We take it from there.</p><button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button></div></section>
 
-      <div class="price-card featured">
-        <div class="price-badge">Most popular</div>
-        <div class="price-name">Growth</div>
-        <div class="price-desc">For serious outbound</div>
-        <div class="price-amount">$2,500</div>
-        <div class="price-period">per month</div>
-        <ul class="price-features">
-          <li><span>✓</span> 4 mailboxes</li>
-          <li><span>✓</span> 4 campaigns</li>
-          <li><span>✓</span> ~2,100 emails/week</li>
-          <li><span>✓</span> AI copy optimisation</li>
-          <li><span>✓</span> Priority lead sourcing</li>
-          <li><span>✓</span> API access</li>
-        </ul>
-        <button class="price-cta price-cta-primary">Get started →</button>
-      </div>
+<footer><div class="ctn fti"><div class="ftl">© 2026 Coldflows</div><div class="ftr"><a href="#">Privacy</a><a href="#">Terms</a><a href="./index.html">Dashboard</a></div></div></footer>
 
-      <div class="price-card">
-        <div class="price-name">Scale</div>
-        <div class="price-desc">Maximum lead flow</div>
-        <div class="price-amount">$5,000</div>
-        <div class="price-period">per month</div>
-        <ul class="price-features">
-          <li><span>✓</span> 10 mailboxes</li>
-          <li><span>✓</span> 10 campaigns</li>
-          <li><span>✓</span> ~5,250 emails/week</li>
-          <li><span>✓</span> Self-learning AI loop</li>
-          <li><span>✓</span> Dedicated support</li>
-          <li><span>✓</span> Full API + webhooks</li>
-        </ul>
-        <button class="price-cta price-cta-secondary">Get started</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section class="faq" id="faq">
-  <div class="faq-inner">
-    <div class="section-label">FAQ</div>
-    <div class="section-title" style="margin-bottom:48px">Questions</div>
-
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">What happens after I purchase?<span>+</span></div>
-      <div class="faq-a">We immediately provision your system — purchase domains, create mailboxes, configure DNS, and start warmup. You'll receive a dashboard login within minutes. Warmup takes ~14 days, then live outreach begins automatically.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Do I need to write any email copy?<span>+</span></div>
-      <div class="faq-a">No. Our AI generates all email copy based on your service description and target market. It then A/B tests multiple variations and automatically promotes winners. The system gets smarter every week.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Where do the leads come from?<span>+</span></div>
-      <div class="faq-a">We source leads matching your ideal customer profile — industry, company size, job title, location. Fresh contacts delivered directly into your campaigns. You never need to buy a lead list.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Why does warmup take 14 days?<span>+</span></div>
-      <div class="faq-a">Email providers like Gmail and Outlook need to see that your mailboxes are legitimate before they'll deliver emails to the inbox. Skipping warmup means your emails land in spam. We build your reputation properly so you get 95%+ inbox placement.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">What kind of results can I expect?<span>+</span></div>
-      <div class="faq-a">At full capacity, clients typically see reply rates of 2-4% which translates to 40-80+ warm leads per month on the Growth plan. The self-learning AI improves rates over time — clients who've been running for 3+ months see significantly higher performance.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Can I connect my own systems via API?<span>+</span></div>
-      <div class="faq-a">Yes. Every account includes API access. You can read campaign data, performance metrics, and lead information. Growth and Scale plans include write access to update copy and targeting, plus webhook notifications for real-time events.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Is there a contract or lock-in?<span>+</span></div>
-      <div class="faq-a">No contracts. Cancel anytime. We recommend a minimum 3-month commitment to see the full benefit of the self-learning AI, but you're free to cancel whenever you want.</div>
-    </div>
-  </div>
-</section>
-
-<!-- FINAL CTA -->
-<section class="final-cta">
-  <h2>Ready to stop doing<br>cold email manually?</h2>
-  <p>Purchase a package. Tell us what you do. We take it from there.</p>
-  <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-left">© 2026 Coldflows. All rights reserved.</div>
-    <div class="footer-links">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-      <a href="./index.html">Dashboard</a>
-    </div>
-  </div>
-</footer>
-
+<script>
+const o=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('v')})},{threshold:.1});
+document.querySelectorAll('.rv').forEach(e=>o.observe(e));
+</script>
 </body>
 </html>
