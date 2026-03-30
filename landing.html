@@ -98,23 +98,30 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 </div></nav>
 
 <section class="hero"><div class="ctn" style="position:relative">
-  <!-- Floating scramble tags like Firecrawl -->
-  <div class="scramble-tag" style="top:20px;right:60px" data-scramble="[ 2,100/WK ]"></div>
-  <div class="scramble-tag" style="top:80px;right:20px" data-scramble="[ A/B TEST ]"></div>
-  <div class="scramble-tag" style="top:160px;right:80px" data-scramble="[ .REPLY ]"></div>
-  <div class="scramble-tag" style="bottom:120px;right:40px" data-scramble="[ AI COPY ]"></div>
-  <div class="scramble-tag" style="top:40px;left:calc(100% - 200px)" data-scramble="[ WARMUP ]"></div>
-
-  <!-- Hero flow canvas — right side background -->
-  <canvas id="heroFlow" width="500" height="360" style="position:absolute;top:0;right:-20px;pointer-events:none;opacity:0.6"></canvas>
-
-  <div class="hb"><div class="hd"></div>Now accepting clients</div>
-  <h1>Cold email that<br>runs <span class="scramble" data-scramble="itself">itself</span></h1>
-  <p class="hs">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> We handle everything else — forever.</p>
-  <div class="hc">
-    <button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
-    <button class="bg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:420px">
+    <!-- LEFT: Text content -->
+    <div style="padding-right:48px;display:flex;flex-direction:column;justify-content:center">
+      <div class="hb"><div class="hd"></div>Now accepting clients</div>
+      <h1>Cold email that<br>runs <span class="scramble" data-scramble="itself">itself</span></h1>
+      <p class="hs">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> We handle everything else — forever.</p>
+      <div class="hc">
+        <button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
+        <button class="bg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
+      </div>
+    </div>
+    <!-- RIGHT: Flowing river canvas -->
+    <div style="position:relative;border-left:1px solid var(--border);overflow:hidden">
+      <canvas id="heroFlow" width="544" height="420" style="display:block;width:100%;height:100%"></canvas>
+      <!-- Scramble tags floating over the river -->
+      <div class="scramble-tag" style="top:40px;left:40px" data-scramble="[ 2,100/WK ]"></div>
+      <div class="scramble-tag" style="top:110px;right:60px" data-scramble="[ A/B TEST ]"></div>
+      <div class="scramble-tag" style="top:200px;left:80px" data-scramble="[ .REPLY ]"></div>
+      <div class="scramble-tag" style="bottom:140px;right:40px" data-scramble="[ AI COPY ]"></div>
+      <div class="scramble-tag" style="bottom:60px;left:60px" data-scramble="[ WARMUP ]"></div>
+    </div>
   </div>
+  <!-- Code block below -->
+  <div style="margin-top:48px">
   <div class="cb"><div class="cbb"><div class="cbd"></div><div class="cbd"></div><div class="cbd"></div></div>
     <div class="cbo">
       <div><span class="d">$</span> <span class="g">coldflows</span> setup --service <span class="d">"SEO services"</span></div>
@@ -127,6 +134,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
       <div><span class="g">✓</span> AI copy generated — A/B testing enabled</div>
       <div style="margin-top:8px"><span class="d">→</span> Dashboard: <span class="g">https://app.coldflows.ai/dash</span><span class="cur"></span></div>
     </div>
+  </div>
   </div>
 </div></section>
 
@@ -339,36 +347,66 @@ function loopScrambleTags(){
 initScramble();
 setTimeout(loopScrambleTags,2000);
 
-// ASCII FLOW EFFECT — slow, water-like flowing green characters
-function createFlow(canvasId,speed){
+// ASCII FLOW — diagonal river (hero) + upward flow (bottom)
+function createFlow(canvasId,speed,diagonal){
   const c=document.getElementById(canvasId);
   if(!c)return;
   const ctx=c.getContext('2d');
   const W=c.width,H=c.height;
-  const cellW=9,cellH=14;
+  const cellW=10,cellH=15;
   const cols=Math.floor(W/cellW),rows=Math.floor(H/cellH);
-  const heat=new Float32Array(cols*rows);
+  const field=new Float32Array(cols*rows);
   const ascii=' .·:;+=*#@'.split('');
   let tick=0;
 
   function step(){
     tick++;
-    for(let x=0;x<cols;x++){
-      const idx=(rows-1)*cols+x;
-      const wave=Math.sin(tick*0.003+x*0.12)*0.5+0.5;
-      const wave2=Math.sin(tick*0.002+x*0.06+1.5)*0.5+0.5;
-      heat[idx]=wave*wave2*0.5;
-      if(Math.random()>0.97)heat[idx]+=0.25;
-    }
-    for(let y=0;y<rows-1;y++){
+    field.fill(0);
+    if(diagonal){
+      // DIAGONAL RIVER: multiple streams flowing top-left to bottom-right
+      for(let s=0;s<5;s++){
+        const off=s*7-10;
+        const phase=tick*0.005+s*1.4;
+        const amp=2.5+Math.sin(tick*0.0015+s)*1.5;
+        for(let t=0;t<cols+rows;t++){
+          const p=t/(cols+rows);
+          const bx=Math.floor(t*0.65);
+          const by=Math.floor(t*0.5)+off;
+          const wave=Math.sin(phase+t*0.06)*amp;
+          const x=Math.floor(bx+wave*0.6);
+          const y=Math.floor(by+wave*0.6);
+          const ef=Math.min(p*4,1)*Math.min((1-p)*4,1);
+          if(x>=0&&x<cols&&y>=0&&y<rows){
+            const sc=1-Math.abs(wave/amp)*0.5;
+            field[y*cols+x]=Math.max(field[y*cols+x],sc*0.65*ef);
+          }
+          for(let w=-2;w<=2;w++){
+            const wx=x+Math.floor(w*0.4);
+            const wy=y+Math.floor(w*0.6);
+            if(wx>=0&&wx<cols&&wy>=0&&wy<rows){
+              field[wy*cols+wx]=Math.max(field[wy*cols+wx],(1-Math.abs(w)/3)*0.35*ef);
+            }
+          }
+        }
+      }
+    } else {
+      // UPWARD FLOW for bottom CTA
       for(let x=0;x<cols;x++){
-        const idx=y*cols+x;
-        const below=(y+1)*cols+x;
-        const bl=x>0?(y+1)*cols+(x-1):below;
-        const br=x<cols-1?(y+1)*cols+(x+1):below;
-        heat[idx]=(heat[below]*0.45+heat[bl]*0.2+heat[br]*0.2)*0.97;
-        heat[idx]+=Math.sin(tick*0.002+y*0.08+x*0.05)*0.006;
-        if(heat[idx]<0)heat[idx]=0;
+        const idx=(rows-1)*cols+x;
+        const w=Math.sin(tick*0.003+x*0.12)*0.5+0.5;
+        const w2=Math.sin(tick*0.002+x*0.06+1.5)*0.5+0.5;
+        field[idx]=w*w2*0.45;
+      }
+      for(let y=0;y<rows-1;y++){
+        for(let x=0;x<cols;x++){
+          const idx=y*cols+x;
+          const below=(y+1)*cols+x;
+          const bl=x>0?(y+1)*cols+(x-1):below;
+          const br=x<cols-1?(y+1)*cols+(x+1):below;
+          field[idx]=(field[below]*0.45+field[bl]*0.2+field[br]*0.2)*0.97;
+          field[idx]+=Math.sin(tick*0.002+y*0.08+x*0.05)*0.005;
+          if(field[idx]<0)field[idx]=0;
+        }
       }
     }
   }
@@ -379,29 +417,27 @@ function createFlow(canvasId,speed){
     ctx.textAlign='center';
     for(let y=0;y<rows;y++){
       for(let x=0;x<cols;x++){
-        const h=Math.min(heat[y*cols+x],1);
-        if(h<0.04)continue;
-        const charIdx=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
-        const alpha=Math.min(h*0.55,0.5);
-        const g=Math.floor(50+h*55);
-        const b=Math.floor(28+h*40);
-        ctx.fillStyle=`rgba(0,${g},${b},${alpha})`;
-        ctx.fillText(ascii[charIdx],x*cellW+cellW/2,y*cellH+cellH-2);
+        const h=Math.min(field[y*cols+x],1);
+        if(h<0.03)continue;
+        const ci=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
+        const a=Math.min(h*0.6,0.5);
+        ctx.fillStyle=`rgba(0,${Math.floor(40+h*65)},${Math.floor(22+h*48)},${a})`;
+        ctx.fillText(ascii[ci],x*cellW+cellW/2,y*cellH+cellH-2);
       }
     }
   }
 
-  let lastFrame=0;
-  const interval=speed||150;
-  function animate(ts){
-    if(ts-lastFrame>interval){step();draw();lastFrame=ts;}
-    requestAnimationFrame(animate);
+  let last=0;
+  const iv=speed||130;
+  function go(ts){
+    if(ts-last>iv){step();draw();last=ts;}
+    requestAnimationFrame(go);
   }
-  requestAnimationFrame(animate);
+  requestAnimationFrame(go);
 }
 
-createFlow('flameCanvas',150);
-createFlow('heroFlow',180);
+createFlow('heroFlow',130,true);
+createFlow('flameCanvas',160,false);
 </script>
 </body>
 </html>
