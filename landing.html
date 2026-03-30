@@ -352,31 +352,25 @@ function createFlow(canvasId,speed){
   let tick=0;
 
   function step(){
-    // Slow seed at bottom — gentle, sparse
+    tick++;
     for(let x=0;x<cols;x++){
       const idx=(rows-1)*cols+x;
-      // Sine wave pattern for flowing water feel
-      const wave=Math.sin(tick*0.008+x*0.15)*0.5+0.5;
-      const wave2=Math.sin(tick*0.005+x*0.08+2)*0.5+0.5;
-      heat[idx]=wave*wave2*(Math.random()*0.6+0.2);
-      // Occasional brighter spots
-      if(Math.random()>0.95)heat[idx]=Math.random()*0.8+0.4;
+      const wave=Math.sin(tick*0.003+x*0.12)*0.5+0.5;
+      const wave2=Math.sin(tick*0.002+x*0.06+1.5)*0.5+0.5;
+      heat[idx]=wave*wave2*0.5;
+      if(Math.random()>0.97)heat[idx]+=0.25;
     }
-    // Propagate upward — very slow cooling for gentle rise
     for(let y=0;y<rows-1;y++){
       for(let x=0;x<cols;x++){
         const idx=y*cols+x;
         const below=(y+1)*cols+x;
         const bl=x>0?(y+1)*cols+(x-1):below;
         const br=x<cols-1?(y+1)*cols+(x+1):below;
-        heat[idx]=(heat[below]*0.45+heat[bl]*0.2+heat[br]*0.2)*0.96;
-        // Gentle lateral drift like water current
-        const drift=Math.sin(tick*0.003+y*0.1)*0.02;
-        heat[idx]+=drift;
+        heat[idx]=(heat[below]*0.45+heat[bl]*0.2+heat[br]*0.2)*0.97;
+        heat[idx]+=Math.sin(tick*0.002+y*0.08+x*0.05)*0.006;
         if(heat[idx]<0)heat[idx]=0;
       }
     }
-    tick++;
   }
 
   function draw(){
@@ -388,21 +382,17 @@ function createFlow(canvasId,speed){
         const h=Math.min(heat[y*cols+x],1);
         if(h<0.04)continue;
         const charIdx=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
-        // Darker green: base rgb(0,60,35) → bright rgb(0,105,73)
-        const alpha=Math.min(h*0.7,0.65);
-        const g=Math.floor(55+h*55);
-        const b=Math.floor(30+h*45);
+        const alpha=Math.min(h*0.55,0.5);
+        const g=Math.floor(50+h*55);
+        const b=Math.floor(28+h*40);
         ctx.fillStyle=`rgba(0,${g},${b},${alpha})`;
-        // Very gentle jitter
-        const jx=(Math.random()-0.5)*0.8;
-        const jy=(Math.random()-0.5)*0.6;
-        ctx.fillText(ascii[charIdx],x*cellW+cellW/2+jx,y*cellH+cellH-2+jy);
+        ctx.fillText(ascii[charIdx],x*cellW+cellW/2,y*cellH+cellH-2);
       }
     }
   }
 
   let lastFrame=0;
-  const interval=speed||50; // slower = more water-like
+  const interval=speed||150;
   function animate(ts){
     if(ts-lastFrame>interval){step();draw();lastFrame=ts;}
     requestAnimationFrame(animate);
@@ -410,8 +400,8 @@ function createFlow(canvasId,speed){
   requestAnimationFrame(animate);
 }
 
-createFlow('flameCanvas',45);
-createFlow('heroFlow',50);
+createFlow('flameCanvas',150);
+createFlow('heroFlow',180);
 </script>
 </body>
 </html>
