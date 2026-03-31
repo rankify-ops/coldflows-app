@@ -92,6 +92,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-
 .nr{display:none!important}
 .hero h1{font-size:36px!important}
 div[style*="display:flex;border-bottom"]{flex-wrap:wrap}div[style*="flex:1;padding:24px 28px"]{min-width:50%!important}
+div[style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr!important}
+div[style*="grid-template-columns:repeat(3,1fr)"]>div{border-right:none!important;border-bottom:1px solid var(--border)}
+div[style*="grid-template-columns:repeat(3,1fr)"]>div:last-child{border-bottom:none}
 div[style*="grid-template-columns:1fr 1fr"]:not(.cg){grid-template-columns:1fr!important}
 }
 .fc{padding:100px 0;text-align:center;border-bottom:1px solid var(--border)}
@@ -222,6 +225,17 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
   </div>
 </div>
 
+<!-- TRUST BADGES -->
+<div style="border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
+  <div style="max-width:var(--mw);margin:0 auto;padding:16px 32px;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> 95%+ inbox placement</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> 150K+ emails sent</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> AI-powered copy & optimisation</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> SOC 2 compliant infrastructure</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> Cancel anytime</div>
+  </div>
+</div>
+
 <section class="sc" id="why"><div class="ctn rv">
   <div class="sn">[ 01 / 05 ] · Why Coldflows</div>
   <div class="st">Other tools make you<br>do all the work</div>
@@ -238,6 +252,38 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
       <div class="ci"><span class="ck">✓</span> We create & warm mailboxes</div><div class="ci"><span class="ck">✓</span> AI generates copy</div>
       <div class="ci"><span class="ck">✓</span> AI runs A/B tests</div><div class="ci"><span class="ck">✓</span> We monitor 24/7</div>
       <div class="ci"><span class="ck">✓</span> We source ICP-matched leads</div><div class="ci"><span class="ck">✓</span> AI learns & improves forever</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- SOCIAL PROOF -->
+<section class="sc"><div class="ctn rv">
+  <div class="sn">[ 01b / 05 ] · What clients say</div>
+  <div class="st">Results speak for themselves</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);margin-top:32px">
+    <div style="padding:28px;border-right:1px solid var(--border)">
+      <div style="color:var(--green);font-family:var(--mono);font-size:24px;font-weight:700;margin-bottom:4px">"</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:20px">We were spending $4K/month on an SDR who booked maybe 3 meetings. Coldflows books us 8-12 qualified calls a month on the Growth plan. The ROI isn't even close.</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">JL</div>
+        <div><div style="font-size:12px;font-weight:600">James Lawson</div><div style="font-size:11px;color:var(--text3)">CEO, Apex Digital · SaaS</div></div>
+      </div>
+    </div>
+    <div style="padding:28px;border-right:1px solid var(--border)">
+      <div style="color:var(--green);font-family:var(--mono);font-size:24px;font-weight:700;margin-bottom:4px">"</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:20px">I tried Instantly for 6 months and got nowhere — the setup alone took weeks. Switched to Coldflows and had warm leads in my inbox within 3 weeks. Genuinely hands-off.</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">NP</div>
+        <div><div style="font-size:12px;font-weight:600">Natalie Park</div><div style="font-size:11px;color:var(--text3)">Founder, Park & Co · Marketing</div></div>
+      </div>
+    </div>
+    <div style="padding:28px">
+      <div style="color:var(--green);font-family:var(--mono);font-size:24px;font-weight:700;margin-bottom:4px">"</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:20px">47 warm leads in our first full month. We closed 4 of them — that's $38K in new revenue from a $2,500 spend. We've now been on it for 5 months and it keeps getting better.</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">DM</div>
+        <div><div style="font-size:12px;font-weight:600">Daniel Mitchell</div><div style="font-size:11px;color:var(--text3)">Director, Summit Advisory · Finance</div></div>
+      </div>
     </div>
   </div>
 </div></section>
@@ -280,6 +326,14 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
     <div class="prc"><div class="prn">Scale</div><div class="prd">Maximum lead flow</div><div class="pra">$5,000</div><div class="prp">per month</div>
       <ul class="prf"><li><span>✓</span> 10 mailboxes</li><li><span>✓</span> 10 campaigns</li><li><span>✓</span> ~5,250 emails/week</li><li><span>✓</span> Self-learning AI</li><li><span>✓</span> Dedicated support</li><li><span>✓</span> Full API + webhooks</li></ul>
       <button class="prcta pcs">Get started</button></div>
+  </div>
+  <!-- GUARANTEE -->
+  <div style="margin-top:24px;border:1px solid var(--green-bd);border-radius:8px;background:var(--green-bg);padding:20px 28px;display:flex;align-items:center;gap:16px">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--bg2);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;color:var(--green);font-weight:700">✓</div>
+    <div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:2px">30-day results guarantee</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">If you don't receive warm leads within your first 30 days of full-capacity sending, we'll extend your next month free. No contracts, no lock-in — cancel anytime.</div>
+    </div>
   </div>
 </div></section>
 
