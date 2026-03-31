@@ -77,6 +77,20 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-
 .fq{font-size:15px;font-weight:500;display:flex;justify-content:space-between;align-items:center}.fq span{color:var(--text3);font-size:16px;transition:transform .2s;font-weight:300}
 .fa{font-size:13px;color:var(--text2);line-height:1.8;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
 .fi.open .fa{max-height:200px;padding-top:10px}.fi.open .fq span{transform:rotate(45deg)}
+.hero-eg{padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--bg2);font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all .15s}.hero-eg:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+@media(max-width:768px){
+.hero>div>div:first-child{grid-template-columns:1fr!important;min-height:auto!important}
+.hero>div>div>div:first-child{padding-right:0!important;padding-bottom:32px}
+.hero>div>div>div:last-child{border-left:none!important;border-top:1px solid var(--border);padding:24px 0!important}
+.cg{grid-template-columns:1fr!important}.cc:first-child{border-right:none!important;border-bottom:1px solid var(--border)}
+.sg{grid-template-columns:1fr!important}.sp{border-right:none!important;border-bottom:1px solid var(--border)}.sp:last-child{border-bottom:none}
+.pg{grid-template-columns:1fr 1fr!important}.ph{border-bottom:1px solid var(--border)!important}
+.prg{grid-template-columns:1fr!important}.prc{border-right:none!important;border-bottom:1px solid var(--border)}.prc:last-child{border-bottom:none}
+.nr{display:none!important}
+.hero h1{font-size:36px!important}
+div[style*="display:flex;border-bottom"]{flex-wrap:wrap}div[style*="flex:1;padding:24px 28px"]{min-width:50%!important}
+div[style*="grid-template-columns:1fr 1fr"]:not(.cg){grid-template-columns:1fr!important}
+}
 .fc{padding:100px 0;text-align:center;border-bottom:1px solid var(--border)}
 .fc h2{font-size:clamp(32px,4vw,48px);font-weight:500;letter-spacing:-1.5px;margin-bottom:12px}
 .fc p{font-size:14px;color:var(--text2);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.7}
@@ -109,32 +123,30 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
         <button class="bg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
       </div>
     </div>
-    <!-- RIGHT: Flowing river canvas -->
-    <div style="position:relative;border-left:1px solid var(--border);overflow:hidden">
-      <canvas id="heroFlow" width="544" height="420" style="display:block;width:100%;height:100%"></canvas>
-      <!-- Scramble tags floating over the river -->
-      <div class="scramble-tag" style="top:40px;left:40px" data-scramble="[ 2,100/WK ]"></div>
-      <div class="scramble-tag" style="top:110px;right:60px" data-scramble="[ A/B TEST ]"></div>
-      <div class="scramble-tag" style="top:200px;left:80px" data-scramble="[ .REPLY ]"></div>
-      <div class="scramble-tag" style="bottom:140px;right:40px" data-scramble="[ AI COPY ]"></div>
-      <div class="scramble-tag" style="bottom:60px;left:60px" data-scramble="[ WARMUP ]"></div>
+    <!-- RIGHT: Interactive terminal -->
+    <div style="border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:32px">
+      <div class="cb" style="max-width:100%">
+        <div class="cbb"><div class="cbd"></div><div class="cbd"></div><div class="cbd"></div><span style="margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--mono)">coldflows.ai</span></div>
+        <div class="cbo" style="min-height:320px">
+          <!-- Input area -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Describe your business and who you want to reach</div>
+            <div id="heroInput" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.7;min-height:52px;position:relative;cursor:text" onclick="document.getElementById('heroRealInput').focus()">
+              <span id="heroTyped"></span><span class="cur"></span>
+              <input id="heroRealInput" style="position:absolute;opacity:0;pointer-events:none" tabindex="-1">
+            </div>
+          </div>
+          <!-- Output area -->
+          <div id="heroOutput" style="font-family:var(--mono);font-size:12px;line-height:2"></div>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="hero-eg" onclick="runExample(0)">Marketing agency</button>
+        <button class="hero-eg" onclick="runExample(1)">SaaS company</button>
+        <button class="hero-eg" onclick="runExample(2)">Real estate</button>
+        <button class="hero-eg" onclick="runExample(3)">Accounting firm</button>
+      </div>
     </div>
-  </div>
-  <!-- Code block below -->
-  <div style="margin-top:48px">
-  <div class="cb"><div class="cbb"><div class="cbd"></div><div class="cbd"></div><div class="cbd"></div></div>
-    <div class="cbo">
-      <div><span class="d">$</span> <span class="g">coldflows</span> setup --service <span class="d">"SEO services"</span></div>
-      <div><span class="d">$</span> <span class="g">coldflows</span> target --icp <span class="d">"SMB owners, Gold Coast"</span></div>
-      <div><span class="d">$</span> <span class="g">coldflows</span> start</div>
-      <div style="margin-top:8px"><span class="g">✓</span> 4 domains purchased</div>
-      <div><span class="g">✓</span> 12 mailboxes created</div>
-      <div><span class="g">✓</span> DNS configured (SPF, DKIM, DMARC)</div>
-      <div><span class="g">✓</span> Warmup started — Phase 1 in 14 days</div>
-      <div><span class="g">✓</span> AI copy generated — A/B testing enabled</div>
-      <div style="margin-top:8px"><span class="d">→</span> Dashboard: <span class="g">https://app.coldflows.ai/dash</span><span class="cur"></span></div>
-    </div>
-  </div>
   </div>
 </div></section>
 
@@ -293,7 +305,6 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 const o=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('v')})},{threshold:.1});
 document.querySelectorAll('.rv').forEach(e=>o.observe(e));
 
-// SCRAMBLE TEXT ANIMATION
 const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/~`';
 function scrambleText(el){
   const target=el.dataset.scramble;
@@ -309,203 +320,154 @@ function scrambleText(el){
     iteration+=1/2;
   },30);
 }
-
-// Run scramble on all elements with data-scramble
 function initScramble(){
   document.querySelectorAll('[data-scramble]').forEach((el,i)=>{
     const target=el.dataset.scramble;
-    // Start with random chars
     el.textContent=target.split('').map(()=>chars[Math.floor(Math.random()*chars.length)]).join('');
-    // Stagger the animation start
     setTimeout(()=>scrambleText(el),300+i*200);
   });
 }
+initScramble();
 
-// Re-scramble floating tags periodically
-function loopScrambleTags(){
-  document.querySelectorAll('.scramble-tag').forEach((el,i)=>{
-    setInterval(()=>{
-      const target=el.dataset.scramble;
-      const len=target.length;
-      let iteration=0;
-      el.style.color='rgba(0,70,50,0.4)';
-      const interval=setInterval(()=>{
-        el.textContent=target.split('').map((ch,idx)=>{
-          if(idx<iteration)return target[idx];
-          return chars[Math.floor(Math.random()*chars.length)];
-        }).join('');
-        if(iteration>=len){
-          clearInterval(interval);
-          setTimeout(()=>{el.style.color='rgba(0,70,50,0.18)'},1500);
-        }
-        iteration+=1/3;
-      },25);
-    },4000+i*2000);
+// INTERACTIVE HERO TERMINAL
+const examples=[
+  {
+    input:"I run a digital marketing agency and want to reach e-commerce brands doing $1-10M revenue in the US",
+    service:"Digital marketing agency",
+    icp:"E-commerce brand owners, $1-10M revenue, United States",
+    domains:["outreach-mktg.com","growthflows.co","revenuereach.io","scaledigital.co"],
+    mailboxes:12
+  },
+  {
+    input:"We're a B2B SaaS platform for HR teams — need to book demos with HR directors at mid-market companies",
+    service:"B2B HR SaaS platform",
+    icp:"HR Directors, 200-2000 employees, mid-market, US/UK/AU",
+    domains:["hroutreach.co","talentflows.io","peoplescale.co","hrgrowth.io"],
+    mailboxes:12
+  },
+  {
+    input:"Real estate agency on the Gold Coast, want to find property sellers thinking about listing in the next 6 months",
+    service:"Real estate agency",
+    icp:"Property owners, Gold Coast QLD, homes valued $800K-2M",
+    domains:["gcpropertyreach.com","coastsellers.co","goldcoasthomes.io","listingflow.co"],
+    mailboxes:8
+  },
+  {
+    input:"Accounting firm in Sydney targeting SMB owners who need tax planning and advisory services",
+    service:"Accounting & tax advisory",
+    icp:"SMB owners, 5-50 employees, Sydney metro, revenue $500K-5M",
+    domains:["taxadvisoryreach.com","bizfinanceflow.co","smbaccounting.io","advisorygrowth.co"],
+    mailboxes:8
+  }
+];
+
+let heroRunning=false;
+const typedEl=document.getElementById('heroTyped');
+const outputEl=document.getElementById('heroOutput');
+
+function typeText(el,text,speed){
+  speed=speed||35;
+  return new Promise(function(resolve){
+    var i=0;
+    el.textContent='';
+    var interval=setInterval(function(){
+      el.textContent=text.substring(0,i+1);
+      i++;
+      if(i>=text.length){clearInterval(interval);resolve();}
+    },speed);
   });
 }
 
-initScramble();
-setTimeout(loopScrambleTags,2000);
-
-// ONE BIG RIVER — snakes from top-left to bottom-right with bends
-function createRiver(canvasId,speed){
-  const c=document.getElementById(canvasId);
-  if(!c)return;
-  const ctx=c.getContext('2d');
-  const W=c.width,H=c.height;
-  const cellW=10,cellH=15;
-  const cols=Math.floor(W/cellW),rows=Math.floor(H/cellH);
-  const field=new Float32Array(cols*rows);
-  const ascii=' .·:;+=*#@'.split('');
-  let tick=0;
-
-  // Define the river path as a series of control points (normalized 0-1)
-  // Snakes from top-left to bottom-right with bends
-  const path=[
-    {x:0.05,y:0.0},{x:0.15,y:0.12},{x:0.35,y:0.15},{x:0.50,y:0.25},
-    {x:0.40,y:0.38},{x:0.25,y:0.42},{x:0.30,y:0.55},{x:0.50,y:0.58},
-    {x:0.65,y:0.52},{x:0.75,y:0.60},{x:0.70,y:0.72},{x:0.55,y:0.78},
-    {x:0.65,y:0.85},{x:0.80,y:0.88},{x:0.92,y:0.95},{x:1.0,y:1.0}
-  ];
-
-  // Interpolate along the path using catmull-rom-ish smoothing
-  function getPathPoint(t){
-    const n=path.length-1;
-    const i=Math.min(Math.floor(t*n),n-1);
-    const f=(t*n)-i;
-    const p0=path[Math.max(i-1,0)];
-    const p1=path[i];
-    const p2=path[Math.min(i+1,n)];
-    const p3=path[Math.min(i+2,n)];
-    // Catmull-rom
-    const f2=f*f,f3=f2*f;
-    const x=0.5*((2*p1.x)+(p2.x-p0.x)*f+(2*p0.x-5*p1.x+4*p2.x-p3.x)*f2+(3*p1.x-p0.x-3*p2.x+p3.x)*f3);
-    const y=0.5*((2*p1.y)+(p2.y-p0.y)*f+(2*p0.y-5*p1.y+4*p2.y-p3.y)*f2+(3*p1.y-p0.y-3*p2.y+p3.y)*f3);
-    return{x,y};
-  }
-
-  function step(){
-    tick++;
-    field.fill(0);
-
-    // Draw the river along the path
-    const steps=200;
-    for(let i=0;i<steps;i++){
-      // t moves along the river — add time offset so it flows
-      const baseT=i/steps;
-
-      // Flow: particles travel along the river over time
-      const flowOffset=(tick*0.0008)%1;
-      const intensity=Math.sin((baseT+flowOffset)*Math.PI*6)*0.3+0.5;
-      const pulse=Math.sin(tick*0.004+baseT*12)*0.15+0.85;
-
-      const pt=getPathPoint(baseT);
-      const cx=pt.x*cols;
-      const cy=pt.y*rows;
-
-      // River width varies — wider in the middle, narrower at edges
-      const widthMult=1+Math.sin(baseT*Math.PI)*0.6;
-      const riverWidth=3.5*widthMult;
-
-      // Paint the river cross-section
-      for(let w=-Math.ceil(riverWidth);w<=Math.ceil(riverWidth);w++){
-        // Perpendicular direction — approximate from path tangent
-        const tNext=Math.min(baseT+0.01,1);
-        const ptNext=getPathPoint(tNext);
-        const dx=ptNext.x*cols-cx;
-        const dy=ptNext.y*rows-cy;
-        const len=Math.sqrt(dx*dx+dy*dy)||1;
-        // Perpendicular
-        const px=-dy/len;
-        const py=dx/len;
-
-        const fx=Math.round(cx+px*w);
-        const fy=Math.round(cy+py*w);
-        if(fx>=0&&fx<cols&&fy>=0&&fy<rows){
-          const dist=Math.abs(w)/riverWidth;
-          const falloff=Math.max(0,1-dist*dist); // Gaussian-ish
-          const val=falloff*intensity*pulse*0.75;
-          const idx=fy*cols+fx;
-          field[idx]=Math.max(field[idx],val);
-        }
-      }
-    }
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    ctx.font='11px JetBrains Mono,monospace';
-    ctx.textAlign='center';
-    for(let y=0;y<rows;y++){
-      for(let x=0;x<cols;x++){
-        const h=Math.min(field[y*cols+x],1);
-        if(h<0.03)continue;
-        const ci=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
-        const a=Math.min(h*0.65,0.55);
-        ctx.fillStyle=`rgba(0,${Math.floor(40+h*70)},${Math.floor(22+h*50)},${a})`;
-        ctx.fillText(ascii[ci],x*cellW+cellW/2,y*cellH+cellH-2);
-      }
-    }
-  }
-
-  let last=0;
-  const iv=speed||130;
-  function go(ts){
-    if(ts-last>iv){step();draw();last=ts;}
-    requestAnimationFrame(go);
-  }
-  requestAnimationFrame(go);
+function addOutput(html,delay){
+  delay=delay||0;
+  return new Promise(function(resolve){
+    setTimeout(function(){
+      var div=document.createElement('div');
+      div.innerHTML=html;
+      div.style.opacity='0';div.style.transform='translateY(4px)';
+      div.style.transition='all .2s ease';
+      outputEl.appendChild(div);
+      requestAnimationFrame(function(){div.style.opacity='1';div.style.transform='none';});
+      resolve();
+    },delay);
+  });
 }
 
-// Upward flow for bottom CTA
+async function runExample(idx){
+  if(heroRunning)return;
+  heroRunning=true;
+  var ex=examples[idx];
+  outputEl.innerHTML='';
+  typedEl.textContent='';
+
+  // Highlight active button
+  document.querySelectorAll('.hero-eg').forEach(function(b,i){
+    b.style.borderColor=i===idx?'var(--green)':'';
+    b.style.color=i===idx?'var(--green)':'';
+  });
+
+  await typeText(typedEl,ex.input,20);
+  await new Promise(function(r){setTimeout(r,400)});
+
+  await addOutput('<span class="d">\u2192</span> <span class="g">Analyzing</span> your business...');
+  await new Promise(function(r){setTimeout(r,500)});
+  await addOutput('<span class="d">  Service:</span> '+ex.service);
+  await addOutput('<span class="d">  ICP:</span> '+ex.icp);
+  await new Promise(function(r){setTimeout(r,300)});
+
+  await addOutput('<br><span class="g">\u2713</span> '+ex.domains.length+' domains purchased <span class="d">('+ex.domains.slice(0,2).join(', ')+'...)</span>',200);
+  await addOutput('<span class="g">\u2713</span> '+ex.mailboxes+' mailboxes created',250);
+  await addOutput('<span class="g">\u2713</span> DNS configured \u2014 SPF, DKIM, DMARC',250);
+  await addOutput('<span class="g">\u2713</span> Warmup started \u2014 Phase 1 in 14 days',250);
+  await addOutput('<span class="g">\u2713</span> AI copy generated \u2014 6 variants, A/B testing enabled',250);
+  await addOutput('<span class="g">\u2713</span> ICP leads sourced \u2014 2,400 contacts loaded',250);
+  await new Promise(function(r){setTimeout(r,300)});
+  await addOutput('<br><span class="d">\u2192</span> Dashboard: <span class="g">https://app.coldflows.ai/dash</span>');
+  await addOutput('<span class="d">\u2192</span> <span class="g" style="font-weight:600">You\'re live. First leads in ~14 days.</span>');
+
+  heroRunning=false;
+}
+
+setTimeout(function(){runExample(0)},1200);
+
+// Flame canvas for CTA section
 function createUpflow(canvasId,speed){
-  const c=document.getElementById(canvasId);
+  var c=document.getElementById(canvasId);
   if(!c)return;
-  const ctx=c.getContext('2d');
-  const W=c.width,H=c.height;
-  const cellW=10,cellH=15;
-  const cols=Math.floor(W/cellW),rows=Math.floor(H/cellH);
-  const heat=new Float32Array(cols*rows);
-  const ascii=' .·:;+=*#@'.split('');
-  let tick=0;
+  var ctx=c.getContext('2d');
+  var W=c.width,H=c.height;
+  var cellW=10,cellH=14;
+  var cols=Math.floor(W/cellW),rows=Math.floor(H/cellH);
+  var field=new Float32Array(cols*rows);
+  var ascii=' .\u00b7:;+=*#@'.split('');
+  var tick=0;
   function step(){
-    tick++;
-    for(let x=0;x<cols;x++){
-      const idx=(rows-1)*cols+x;
-      heat[idx]=Math.sin(tick*0.003+x*0.12)*0.25+0.25;
-    }
-    for(let y=0;y<rows-1;y++){
-      for(let x=0;x<cols;x++){
-        const idx=y*cols+x;
-        const below=(y+1)*cols+x;
-        const bl=x>0?(y+1)*cols+(x-1):below;
-        const br=x<cols-1?(y+1)*cols+(x+1):below;
-        heat[idx]=(heat[below]*0.45+heat[bl]*0.2+heat[br]*0.2)*0.97;
-        if(heat[idx]<0)heat[idx]=0;
-      }
-    }
+    tick++;field.fill(0);
+    for(var x=0;x<cols;x++){for(var y=0;y<rows;y++){
+      var cx=x/cols-0.5,cy=y/rows;
+      var wave=Math.sin(x*0.15+tick*0.02)*0.3+Math.cos(x*0.08-tick*0.015)*0.2;
+      var rise=Math.max(0,1-cy-0.1+wave*0.3);
+      var flicker=Math.sin(tick*0.05+x*0.3+y*0.2)*0.15+0.85;
+      var center=Math.max(0,1-Math.abs(cx)*2.5);
+      field[y*cols+x]=rise*center*flicker*0.6;
+    }}
   }
   function draw(){
     ctx.clearRect(0,0,W,H);
-    ctx.font='11px JetBrains Mono,monospace';
-    ctx.textAlign='center';
-    for(let y=0;y<rows;y++){
-      for(let x=0;x<cols;x++){
-        const h=Math.min(heat[y*cols+x],1);
-        if(h<0.03)continue;
-        const ci=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
-        const a=Math.min(h*0.55,0.45);
-        ctx.fillStyle=`rgba(0,${Math.floor(40+h*65)},${Math.floor(22+h*48)},${a})`;
-        ctx.fillText(ascii[ci],x*cellW+cellW/2,y*cellH+cellH-2);
-      }
-    }
+    ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='center';
+    for(var y=0;y<rows;y++){for(var x=0;x<cols;x++){
+      var h=Math.min(field[y*cols+x],1);
+      if(h<0.03)continue;
+      var ci=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
+      var g=Math.round(105+h*60);
+      ctx.fillStyle='rgba(0,'+g+','+Math.round(73-h*20)+','+h*0.5+')';
+      ctx.fillText(ascii[ci],x*cellW+cellW/2,y*cellH+cellH);
+    }}
   }
-  let last=0;
+  var last=0;
   function go(ts){if(ts-last>speed){step();draw();last=ts;}requestAnimationFrame(go);}
   requestAnimationFrame(go);
 }
-
-createRiver('heroFlow',120);
 createUpflow('flameCanvas',160);
 </script>
 </body>
