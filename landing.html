@@ -78,6 +78,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-
 .fa{font-size:13px;color:var(--text2);line-height:1.8;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
 .fi.open .fa{max-height:200px;padding-top:10px}.fi.open .fq span{transform:rotate(45deg)}
 .hero-eg{padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--bg2);font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all .15s}.hero-eg:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.dash-preview-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--green);text-decoration:none;padding:8px 16px;border:1px solid var(--green-bd);border-radius:6px;background:var(--green-bg);animation:dashPulse 2s ease-in-out infinite;transition:background .15s}
+.dash-preview-link:hover{background:rgba(0,105,73,0.12)}
+@keyframes dashPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,105,73,0.3)}50%{box-shadow:0 0 0 6px rgba(0,105,73,0)}}
 @media(max-width:768px){
 .hero>div>div:first-child{grid-template-columns:1fr!important;min-height:auto!important}
 .hero>div>div>div:first-child{padding-right:0!important;padding-bottom:32px}
@@ -127,7 +130,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
     <div style="border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:32px">
       <div class="cb" style="max-width:100%">
         <div class="cbb"><div class="cbd"></div><div class="cbd"></div><div class="cbd"></div><span style="margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--mono)">coldflows.ai</span></div>
-        <div class="cbo" style="min-height:320px">
+        <div class="cbo" style="height:340px;overflow-y:auto;scroll-behavior:smooth">
           <!-- Input area -->
           <div style="margin-bottom:12px">
             <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Describe your business and who you want to reach</div>
@@ -138,6 +141,10 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
           </div>
           <!-- Output area -->
           <div id="heroOutput" style="font-family:var(--mono);font-size:12px;line-height:2"></div>
+          <!-- Dashboard preview link -->
+          <div id="dashLink" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);opacity:0;transition:opacity .4s">
+            <a href="./index.html" target="_blank" class="dash-preview-link">Preview example dashboard →</a>
+          </div>
         </div>
       </div>
       <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
@@ -387,7 +394,11 @@ function addOutput(html,delay){
       div.style.opacity='0';div.style.transform='translateY(4px)';
       div.style.transition='all .2s ease';
       outputEl.appendChild(div);
-      requestAnimationFrame(function(){div.style.opacity='1';div.style.transform='none';});
+      requestAnimationFrame(function(){
+        div.style.opacity='1';div.style.transform='none';
+        var scroller=outputEl.closest('.cbo');
+        if(scroller)scroller.scrollTop=scroller.scrollHeight;
+      });
       resolve();
     },delay);
   });
@@ -399,6 +410,7 @@ async function runExample(idx){
   var ex=examples[idx];
   outputEl.innerHTML='';
   typedEl.textContent='';
+  document.getElementById('dashLink').style.opacity='0';
 
   // Highlight active button
   document.querySelectorAll('.hero-eg').forEach(function(b,i){
@@ -424,6 +436,11 @@ async function runExample(idx){
   await new Promise(function(r){setTimeout(r,300)});
   await addOutput('<br><span class="d">\u2192</span> Dashboard: <span class="g">https://app.coldflows.ai/dash</span>');
   await addOutput('<span class="d">\u2192</span> <span class="g" style="font-weight:600">You\'re live. First leads in ~14 days.</span>');
+
+  var dl=document.getElementById('dashLink');
+  dl.style.opacity='1';
+  var scroller=outputEl.closest('.cbo');
+  if(scroller)setTimeout(function(){scroller.scrollTop=scroller.scrollHeight;},300);
 
   heroRunning=false;
 }
