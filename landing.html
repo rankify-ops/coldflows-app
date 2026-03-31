@@ -508,16 +508,16 @@ function createRiver(canvasId,speed){
   if(!c)return;
   var ctx=c.getContext('2d');
   var W=c.width,H=c.height;
-  var cellW=10,cellH=14;
+  var cellW=9,cellH=12;
   var cols=Math.floor(W/cellW),rows=Math.floor(H/cellH);
   var field=new Float32Array(cols*rows);
-  var ascii=' .·:;+=*#@'.split('');
+  var ascii=':;+=*#%@$&'.split('');
   var tick=0;
 
   var path=[
-    {x:0.0,y:0.3},{x:0.1,y:0.25},{x:0.2,y:0.35},{x:0.3,y:0.5},
-    {x:0.4,y:0.6},{x:0.5,y:0.5},{x:0.6,y:0.35},{x:0.7,y:0.45},
-    {x:0.8,y:0.6},{x:0.9,y:0.55},{x:1.0,y:0.5}
+    {x:0.0,y:0.3},{x:0.08,y:0.2},{x:0.18,y:0.4},{x:0.3,y:0.55},
+    {x:0.42,y:0.65},{x:0.52,y:0.45},{x:0.62,y:0.3},{x:0.72,y:0.5},
+    {x:0.82,y:0.65},{x:0.92,y:0.5},{x:1.0,y:0.45}
   ];
 
   function getPathPoint(t){
@@ -537,17 +537,17 @@ function createRiver(canvasId,speed){
   function step(){
     tick++;
     field.fill(0);
-    var steps=200;
+    var steps=300;
     for(var i=0;i<steps;i++){
       var baseT=i/steps;
-      var flowOffset=(tick*0.001)%1;
-      var intensity=Math.sin((baseT+flowOffset)*Math.PI*6)*0.3+0.5;
-      var pulse=Math.sin(tick*0.004+baseT*12)*0.15+0.85;
+      var flowOffset=(tick*0.0015)%1;
+      var intensity=Math.sin((baseT+flowOffset)*Math.PI*8)*0.25+0.75;
+      var pulse=Math.sin(tick*0.005+baseT*14)*0.1+0.9;
       var pt=getPathPoint(baseT);
       var cx=pt.x*cols;
       var cy=pt.y*rows;
-      var widthMult=1+Math.sin(baseT*Math.PI)*0.8;
-      var riverWidth=3*widthMult;
+      var widthMult=1+Math.sin(baseT*Math.PI)*1.2;
+      var riverWidth=5*widthMult;
       for(var w=-Math.ceil(riverWidth);w<=Math.ceil(riverWidth);w++){
         var tNext=Math.min(baseT+0.01,1);
         var ptNext=getPathPoint(tNext);
@@ -561,7 +561,7 @@ function createRiver(canvasId,speed){
         if(fx>=0&&fx<cols&&fy>=0&&fy<rows){
           var dist=Math.abs(w)/riverWidth;
           var falloff=Math.max(0,1-dist*dist);
-          var val=falloff*intensity*pulse*0.7;
+          var val=falloff*intensity*pulse;
           var idx=fy*cols+fx;
           field[idx]=Math.max(field[idx],val);
         }
@@ -571,15 +571,16 @@ function createRiver(canvasId,speed){
 
   function draw(){
     ctx.clearRect(0,0,W,H);
-    ctx.font='11px JetBrains Mono,monospace';
+    ctx.font='bold 12px JetBrains Mono,monospace';
     ctx.textAlign='center';
     for(var y=0;y<rows;y++){
       for(var x=0;x<cols;x++){
         var h=Math.min(field[y*cols+x],1);
-        if(h<0.03)continue;
+        if(h<0.05)continue;
         var ci=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
-        var g=Math.round(105+h*60);
-        ctx.fillStyle='rgba(0,'+g+','+Math.round(73-h*20)+','+h*0.55+')';
+        var g=Math.round(80+h*100);
+        var alpha=0.3+h*0.7;
+        ctx.fillStyle='rgba(0,'+g+','+Math.round(60-h*15)+','+alpha+')';
         ctx.fillText(ascii[ci],x*cellW+cellW/2,y*cellH+cellH);
       }
     }
@@ -589,7 +590,7 @@ function createRiver(canvasId,speed){
   function go(ts){if(ts-last>speed){step();draw();last=ts;}requestAnimationFrame(go);}
   requestAnimationFrame(go);
 }
-createRiver('heroRiver',100);
+createRiver('heroRiver',80);
 
 // Flame canvas for CTA section
 function createUpflow(canvasId,speed){
