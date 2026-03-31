@@ -82,9 +82,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-
 .dash-preview-link:hover{background:rgba(0,105,73,0.12)}
 @keyframes dashPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,105,73,0.3)}50%{box-shadow:0 0 0 6px rgba(0,105,73,0)}}
 @media(max-width:768px){
-.hero>div>div:first-child{grid-template-columns:1fr!important;height:auto!important;min-height:auto!important}
-.hero>div>div>div:first-child{padding-right:0!important;padding-bottom:32px}
-.hero>div>div>div:last-child{border-left:none!important;border-top:1px solid var(--border);padding:24px 0!important}
+.hero>div>div:first-child{display:block!important;height:auto!important;min-height:auto!important}
+.hero>div>div>div:first-child{padding-right:0!important;padding-bottom:32px;width:100%!important;min-height:auto!important}
+.hero-terminal{position:static!important;width:100%!important;border-left:none!important;border-top:1px solid var(--border)}
 .cg{grid-template-columns:1fr!important}.cc:first-child{border-right:none!important;border-bottom:1px solid var(--border)}
 .sg{grid-template-columns:1fr!important}.sp{border-right:none!important;border-bottom:1px solid var(--border)}.sp:last-child{border-bottom:none}
 .pg{grid-template-columns:1fr 1fr!important}.ph{border-bottom:1px solid var(--border)!important}
@@ -115,9 +115,9 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 </div></nav>
 
 <section class="hero"><div class="ctn" style="position:relative">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;height:620px">
-    <!-- LEFT: Text content -->
-    <div style="padding-right:48px;display:flex;flex-direction:column;justify-content:center">
+  <div style="position:relative;min-height:420px">
+    <!-- LEFT: Text content — this determines hero height -->
+    <div style="width:50%;padding-right:48px;display:flex;flex-direction:column;justify-content:center;min-height:420px">
       <div class="hb"><div class="hd"></div>Now accepting clients</div>
       <h1>Cold email that<br>runs <span class="scramble" data-scramble="itself">itself</span></h1>
       <p class="hs">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> We handle everything else — forever.</p>
@@ -126,28 +126,28 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
         <button class="bg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
       </div>
     </div>
-    <!-- RIGHT: Interactive terminal -->
-    <div style="border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:24px 32px">
+    <!-- RIGHT: Interactive terminal — absolute positioned, doesn't affect hero height -->
+    <div class="hero-terminal" style="position:absolute;top:0;right:0;width:50%;border-left:1px solid var(--border);padding:32px;display:flex;flex-direction:column;justify-content:center;min-height:100%">
       <div class="cb" style="max-width:100%">
         <div class="cbb"><div class="cbd"></div><div class="cbd"></div><div class="cbd"></div><span style="margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--mono)">coldflows.ai</span></div>
-        <div class="cbo" style="padding:14px 18px">
+        <div class="cbo">
           <!-- Input area -->
-          <div style="margin-bottom:10px">
-            <div style="font-size:10px;color:var(--text3);margin-bottom:6px">Describe your business and who you want to reach</div>
-            <div id="heroInput" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--text);line-height:1.6;min-height:44px;position:relative;cursor:text" onclick="document.getElementById('heroRealInput').focus()">
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Describe your business and who you want to reach</div>
+            <div id="heroInput" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.7;min-height:52px;position:relative;cursor:text" onclick="document.getElementById('heroRealInput').focus()">
               <span id="heroTyped"></span><span class="cur"></span>
               <input id="heroRealInput" style="position:absolute;opacity:0;pointer-events:none" tabindex="-1">
             </div>
           </div>
           <!-- Output area -->
-          <div id="heroOutput" style="font-family:var(--mono);font-size:11px;line-height:1.7"></div>
+          <div id="heroOutput" style="font-family:var(--mono);font-size:12px;line-height:2"></div>
           <!-- Dashboard preview link -->
-          <div id="dashLink" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);opacity:0;transition:opacity .4s">
+          <div id="dashLink" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);opacity:0;transition:opacity .4s">
             <a href="./index.html" target="_blank" class="dash-preview-link">Preview example dashboard →</a>
           </div>
         </div>
       </div>
-      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="hero-eg" onclick="runExample(0)">Marketing agency</button>
         <button class="hero-eg" onclick="runExample(1)">SaaS company</button>
         <button class="hero-eg" onclick="runExample(2)">Real estate</button>
@@ -427,14 +427,14 @@ async function runExample(idx){
   await addOutput('<span class="d">  ICP:</span> '+ex.icp);
   await new Promise(function(r){setTimeout(r,300)});
 
-  await addOutput('<span class="g">\u2713</span> '+ex.domains.length+' domains purchased <span class="d">('+ex.domains.slice(0,2).join(', ')+'...)</span>',200);
+  await addOutput('<br><span class="g">\u2713</span> '+ex.domains.length+' domains purchased <span class="d">('+ex.domains.slice(0,2).join(', ')+'...)</span>',200);
   await addOutput('<span class="g">\u2713</span> '+ex.mailboxes+' mailboxes created',250);
   await addOutput('<span class="g">\u2713</span> DNS configured \u2014 SPF, DKIM, DMARC',250);
   await addOutput('<span class="g">\u2713</span> Warmup started \u2014 Phase 1 in 14 days',250);
-  await addOutput('<span class="g">\u2713</span> AI copy generated \u2014 6 variants, A/B testing',250);
-  await addOutput('<span class="g">\u2713</span> 2,400 ICP leads sourced and loaded',250);
+  await addOutput('<span class="g">\u2713</span> AI copy generated \u2014 6 variants, A/B testing enabled',250);
+  await addOutput('<span class="g">\u2713</span> ICP leads sourced \u2014 2,400 contacts loaded',250);
   await new Promise(function(r){setTimeout(r,300)});
-  await addOutput('<span class="d">\u2192</span> Dashboard: <span class="g">app.coldflows.ai/dash</span>');
+  await addOutput('<br><span class="d">\u2192</span> Dashboard: <span class="g">https://app.coldflows.ai/dash</span>');
   await addOutput('<span class="d">\u2192</span> <span class="g" style="font-weight:600">You\'re live. First leads in ~14 days.</span>');
 
   document.getElementById('dashLink').style.opacity='1';
