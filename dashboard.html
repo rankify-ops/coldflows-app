@@ -1156,90 +1156,82 @@ function App(){
       {/* SUBSCRIPTION PAGE */}
       {pg==="subscription"&&<div className="fade-in" style={{padding:"24px 28px"}}>
         <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Subscription</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Manage your plan and mailboxes</p></div>
-
-        {/* Current Plan Card */}
         <div style={{border:"2px solid var(--green-bd)",borderRadius:"var(--r)",padding:24,marginBottom:24,background:"var(--green-bg)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
             <div>
               <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:6}}>Current plan</div>
               <div style={{fontSize:22,fontWeight:800}}>Growth</div>
-              <div style={{fontSize:13,color:"var(--text2)",marginTop:4}}>12 mailboxes · $208/mailbox</div>
+              <div style={{fontSize:13,color:"var(--text2)",marginTop:4}}>12 mailboxes at $208 per mailbox</div>
             </div>
             <div style={{textAlign:"right"}}>
               <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:"var(--green)"}}>$2,500</div>
               <div style={{fontSize:11,color:"var(--text3)"}}>per month</div>
             </div>
           </div>
-          <div style={{display:"flex",gap:12,marginTop:20}}>
-            <div style={{flex:1,background:"var(--bg2)",borderRadius:"var(--r)",padding:14,border:"1px solid var(--border)"}}>
-              <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Mailboxes</div>
-              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>12 <span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/ 12</span></div>
-            </div>
-            <div style={{flex:1,background:"var(--bg2)",borderRadius:"var(--r)",padding:14,border:"1px solid var(--border)"}}>
-              <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Daily capacity</div>
-              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>1,200 <span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>emails/day</span></div>
-            </div>
-            <div style={{flex:1,background:"var(--bg2)",borderRadius:"var(--r)",padding:14,border:"1px solid var(--border)"}}>
-              <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Weekly volume</div>
-              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>6,000 <span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>emails/wk</span></div>
-            </div>
-            <div style={{flex:1,background:"var(--bg2)",borderRadius:"var(--r)",padding:14,border:"1px solid var(--border)"}}>
-              <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Next billing</div>
-              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>May 1</div>
-            </div>
+        </div>
+        <div style={{display:"flex",gap:12,marginBottom:24}}>
+          <div style={{flex:1,background:"var(--bg2)",borderRadius:"var(--r)",padding:14,border:"1px solid var(--border)"}}>
+            <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Mailboxes</div>
+            <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>12</div>
+          </div>
+          <div style={{flex:1,background:"var(--bg2)",borderRadius:"var(--r)",padding:14,border:"1px solid var(--border)"}}>
+            <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Daily capacity</div>
+            <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>1,200</div>
+          </div>
+          <div style={{flex:1,background:"var(--bg2)",borderRadius:"var(--r)",padding:14,border:"1px solid var(--border)"}}>
+            <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Weekly volume</div>
+            <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>6,000</div>
+          </div>
+          <div style={{flex:1,background:"var(--bg2)",borderRadius:"var(--r)",padding:14,border:"1px solid var(--border)"}}>
+            <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Next billing</div>
+            <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700}}>May 1</div>
           </div>
         </div>
-
-        {/* Mailboxes List */}
         <div style={{marginBottom:24}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
             <div style={{fontSize:15,fontWeight:700}}>Mailboxes</div>
-            <button className="hoverable" style={{padding:"8px 16px",borderRadius:"var(--r)",background:"var(--green)",color:"#fff",border:"none",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>+ Add mailbox · $208/mo</button>
+            <button className="hoverable" style={{padding:"8px 16px",borderRadius:"var(--r)",background:"var(--green)",color:"#fff",border:"none",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>+ Add mailbox</button>
           </div>
           <div style={{border:"1px solid var(--border)",borderRadius:"var(--r)",overflow:"hidden"}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 100px 80px",padding:"10px 16px",background:"var(--bg)",fontSize:10,fontWeight:600,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"1px",borderBottom:"1px solid var(--border)"}}>
-              <div>Mailbox</div><div>Domain</div><div>Status</div><div>Sends/day</div><div></div>
+            <div style={{display:"grid",gridTemplateColumns:"2fr 2fr 1fr 1fr",padding:"10px 16px",background:"var(--bg)",fontSize:10,fontWeight:600,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"1px",borderBottom:"1px solid var(--border)"}}>
+              <div>Mailbox</div><div>Domain</div><div>Status</div><div>Sends</div>
             </div>
-            {D.mbs.map((m,i)=>{
-              var domain=m.name.substring(m.name.indexOf("@")+1);
-              var sends=m.day>=14?100:Math.round(m.day*4);
-              return <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 100px 80px",padding:"12px 16px",borderBottom:i<D.mbs.length-1?"1px solid var(--border)":"none",fontSize:13,alignItems:"center"}}>
+            {D.mbs.map(function(m,i){
+              return <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 2fr 1fr 1fr",padding:"12px 16px",borderBottom:i<D.mbs.length-1?"1px solid var(--border)":"none",fontSize:13,alignItems:"center"}}>
                 <div style={{fontWeight:500}}>{m.name}</div>
-                <div style={{color:"var(--text2)",fontSize:12,fontFamily:"var(--mono)"}}>{domain}</div>
+                <div style={{color:"var(--text2)",fontSize:12,fontFamily:"var(--mono)"}}>{m.name.substring(m.name.indexOf("@")+1)}</div>
                 <div><span style={{fontSize:10,fontWeight:600,padding:"3px 8px",borderRadius:10,background:m.day>=14?"var(--green-bg)":"var(--orange-bg)",color:m.day>=14?"var(--green)":"var(--orange)"}}>{m.day>=14?"Active":"Warming"}</span></div>
-                <div style={{fontFamily:"var(--mono)",fontSize:12}}>{sends}</div>
-                <div style={{textAlign:"right"}}><button className="hoverable" style={{fontSize:10,color:"var(--red)",background:"none",border:"none",cursor:"pointer",fontWeight:600,fontFamily:"var(--sans)"}}>Remove</button></div>
-              </div>;}
-            )}
+                <div style={{fontFamily:"var(--mono)",fontSize:12}}>{m.day>=14?100:Math.round(m.day*4)}</div>
+              </div>;
+            })}
           </div>
         </div>
-
-        {/* Upgrade Path */}
         <div style={{border:"1px solid var(--border)",borderRadius:"var(--r)",padding:20,marginBottom:24}}>
           <div style={{fontSize:13,fontWeight:700,marginBottom:14}}>Plan tiers</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
-            {[
-              {name:"Starter",boxes:4,price:"$1,000",per:"$250",active:false},
-              {name:"Growth",boxes:12,price:"$2,500",per:"$208",active:true},
-              {name:"Scale",boxes:30,price:"$5,000",per:"$167",active:false}
-            ].map((plan,i)=>
-              <div key={i} style={{border:plan.active?"2px solid var(--green)":"1px solid var(--border)",borderRadius:"var(--r)",padding:16,background:plan.active?"var(--green-bg)":"transparent",position:"relative"}}>
-                {plan.active&&<div style={{position:"absolute",top:-8,right:12,fontSize:9,fontWeight:700,background:"var(--green)",color:"#fff",padding:"2px 8px",borderRadius:10,textTransform:"uppercase",letterSpacing:"0.5px"}}>Current</div>}
-                <div style={{fontSize:15,fontWeight:700,marginBottom:2}}>{plan.name}</div>
-                <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)",marginBottom:2}}>{plan.price}<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
-                <div style={{fontSize:11,color:"var(--text2)",marginBottom:8}}>{plan.boxes} mailboxes · {plan.per}/mailbox</div>
-                <div style={{fontSize:11,color:"var(--text3)"}}>Add extras at {plan.per}/mailbox</div>
-                {!plan.active&&<button className="hoverable" style={{marginTop:12,width:"100%",padding:"8px",borderRadius:"var(--r)",border:"1px solid var(--border)",background:"transparent",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)",color:"var(--text2)"}}>{i===0?"Downgrade":"Upgrade"}</button>}
-              </div>
-            )}
+            <div style={{border:"1px solid var(--border)",borderRadius:"var(--r)",padding:16}}>
+              <div style={{fontSize:15,fontWeight:700,marginBottom:2}}>Starter</div>
+              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$1,000<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
+              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>4 mailboxes at $250 each</div>
+            </div>
+            <div style={{border:"2px solid var(--green)",borderRadius:"var(--r)",padding:16,background:"var(--green-bg)",position:"relative"}}>
+              <div style={{position:"absolute",top:-8,right:12,fontSize:9,fontWeight:700,background:"var(--green)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Current</div>
+              <div style={{fontSize:15,fontWeight:700,marginBottom:2}}>Growth</div>
+              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$2,500<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
+              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>12 mailboxes at $208 each</div>
+            </div>
+            <div style={{border:"1px solid var(--border)",borderRadius:"var(--r)",padding:16}}>
+              <div style={{fontSize:15,fontWeight:700,marginBottom:2}}>Scale</div>
+              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$5,000<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
+              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>30 mailboxes at $167 each</div>
+              <button className="hoverable" style={{marginTop:12,width:"100%",padding:"8px",borderRadius:"var(--r)",border:"1px solid var(--border)",background:"transparent",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)",color:"var(--text2)"}}>Upgrade</button>
+            </div>
           </div>
         </div>
-
-        {/* Danger Zone */}
-        <div style={{border:"1px solid var(--red)",borderRadius:"var(--r)",padding:20,opacity:0.7}}>
+        <div style={{border:"1px solid var(--red)",borderRadius:"var(--r)",padding:20,opacity:0.6}}>
           <div style={{fontSize:13,fontWeight:700,color:"var(--red)",marginBottom:6}}>Cancel subscription</div>
-          <div style={{fontSize:12,color:"var(--text2)",marginBottom:12,lineHeight:1.6}}>Cancelling will stop all campaigns and mailboxes at the end of your current billing period. This action cannot be undone.</div>
-          <button className="hoverable" style={{padding:"8px 16px",borderRadius:"var(--r)",background:"none",border:"1px solid var(--red)",color:"var(--red)",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Cancel subscription</button>
+          <div style={{fontSize:12,color:"var(--text2)",marginBottom:12}}>This will stop all campaigns at the end of your billing period.</div>
+          <button className="hoverable" style={{padding:"8px 16px",borderRadius:"var(--r)",background:"none",border:"1px solid var(--red)",color:"var(--red)",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Cancel</button>
         </div>
       </div>}
 
