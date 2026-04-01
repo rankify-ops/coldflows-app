@@ -551,7 +551,7 @@ function createRiver(canvasId){
       char:chars[Math.floor(Math.random()*chars.length)],
       phase:Math.random()*Math.PI*2,
       speed:0.3+Math.random()*0.7,
-      baseAlpha:0.15+Math.random()*0.45
+      baseAlpha:0.35+Math.random()*0.55
     });
   }
 
@@ -574,7 +574,7 @@ function createRiver(canvasId){
       var pulse=Math.sin(tick*0.02+p.phase*3)*0.3+0.7;
       var edgeFade=1-Math.abs(p.offX)/(0.08)*1.5;
       edgeFade=Math.max(0,Math.min(1,edgeFade));
-      var alpha=p.baseAlpha*pulse*edgeFade;
+      var alpha=p.baseAlpha*pulse*edgeFade*1.4;
       if(alpha<0.03)continue;
 
       ctx.fillStyle='rgba(0,105,73,'+alpha.toFixed(2)+')';
