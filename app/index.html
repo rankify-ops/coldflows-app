@@ -64,6 +64,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:3px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
 @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(0,212,126,0.15)}50%{box-shadow:0 0 40px rgba(0,212,126,0.25)}}
 .fade-in{animation:fadeIn .4s ease both}
 .hoverable{transition:background .12s ease}
@@ -887,6 +888,20 @@ function App(){
   const [mb,setMb]=useState(null);
   const [treeFilter,setTreeFilter]=useState("SEO");
   const [dark,setDark]=useState(false);
+  const [custData,setCustData]=useState(null);
+  const [isNew,setIsNew]=useState(false);
+  const toggleTheme=()=>{const next=!dark;setDark(next);document.body.classList.toggle('dark',next);document.body.classList.toggle('light',!next);};
+  
+  // Fetch customer data from Supabase
+  React.useEffect(()=>{
+    if(!currentUser)return;
+    sb.from('customers').select('*').eq('user_id',currentUser.id).single().then(({data,error})=>{
+      if(data){
+        setCustData(data);
+        if(!data.business_name||data.plan_status==='pending'){setIsNew(true);}
+      }
+    });
+  },[]);
   const toggleTheme=()=>{const next=!dark;setDark(next);document.body.classList.toggle('dark',next);document.body.classList.toggle('light',!next);};
   const nav=p=>{setPg(p);setMd(null);setLd(null)};
   const pct=Math.round(D.sentToday/D.cap*100);
@@ -934,15 +949,59 @@ function App(){
               transform:dark?"translateX(18px)":"translateX(0)",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}}/>
           </div>
         </div>
+        {currentUser&&<div style={{fontSize:11,color:"var(--text3)",marginBottom:8,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{currentUser.email}</div>}
         <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"1px"}}>Plan</div>
-        <div style={{fontSize:13,fontWeight:700,color:"var(--green)",marginTop:3}}>Scale — $5,000/mo</div>
+        <div style={{fontSize:13,fontWeight:700,color:"var(--green)",marginTop:3,marginBottom:12}}>{custData?custData.plan?custData.plan.charAt(0).toUpperCase()+custData.plan.slice(1):"No plan":"Loading..."}</div>
+        <div onClick={async()=>{await sb.auth.signOut();window.location.href='/signup.html';}} className="hoverable" style={{display:"flex",alignItems:"center",gap:6,padding:"8px 14px",borderRadius:6,color:"var(--text3)",fontSize:12,cursor:"pointer",border:"1px solid var(--border)",justifyContent:"center",fontWeight:500}}>
+          Log out
+        </div>
       </div>
     </nav>
 
     {/* Main */}
     <main style={{flex:1,marginLeft:220,background:"var(--bg)",borderLeft:"1px solid var(--border)",minHeight:"100vh"}}>
 
-      <div>
+      {/* New account / pending payment state */}
+      {isNew?<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:40}}>
+        <div style={{textAlign:"center",maxWidth:480}}>
+          <div style={{width:48,height:48,borderRadius:12,background:"var(--green-bg)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h1 style={{fontSize:24,fontWeight:700,letterSpacing:"-0.5px",marginBottom:8}}>Welcome to Coldflows</h1>
+          {!custData||!custData.business_name?<>
+            <p style={{fontSize:14,color:"var(--text2)",lineHeight:1.7,marginBottom:24}}>You haven't set up your first campaign yet. Complete your onboarding to get started.</p>
+            <button onClick={()=>window.location.href='/onboarding.html'} style={{padding:"12px 32px",borderRadius:8,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:600,border:"none",cursor:"pointer",fontFamily:"var(--sans)"}}>Complete setup →</button>
+          </>:<>
+            <p style={{fontSize:14,color:"var(--text2)",lineHeight:1.7,marginBottom:8}}>Your campaign is being provisioned. We're setting up your domains, mailboxes, and warmup right now.</p>
+            <p style={{fontSize:13,color:"var(--text3)",lineHeight:1.7,marginBottom:24}}>This usually takes 24-48 hours. We'll email you at <strong>{custData.lead_email||custData.email}</strong> when everything is ready.</p>
+            <div style={{border:"1px solid var(--border)",borderRadius:8,padding:16,textAlign:"left",background:"var(--bg2)"}}>
+              <div style={{fontSize:11,fontWeight:600,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"1px",marginBottom:12}}>Setup progress</div>
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
+                  <div style={{width:20,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
+                  <span>Account created</span>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
+                  <div style={{width:20,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
+                  <span>Campaign targeting saved</span>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
+                  <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--green)",borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
+                  <span style={{color:"var(--text3)"}}>Purchasing domains...</span>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12,color:"var(--text3)"}}>
+                  <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)"}}/>
+                  <span>Creating mailboxes</span>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12,color:"var(--text3)"}}>
+                  <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)"}}/>
+                  <span>Starting warmup</span>
+                </div>
+              </div>
+            </div>
+          </>}
+        </div>
+      </div>:<div>
 
       {pg==="overview"&&<div className="fade-in" style={{}}>
         <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)"}}><h1 style={{fontSize:22,fontWeight:600,letterSpacing:"-0.3px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Last updated 3 minutes ago</p></div>
@@ -1489,6 +1548,7 @@ function App(){
         </div>
       </div>
     </div>}
+  </div>}
   </div>;
 }
 
