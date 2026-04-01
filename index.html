@@ -436,7 +436,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
     <div class="prc"><div class="prn">Starter</div><div class="prd">Test the waters</div><div class="pra">$1,000</div><div class="prp">per month</div>
       <ul class="prf"><li><span>✓</span> 2 dedicated domains</li><li><span>✓</span> 4 mailboxes</li><li><span>✓</span> 2 campaigns</li><li><span>✓</span> ~1,050 emails/week at full capacity</li><li><span>✓</span> A/B copy testing</li><li><span>✓</span> Verified lead sourcing</li><li><span>✓</span> Dashboard access</li></ul>
       <button class="prcta pcs">Get started</button></div>
-    <div class="prc ft" style="position:relative;overflow:hidden"><div class="prb">Most popular</div><canvas id="pricingRiver" width="400" height="500" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.08;pointer-events:none"></canvas><div style="position:relative;z-index:1"><div class="prn">Growth</div><div class="prd">Serious outbound</div><div class="pra">$2,500</div><div class="prp">per month</div>
+    <div class="prc ft" style="position:relative;overflow:hidden"><div class="prb">Most popular</div><canvas id="pricingRiver" width="400" height="500" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.35;pointer-events:none"></canvas><div style="position:relative;z-index:1"><div class="prn">Growth</div><div class="prd">Serious outbound</div><div class="pra">$2,500</div><div class="prp">per month</div>
       <ul class="prf"><li><span>✓</span> 4 dedicated domains</li><li><span>✓</span> 8 mailboxes</li><li><span>✓</span> 4 campaigns</li><li><span>✓</span> ~2,100 emails/week at full capacity</li><li><span>✓</span> AI copy optimisation</li><li><span>✓</span> Priority verified leads</li><li><span>✓</span> Dashboard + API access</li><li><span>✓</span> Dedicated account manager</li></ul>
       <button class="prcta pcp">Get started →</button></div></div>
     <div class="prc"><div class="prn">Scale</div><div class="prd">Maximum lead flow</div><div class="pra">$5,000</div><div class="prp">per month</div>
@@ -752,13 +752,13 @@ createRiver('bottomRiver');
   var W=c.width,H=c.height;
   var chars='·.·:+·.·:+'.split('');
   var drops=[];
-  for(var i=0;i<80;i++){
+  for(var i=0;i<150;i++){
     drops.push({
       x:Math.random()*W,
       y:Math.random()*H,
       speed:0.3+Math.random()*0.8,
       char:chars[Math.floor(Math.random()*chars.length)],
-      alpha:0.3+Math.random()*0.7,
+      alpha:0.5+Math.random()*0.5,
       phase:Math.random()*Math.PI*2
     });
   }
