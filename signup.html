@@ -129,13 +129,19 @@ var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 // Check if already logged in
 sb.auth.getSession().then(function(res){
   if(res.data.session){
-    // Already logged in — check if they have onboarding data
-    sb.from('customers').select('business_name').eq('user_id',res.data.session.user.id).single().then(function(r){
-      if(r.data&&r.data.business_name){
+    // Already logged in — check plan_status to decide where to go
+    sb.from('customers').select('business_name,plan_status').eq('user_id',res.data.session.user.id).single().then(function(r){
+      if(r.data&&r.data.plan_status==='active'){
+        window.location.href='/app';
+      }else if(r.data&&r.data.business_name){
+        // Has onboarding data but hasn't paid yet
         window.location.href='/app';
       }else{
         window.location.href='/onboarding.html';
       }
+    }).catch(function(){
+      // If query fails (RLS issue), try going to app and let it handle redirect
+      window.location.href='/app';
     });
   }
 });
@@ -158,7 +164,7 @@ async function googleAuth(){
   document.getElementById('err-msg').style.display='none';
   var{error}=await sb.auth.signInWithOAuth({
     provider:'google',
-    options:{redirectTo:'https://coldflows.ai/onboarding.html'}
+    options:{redirectTo:'https://coldflows.ai/signup.html'}
   });
   if(error)showError(error.message);
 }
@@ -173,8 +179,8 @@ async function handleLogin(){
   var{data,error}=await sb.auth.signInWithPassword({email:email,password:pw});
   if(error){showError(error.message);btn.disabled=false;btn.textContent='Log In';return;}
   // Check if onboarded
-  var{data:cust}=await sb.from('customers').select('business_name').eq('user_id',data.user.id).single();
-  if(cust&&cust.business_name){
+  var{data:cust}=await sb.from('customers').select('business_name,plan_status').eq('user_id',data.user.id).single();
+  if(cust&&(cust.plan_status==='active'||cust.business_name)){
     window.location.href='/app';
   }else{
     window.location.href='/onboarding.html';
