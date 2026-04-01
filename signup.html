@@ -44,6 +44,7 @@ input::placeholder{color:var(--text3)}
 .footer a{color:var(--text3);text-decoration:underline}
 .footer a:hover{color:var(--text2)}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="gl"><i></i></div>
@@ -72,6 +73,8 @@ input::placeholder{color:var(--text3)}
     </svg>
     Coldflows
   </a>
+
+  <div id="err-msg" style="display:none;padding:10px 14px;border-radius:6px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;font-size:13px;margin-bottom:20px"></div>
 
   <div class="tabs">
     <div class="tab" id="tab-login" onclick="switchTab('login')">Log In</div>
@@ -119,24 +122,83 @@ input::placeholder{color:var(--text3)}
 </div>
 
 <script>
+var SUPABASE_URL='https://bmjjyujuyjpkyggormoa.supabase.co';
+var SUPABASE_KEY='sb_publishable_ED6qY1Iun-NAL6F96eq0yQ_mayBlmFJ';
+var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// Check if already logged in
+sb.auth.getSession().then(function(res){
+  if(res.data.session){
+    // Already logged in — check if they have onboarding data
+    sb.from('customers').select('business_name').eq('user_id',res.data.session.user.id).single().then(function(r){
+      if(r.data&&r.data.business_name){
+        window.location.href='/app';
+      }else{
+        window.location.href='/onboarding.html';
+      }
+    });
+  }
+});
+
 function switchTab(t){
   document.getElementById('tab-login').classList.toggle('active',t==='login');
   document.getElementById('tab-signup').classList.toggle('active',t==='signup');
   document.getElementById('form-login').classList.toggle('active',t==='login');
   document.getElementById('form-signup').classList.toggle('active',t==='signup');
+  document.getElementById('err-msg').style.display='none';
 }
-function googleAuth(){alert('Google sign-in will be connected here');}
-function handleLogin(){
-  var e=document.getElementById('li-email').value,p=document.getElementById('li-pw').value;
-  if(!e||!p){alert('Please fill in all fields');return;}
-  window.location.href='/dashboard.html';
+
+function showError(msg){
+  var el=document.getElementById('err-msg');
+  el.textContent=msg;
+  el.style.display='block';
 }
-function handleSignup(){
-  var e=document.getElementById('su-email').value,p=document.getElementById('su-pw').value;
-  if(!e||!p){alert('Please fill in all fields');return;}
-  if(p.length<8){alert('Password must be at least 8 characters');return;}
-  window.location.href='/onboarding.html';
+
+async function googleAuth(){
+  document.getElementById('err-msg').style.display='none';
+  var{error}=await sb.auth.signInWithOAuth({
+    provider:'google',
+    options:{redirectTo:'https://coldflows.ai/onboarding.html'}
+  });
+  if(error)showError(error.message);
 }
+
+async function handleLogin(){
+  var email=document.getElementById('li-email').value;
+  var pw=document.getElementById('li-pw').value;
+  if(!email||!pw){showError('Please fill in all fields');return;}
+  document.getElementById('err-msg').style.display='none';
+  var btn=document.querySelector('#form-login .btn-main');
+  btn.disabled=true;btn.textContent='Signing in...';
+  var{data,error}=await sb.auth.signInWithPassword({email:email,password:pw});
+  if(error){showError(error.message);btn.disabled=false;btn.textContent='Log In';return;}
+  // Check if onboarded
+  var{data:cust}=await sb.from('customers').select('business_name').eq('user_id',data.user.id).single();
+  if(cust&&cust.business_name){
+    window.location.href='/app';
+  }else{
+    window.location.href='/onboarding.html';
+  }
+}
+
+async function handleSignup(){
+  var email=document.getElementById('su-email').value;
+  var pw=document.getElementById('su-pw').value;
+  if(!email||!pw){showError('Please fill in all fields');return;}
+  if(pw.length<8){showError('Password must be at least 8 characters');return;}
+  document.getElementById('err-msg').style.display='none';
+  var btn=document.querySelector('#form-signup .btn-main');
+  btn.disabled=true;btn.textContent='Creating account...';
+  var{data,error}=await sb.auth.signUp({email:email,password:pw,options:{emailRedirectTo:'https://coldflows.ai/onboarding.html'}});
+  if(error){showError(error.message);btn.disabled=false;btn.textContent='Create Account';return;}
+  if(data.user&&!data.user.confirmed_at){
+    // Email confirmation required
+    document.querySelector('#form-signup').innerHTML='<div style="text-align:center;padding:40px 0"><div style="font-size:40px;margin-bottom:16px">\u2709</div><h2 style="font-size:20px;font-weight:600;margin-bottom:8px">Check your email</h2><p style="font-size:14px;color:var(--text2);line-height:1.6">We sent a confirmation link to <strong>'+email+'</strong>. Click the link to activate your account.</p></div>';
+  }else{
+    window.location.href='/onboarding.html';
+  }
+}
+
 if(window.location.search.includes('login'))switchTab('login');
 </script>
 </body>

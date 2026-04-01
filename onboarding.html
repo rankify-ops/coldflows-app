@@ -64,6 +64,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.6}
 .page{display:none}
 .page.active{display:block;animation:fadeIn .3s ease-out}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="gl"><i></i></div>
@@ -177,6 +178,20 @@ textarea{resize:vertical;min-height:80px;line-height:1.6}
 </div>
 
 <script>
+var SUPABASE_URL='https://bmjjyujuyjpkyggormoa.supabase.co';
+var SUPABASE_KEY='sb_publishable_ED6qY1Iun-NAL6F96eq0yQ_mayBlmFJ';
+var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+var currentUser=null;
+
+// Check auth — redirect to signup if not logged in
+sb.auth.getSession().then(function(res){
+  if(!res.data.session){
+    window.location.href='/signup.html?signup';
+    return;
+  }
+  currentUser=res.data.session.user;
+});
+
 var plan='growth';
 var planData={
   starter:{name:'Starter',price:'$1,000/mo',mailboxes:'4',campaigns:'2'},
@@ -198,44 +213,57 @@ function pickPlan(el,p){
 }
 
 function goTo(page){
-  // Validate
   if(page===2){
     if(!document.getElementById('biz').value||!document.getElementById('service').value||!document.getElementById('target').value){
       alert('Please fill in all fields');return;
     }
   }
   if(page===3){
-    // Fill review
     var pd=planData[plan];
     document.getElementById('rv-biz').textContent=document.getElementById('biz').value;
-    document.getElementById('rv-svc').textContent=document.getElementById('service').value.substring(0,120)+(document.getElementById('service').value.length>120?'...':'');
-    document.getElementById('rv-tgt').textContent=document.getElementById('target').value.substring(0,120)+(document.getElementById('target').value.length>120?'...':'');
-    document.getElementById('rv-plan').textContent=pd.name+' — '+pd.mailboxes+' mailboxes';
+    var svc=document.getElementById('service').value;
+    document.getElementById('rv-svc').textContent=svc.length>120?svc.substring(0,120)+'...':svc;
+    var tgt=document.getElementById('target').value;
+    document.getElementById('rv-tgt').textContent=tgt.length>120?tgt.substring(0,120)+'...':tgt;
+    document.getElementById('rv-plan').textContent=pd.name+' \u2014 '+pd.mailboxes+' mailboxes';
     document.getElementById('rv-price').textContent=pd.price;
   }
-
-  // Update steps
   document.querySelectorAll('.step').forEach(function(s,i){
     s.className='step';
-    if(i<page) s.classList.add('done');
-    if(i===page-1) s.classList.add('active');
+    if(i<page)s.classList.add('done');
+    if(i===page-1)s.classList.add('active');
   });
-
-  // Switch page
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.getElementById('p'+page).classList.add('active');
   window.scrollTo(0,0);
 }
 
-function checkout(){
-  // TODO: Store business info (webhook to Google Sheet / Airtable / DB)
-  // Then redirect to Stripe
-  var link=stripeLinks[plan];
-  if(link.includes('REPLACE')){
-    alert('Stripe payment links not configured yet. Replace stripeLinks in onboarding.html with your actual Stripe URLs.');
+async function checkout(){
+  if(!currentUser){alert('Session expired. Please log in again.');window.location.href='/signup.html';return;}
+  
+  // Save business info to Supabase
+  var{error}=await sb.from('customers').update({
+    business_name:document.getElementById('biz').value,
+    service_description:document.getElementById('service').value,
+    target_market:document.getElementById('target').value,
+    plan:plan,
+  }).eq('user_id',currentUser.id);
+  
+  if(error){
+    console.error('Save error:',error);
+    alert('Error saving your details. Please try again.');
     return;
   }
-  window.location.href=link;
+  
+  // Redirect to Stripe
+  var link=stripeLinks[plan];
+  if(link.includes('REPLACE')){
+    alert('Stripe payment links not configured yet. Your details have been saved. Replace stripeLinks in onboarding.html with your Stripe URLs.');
+    return;
+  }
+  // Append email to Stripe link for pre-fill
+  var sep=link.includes('?')?'&':'?';
+  window.location.href=link+sep+'prefilled_email='+encodeURIComponent(currentUser.email);
 }
 </script>
 </body>
