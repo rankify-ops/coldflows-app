@@ -972,8 +972,13 @@ function App(){
     {/* Main */}
     <main style={{flex:1,marginLeft:220,background:"var(--bg)",borderLeft:"1px solid var(--border)",minHeight:"100vh"}}>
 
-      {/* New account / pending payment state */}
-      {isNew?<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:40}}>
+      {/* Loading state */}
+      {!authLoaded?<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}}>
+        <div style={{fontSize:13,color:"var(--text3)"}}>Loading...</div>
+      </div>:
+
+      /* New account / pending payment state */
+      isNew?<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:40}}>
         <div style={{textAlign:"center",maxWidth:480}}>
           <div style={{width:48,height:48,borderRadius:12,background:"var(--green-bg)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
@@ -997,7 +1002,7 @@ function App(){
                   <span>Campaign targeting saved</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
-                  <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--green)",borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
+                  <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--green)",animation:"spin 1s linear infinite"}}/>
                   <span style={{color:"var(--text3)"}}>Purchasing domains...</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12,color:"var(--text3)"}}>
@@ -1380,6 +1385,7 @@ function App(){
         </div>
       </div>}
       </div>
+    }
     </main>
 
     {md&&<Modal c={md} onClose={()=>setMd(null)}/>}
