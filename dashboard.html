@@ -1200,14 +1200,16 @@ function App(){
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 100px 80px",padding:"10px 16px",background:"var(--bg)",fontSize:10,fontWeight:600,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"1px",borderBottom:"1px solid var(--border)"}}>
               <div>Mailbox</div><div>Domain</div><div>Status</div><div>Sends/day</div><div></div>
             </div>
-            {D.mbs.map((m,i)=>
-              <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 100px 80px",padding:"12px 16px",borderBottom:i<D.mbs.length-1?"1px solid var(--border)":"none",fontSize:13,alignItems:"center"}}>
+            {D.mbs.map((m,i)=>{
+              var domain=m.name.substring(m.name.indexOf("@")+1);
+              var sends=m.day>=14?100:Math.round(m.day*4);
+              return <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 100px 80px",padding:"12px 16px",borderBottom:i<D.mbs.length-1?"1px solid var(--border)":"none",fontSize:13,alignItems:"center"}}>
                 <div style={{fontWeight:500}}>{m.name}</div>
-                <div style={{color:"var(--text2)",fontSize:12,fontFamily:"var(--mono)"}}>{m.name.split("@")[1]}</div>
+                <div style={{color:"var(--text2)",fontSize:12,fontFamily:"var(--mono)"}}>{domain}</div>
                 <div><span style={{fontSize:10,fontWeight:600,padding:"3px 8px",borderRadius:10,background:m.day>=14?"var(--green-bg)":"var(--orange-bg)",color:m.day>=14?"var(--green)":"var(--orange)"}}>{m.day>=14?"Active":"Warming"}</span></div>
-                <div style={{fontFamily:"var(--mono)",fontSize:12}}>{m.day>=14?"100":"~"+Math.round(m.day*4)}</div>
+                <div style={{fontFamily:"var(--mono)",fontSize:12}}>{sends}</div>
                 <div style={{textAlign:"right"}}><button className="hoverable" style={{fontSize:10,color:"var(--red)",background:"none",border:"none",cursor:"pointer",fontWeight:600,fontFamily:"var(--sans)"}}>Remove</button></div>
-              </div>
+              </div>;}
             )}
           </div>
         </div>
