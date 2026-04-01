@@ -17,13 +17,17 @@ var SUPABASE_URL='https://bmjjyujuyjpkyggormoa.supabase.co';
 var SUPABASE_KEY='sb_publishable_ED6qY1Iun-NAL6F96eq0yQ_mayBlmFJ';
 var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var currentUser=null;
+var authReady=false;
 sb.auth.getSession().then(function(res){
   if(!res.data.session){
     window.location.href='/signup.html';
     return;
   }
   currentUser=res.data.session.user;
+  authReady=true;
   document.body.style.opacity='1';
+  // Trigger React re-render if already mounted
+  if(window.__refreshAuth)window.__refreshAuth();
 });
 </script>
 <style>
@@ -890,19 +894,26 @@ function App(){
   const [dark,setDark]=useState(false);
   const [custData,setCustData]=useState(null);
   const [isNew,setIsNew]=useState(false);
+  const [authLoaded,setAuthLoaded]=useState(false);
   const toggleTheme=()=>{const next=!dark;setDark(next);document.body.classList.toggle('dark',next);document.body.classList.toggle('light',!next);};
   
-  // Fetch customer data from Supabase
+  // Fetch customer data from Supabase once auth is ready
   React.useEffect(()=>{
-    if(!currentUser)return;
-    sb.from('customers').select('*').eq('user_id',currentUser.id).single().then(({data,error})=>{
-      if(data){
-        setCustData(data);
-        if(!data.business_name||data.plan_status==='pending'){setIsNew(true);}
-      }
-    });
+    function loadData(){
+      if(!currentUser)return;
+      setAuthLoaded(true);
+      sb.from('customers').select('*').eq('user_id',currentUser.id).single().then(({data,error})=>{
+        if(data){
+          setCustData(data);
+          if(!data.business_name||data.plan_status==='pending'){setIsNew(true);}
+        } else {
+          setIsNew(true);
+        }
+      });
+    }
+    if(authReady){loadData();}
+    else{window.__refreshAuth=loadData;}
   },[]);
-  const toggleTheme=()=>{const next=!dark;setDark(next);document.body.classList.toggle('dark',next);document.body.classList.toggle('light',!next);};
   const nav=p=>{setPg(p);setMd(null);setLd(null)};
   const pct=Math.round(D.sentToday/D.cap*100);
   const wc=D.reps.filter(r=>r.cat==="warm").length;
