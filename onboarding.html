@@ -221,6 +221,11 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
       <label>What are you offering to prospects?</label>
       <textarea id="f-offer" placeholder="Full Shopify store build starting at $15K. 6-week turnaround. Free migration." style="min-height:56px"></textarea>
     </div>
+    <div class="field">
+      <label>Where should we send your leads?</label>
+      <input type="email" id="f-lead-email" placeholder="you@yourbusiness.com">
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">Warm replies will land directly in this inbox</div>
+    </div>
     <button class="btn" onclick="goTo(2)">Continue</button>
   </div>
 
@@ -384,6 +389,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
 
     <div class="summary">
       <div class="sr"><span class="sl">Business</span><span class="sv" id="rv-biz"></span></div>
+      <div class="sr"><span class="sl">Leads inbox</span><span class="sv" id="rv-email"></span></div>
       <div class="sr"><span class="sl">Campaign</span><span class="sv" id="rv-camp"></span></div>
       <div class="sr"><span class="sl">Titles</span><span class="sv"><div class="stags" id="rv-titles"></div></span></div>
       <div class="sr"><span class="sl">Seniority</span><span class="sv"><div class="stags" id="rv-sen"></div></span></div>
@@ -467,6 +473,7 @@ function goTo(page){
   if(page===4){
     var pd=planData[plan];
     document.getElementById('rv-biz').textContent=document.getElementById('f-biz').value;
+    document.getElementById('rv-email').textContent=document.getElementById('f-lead-email').value||currentUser.email;
     document.getElementById('rv-camp').textContent=document.getElementById('f-camp').value||'Campaign 1';
     fillTags('rv-titles',getSelected('titles'));
     fillTags('rv-sen',getSelected('seniority'));
@@ -496,6 +503,7 @@ async function checkout(){
 
   var{error}=await sb.from('customers').update({
     business_name:document.getElementById('f-biz').value,
+    lead_email:document.getElementById('f-lead-email').value||currentUser.email,
     service_description:document.getElementById('f-svc').value,
     target_market:JSON.stringify({
       website:document.getElementById('f-url').value,
