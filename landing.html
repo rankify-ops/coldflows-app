@@ -32,7 +32,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-
 @keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
 .hero h1{font-size:clamp(42px,5.5vw,64px);font-weight:500;letter-spacing:-2px;line-height:1.08;margin-bottom:20px}
 .hs{font-size:16px;color:var(--text2);max-width:480px;line-height:1.7;margin-bottom:40px}.hs strong{color:var(--text);font-weight:600}
-.hc{display:flex;gap:12px;align-items:center;margin-bottom:64px}
+.hc{display:flex;gap:12px;align-items:center;margin-bottom:20px}
 .bp{padding:12px 28px;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .15s;display:inline-flex;align-items:center;gap:6px}.bp:hover{background:#005238}
 .bg{padding:12px 28px;border-radius:8px;background:transparent;color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);font-family:var(--sans);transition:all .15s}.bg:hover{border-color:var(--text3);color:var(--text)}
 .cb{border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:580px}
@@ -122,22 +122,22 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
     <!-- LEFT: Text content — this determines hero height -->
     <div style="width:50%;padding-right:48px;display:flex;flex-direction:column;justify-content:center;min-height:560px">
       <div class="hb"><div class="hd"></div>Now accepting clients</div>
-      <h1>Cold email that<br>runs <span class="scramble" data-scramble="itself">itself</span></h1>
+      <h1>Cold email that<br>runs <span class="scramble" data-scramble="itself">itself</span><span class="cur" style="height:0.9em;margin-left:4px"></span></h1>
       <p class="hs">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> Open your dashboard, track your campaigns, watch them optimise — and reply to your leads.</p>
       <div class="hc">
         <button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
         <button class="bg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
       </div>
       <!-- Conviction points -->
-      <div style="margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px">
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Real verified leads guaranteed</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> No complicated setup required</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Moneyback if no leads 30 days after Phase 1</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Dedicated sending domains included</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Trained on millions of cold email responses</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> A/B testing every campaign automatically</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Self-optimising & self-learning AI</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Works while you sleep</div>
+      <div style="margin-top:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 20px">
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Real verified leads guaranteed</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> No complicated setup required</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Moneyback if no leads 30 days after Phase 1</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Dedicated sending domains included</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Trained on millions of cold email responses</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> A/B testing every campaign automatically</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Self-optimising & self-learning AI</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Works while you sleep</div>
       </div>
       <!-- Flowing digits river -->
       <div style="margin-top:24px;overflow:hidden;border-radius:8px">
