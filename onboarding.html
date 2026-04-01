@@ -265,6 +265,11 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
         <div class="chip" onclick="toggleChip(this)">Asia Pacific (all)</div>
         <div class="chip" onclick="toggleChip(this)">Global</div>
       </div>
+      <div style="margin-top:10px">
+        <label style="font-weight:500;color:var(--text3)">Narrow it down (optional)</label>
+        <input type="text" id="f-locdetail" placeholder="e.g. California, New York / Sydney, Melbourne / London, Manchester">
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">Add specific states, cities, or regions for more targeted leads</div>
+      </div>
     </div>
 
     <button class="btn btn-back" onclick="goTo(1)">Back</button>
@@ -323,6 +328,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
       <div class="sr"><span class="sl">Industries</span><span class="sv"><div class="stags" id="rv-ind"></div></span></div>
       <div class="sr"><span class="sl">Size</span><span class="sv"><div class="stags" id="rv-size"></div></span></div>
       <div class="sr"><span class="sl">Locations</span><span class="sv"><div class="stags" id="rv-loc"></div></span></div>
+      <div class="sr" id="rv-locdetail-row" style="display:none"><span class="sl">Specific areas</span><span class="sv" id="rv-locdetail"></span></div>
       <div class="sr" style="border-top:2px solid var(--border);padding-top:10px"><span class="sl" style="font-weight:700;color:var(--text)">Plan</span><span class="sv" id="rv-plan"></span></div>
       <div class="sr"><span class="sl" style="font-weight:700;color:var(--text)">Monthly total</span><span class="sv" style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)" id="rv-price"></span></div>
     </div>
@@ -405,6 +411,13 @@ function goTo(page){
     fillTags('rv-ind',getSelected('industries'));
     fillTags('rv-size',getSelected('size'));
     fillTags('rv-loc',getSelected('locations'));
+    var locDetail=document.getElementById('f-locdetail').value.trim();
+    if(locDetail){
+      document.getElementById('rv-locdetail').textContent=locDetail;
+      document.getElementById('rv-locdetail-row').style.display='flex';
+    }else{
+      document.getElementById('rv-locdetail-row').style.display='none';
+    }
     document.getElementById('rv-plan').textContent=pd.name+' — '+pd.mailboxes+' mailboxes';
     document.getElementById('rv-price').textContent=pd.priceNum+' USD';
   }
@@ -430,7 +443,8 @@ async function checkout(){
       seniority:getSelected('seniority'),
       industries:getSelected('industries'),
       company_size:getSelected('size'),
-      locations:getSelected('locations')
+      locations:getSelected('locations'),
+      location_detail:document.getElementById('f-locdetail').value.trim()
     }),
     plan:plan,
   }).eq('user_id',currentUser.id);
