@@ -973,12 +973,12 @@ function App(){
     <main style={{flex:1,marginLeft:220,background:"var(--bg)",borderLeft:"1px solid var(--border)",minHeight:"100vh"}}>
 
       {/* Loading state */}
-      {!authLoaded?<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}}>
+      {!authLoaded&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}}>
         <div style={{fontSize:13,color:"var(--text3)"}}>Loading...</div>
-      </div>:
+      </div>}
 
-      /* New account / pending payment state */
-      isNew?<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:40}}>
+      {/* New account / pending payment state */}
+      {authLoaded&&isNew&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:40}}>
         <div style={{textAlign:"center",maxWidth:480}}>
           <div style={{width:48,height:48,borderRadius:12,background:"var(--green-bg)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
@@ -1017,7 +1017,10 @@ function App(){
             </div>
           </>}
         </div>
-      </div>:<div>
+      </div>}
+
+      {/* Dashboard content — only for active accounts */}
+      {authLoaded&&!isNew&&<div>
 
       {pg==="overview"&&<div className="fade-in" style={{}}>
         <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)"}}><h1 style={{fontSize:22,fontWeight:600,letterSpacing:"-0.3px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Last updated 3 minutes ago</p></div>
@@ -1384,8 +1387,7 @@ function App(){
           )}
         </div>
       </div>}
-      </div>
-    }
+      </div>}
     </main>
 
     {md&&<Modal c={md} onClose={()=>setMd(null)}/>}
