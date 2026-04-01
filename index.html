@@ -6,6 +6,15 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Coldflows — Cold email that runs itself</title>
 <meta name="description" content="Purchase a package. Tell us your service. We handle everything. AI-powered cold email that runs, optimises, and improves itself.">
+<meta property="og:title" content="Coldflows — Cold email that runs itself">
+<meta property="og:description" content="Fully managed cold email. We buy the domains, create the mailboxes, write the copy, source the leads, and optimise everything with AI. You just reply to warm leads.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://coldflows.ai">
+<meta property="og:image" content="https://coldflows.ai/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Coldflows — Cold email that runs itself">
+<meta name="twitter:description" content="Fully managed cold email. We handle everything. You just reply to warm leads.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%23006949'/><path d='M50 20L30 50l20 30 20-30z' fill='white' opacity='0.9'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -81,6 +90,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-
 .dash-preview-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--green);text-decoration:none;padding:8px 16px;border:1px solid var(--green-bd);border-radius:6px;background:var(--green-bg);animation:dashPulse 2s ease-in-out infinite;transition:background .15s}
 .dash-preview-link:hover{background:rgba(0,105,73,0.12)}
 @keyframes dashPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,105,73,0.3)}50%{box-shadow:0 0 0 6px rgba(0,105,73,0)}}
+.hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px}
+.hamburger span{width:18px;height:2px;background:var(--text);border-radius:1px}
+.mobile-menu{display:none;position:fixed;top:56px;left:0;right:0;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 32px;z-index:99;transform:translateY(-100%);transition:transform .2s}
+.mobile-menu.open{display:block;transform:translateY(0)}
+.mobile-menu a{display:block;padding:10px 0;font-size:14px;color:var(--text2);font-weight:500;border-bottom:1px solid var(--border)}
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);padding:12px 0;z-index:100;transform:translateY(100%);transition:transform .3s;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(245,245,245,0.9)}
+.sticky-cta.show{transform:translateY(0)}
 @media(max-width:768px){
 .hero>div>div:first-child{display:block!important;height:auto!important;min-height:auto!important}
 .hero>div>div>div:first-child{padding-right:0!important;padding-bottom:32px;width:100%!important;min-height:auto!important}
@@ -90,6 +106,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-
 .pg{grid-template-columns:1fr 1fr!important}.ph{border-bottom:1px solid var(--border)!important}
 .prg{grid-template-columns:1fr!important}.prc{border-right:none!important;border-bottom:1px solid var(--border)}.prc:last-child{border-bottom:none}
 .nr{display:none!important}
+.hamburger{display:flex!important}
 .hero h1{font-size:36px!important}
 div[style*="display:flex;border-bottom"]{flex-wrap:wrap}div[style*="flex:1;padding:24px 28px"]{min-width:50%!important}
 div[style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr!important}
@@ -116,7 +133,22 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 <nav><div class="ni">
   <div class="nl"><div class="nli"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></div>coldflows</div>
   <div class="nr"><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><button class="nc" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started</button></div>
+  <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
 </div></nav>
+<div class="mobile-menu">
+  <a href="#how" onclick="this.parentElement.classList.remove('open')">How it works</a>
+  <a href="#pricing" onclick="this.parentElement.classList.remove('open')">Pricing</a>
+  <a href="#faq" onclick="this.parentElement.classList.remove('open')">FAQ</a>
+  <button class="bp" style="width:100%;margin-top:8px" onclick="this.parentElement.classList.remove('open');document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
+</div>
+
+<!-- Sticky CTA -->
+<div class="sticky-cta" id="stickyCta">
+  <div style="max-width:var(--mw);margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:13px;font-weight:500">Ready to fill your pipeline?</div>
+    <button class="bp" style="padding:8px 20px;font-size:12px" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
+  </div>
+</div>
 
 <section class="hero" style="overflow:visible"><div class="ctn" style="position:relative">
   <div style="position:relative;min-height:560px">
@@ -321,9 +353,9 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 </div>
 
 <section class="sc" id="why"><div class="ctn rv">
-  <div class="sn">[ 01 / 05 ] · Why Coldflows</div>
+  <div class="sn">Why Coldflows</div>
   <div class="st">Other tools make you<br>do all the work</div>
-  <div class="sd">Smartlead, Instantly, Lemlist — they hand you a tool and wish you luck. Coldflows does the actual work.</div>
+  <div class="sd">Other tools hand you a platform and wish you luck. Coldflows does the actual work.</div>
   <div class="cg">
     <div class="cc"><div class="cl clo">Other cold email tools</div>
       <div class="ci"><span class="cx">✕</span> You buy domains</div><div class="ci"><span class="cx">✕</span> You set up DNS manually</div>
@@ -342,7 +374,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 
 <!-- SOCIAL PROOF -->
 <section class="sc"><div class="ctn rv">
-  <div class="sn">[ 01b / 05 ] · What clients say</div>
+  <div class="sn">What clients say</div>
   <div class="st">Results speak for themselves</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);margin-top:32px">
     <div style="padding:28px;border-right:1px solid var(--border)">
@@ -373,7 +405,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 </div></section>
 
 <section class="sc" id="how"><div class="ctn rv">
-  <div class="sn">[ 02 / 05 ] · How it works</div>
+  <div class="sn">How it works</div>
   <div class="st">Three steps. That's it.</div><div class="sd" style="margin-bottom:0"></div>
 </div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
   <div class="sg"><div class="sp"><div class="spn">01 Purchase</div><div class="spt">Pick a plan</div><div class="spd">Stripe checkout takes 30 seconds. Your system starts provisioning immediately.</div></div>
@@ -383,7 +415,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 </div></section>
 
 <section class="sc"><div class="ctn rv">
-  <div class="sn">[ 03 / 05 ] · The system</div>
+  <div class="sn">The system</div>
   <div class="st">Volume that scales itself</div>
   <div class="sd">Every account progresses through four phases automatically.</div>
 </div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
@@ -396,7 +428,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 </div></section>
 
 <section class="sc" id="pricing"><div class="ctn rv">
-  <div class="sn">[ 04 / 05 ] · Pricing</div>
+  <div class="sn">Pricing</div>
   <div class="st">Simple. No hidden fees.</div>
   <div class="sd">Everything included — domains, mailboxes, warmup, copy, leads, optimisation.</div>
 </div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
@@ -422,7 +454,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 </div></section>
 
 <section class="sc" id="faq"><div class="ctn rv">
-  <div class="sn">[ 05 / 05 ] · FAQ</div>
+  <div class="sn">FAQ</div>
   <div class="st" style="margin-bottom:32px">Questions</div>
   <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">What happens after I purchase?<span>+</span></div><div class="fa">We immediately provision your system — purchase domains, create mailboxes, configure DNS, start warmup. Dashboard login within minutes. Warmup takes ~14 days, then outreach begins automatically.</div></div>
   <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Do I need to write any email copy?<span>+</span></div><div class="fa">No. Our AI generates all copy based on your service and target market. It A/B tests variations and promotes winners automatically.</div></div>
@@ -444,7 +476,37 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
   </div>
 </section>
 
-<footer><div class="ctn fti"><div class="ftl">© 2026 Coldflows</div><div class="ftr"><a href="#">Privacy</a><a href="#">Terms</a><a href="./dashboard.html">Dashboard</a></div></div></footer>
+<footer><div class="ctn" style="padding:40px 32px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:32px">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:8px"><div class="nli" style="width:20px;height:20px;border-radius:4px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" style="width:10px;height:10px"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></div>Coldflows</div>
+      <div style="font-size:12px;color:var(--text3);max-width:280px;line-height:1.6">AI-powered cold email that runs, optimises, and improves itself. Built by <a href="https://rankify.com.au" target="_blank" style="color:var(--green);text-decoration:underline">Rankify</a>.</div>
+    </div>
+    <div style="display:flex;gap:48px">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:12px;font-family:var(--mono)">Product</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text2)">
+          <a href="#how">How it works</a>
+          <a href="#pricing">Pricing</a>
+          <a href="./dashboard.html" target="_blank">Dashboard demo</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:12px;font-family:var(--mono)">Legal</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text2)">
+          <a href="mailto:hello@coldflows.ai">Contact</a>
+          <a href="#">Privacy policy</a>
+          <a href="#">Terms of service</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:11px;color:var(--text3)">
+    <div>© 2026 Coldflows. All rights reserved.</div>
+    <div>ABN coming soon</div>
+  </div>
+</div></footer>
 
 <script>
 const o=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('v')})},{threshold:.1});
@@ -473,6 +535,15 @@ function initScramble(){
   });
 }
 initScramble();
+
+// Sticky CTA — show after scrolling past hero
+var stickyCta=document.getElementById('stickyCta');
+var heroSection=document.querySelector('.hero');
+window.addEventListener('scroll',function(){
+  var heroBottom=heroSection.getBoundingClientRect().bottom;
+  if(heroBottom<0){stickyCta.classList.add('show')}
+  else{stickyCta.classList.remove('show')}
+});
 
 // INTERACTIVE HERO TERMINAL
 const examples=[
