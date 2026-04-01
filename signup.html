@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sign in — Coldflows</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><rect x='2' y='2' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='19' y='2' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='2' y='19' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='19' y='19' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='10.5' y='10.5' width='7' height='7' rx='1.2' fill='%23006949'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f5f5f5;--bg2:#fff;--bg3:#ebebeb;--border:#e5e5e5;--border2:#d4d4d4;--text:#171717;--text2:#525252;--text3:#a3a3a3;--green:#006949;--green2:#008f5d;--green-bg:rgba(0,105,73,0.05);--green-bd:rgba(0,105,73,0.15);--red:#dc2626;--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased}
+
+/* Grid lines background */
+.gl{position:fixed;top:0;left:50%;transform:translateX(-50%);width:1088px;height:100vh;pointer-events:none;z-index:0;opacity:0.5}
+.gl::before,.gl::after{content:'';position:absolute;top:0;bottom:0;width:1px;background:var(--border)}.gl::before{left:0}.gl::after{right:0}
+.gl i{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--border)}
+
+/* Logo animations */
+@keyframes cPulse{0%,100%{opacity:0.9;transform:scale(1)}30%{opacity:1;transform:scale(1.05)}60%{opacity:0.25;transform:scale(0.9)}80%{opacity:0.7;transform:scale(1)}}
+@keyframes sL1{0%{stroke-dashoffset:12;opacity:0}10%{opacity:0.6}30%{stroke-dashoffset:0;opacity:0.5}70%{opacity:0.15}85%{opacity:0}90%{stroke-dashoffset:12}100%{stroke-dashoffset:12;opacity:0}}
+@keyframes sN1{0%,25%{opacity:0.1;transform:scale(0.8)}30%{opacity:0.7;transform:scale(1.15)}35%{transform:scale(1)}70%{opacity:0.5}85%{opacity:0.1;transform:scale(0.8)}100%{opacity:0.1;transform:scale(0.8)}}
+@keyframes sE1{0%{stroke-dashoffset:16;opacity:0}15%{opacity:0.3}35%{stroke-dashoffset:0;opacity:0.2}75%{opacity:0.05}90%{stroke-dashoffset:16;opacity:0}100%{opacity:0}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.card{width:100%;max-width:400px;padding:24px;position:relative;z-index:1;animation:fadeIn .4s ease-out}
+
+/* Logo */
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:500;font-size:20px;letter-spacing:-0.5px;margin-bottom:40px}
+
+/* Tabs */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px}
+.tab{flex:1;padding:12px 0;text-align:center;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* Form */
+.form{display:none}
+.form.active{display:block}
+label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.3px}
+input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:14px;color:var(--text);background:var(--bg2);outline:none;transition:border-color .15s}
+input:focus{border-color:var(--green)}
+input::placeholder{color:var(--text3)}
+.field{margin-bottom:16px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.error{font-size:11px;color:var(--red);margin-top:4px;display:none}
+
+/* Password toggle */
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:44px}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text3);font-size:12px;font-family:var(--mono);user-select:none}
+.pw-toggle:hover{color:var(--text2)}
+
+/* Buttons */
+.btn{width:100%;padding:12px;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:background .15s;margin-top:8px}
+.btn:hover{background:#005238}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:14px;margin:20px 0;font-size:11px;color:var(--text3)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Google button */
+.btn-google{width:100%;padding:11px;border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);font-family:var(--sans);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-google:hover{background:var(--bg);border-color:var(--border2)}
+.btn-google svg{width:18px;height:18px}
+
+/* Links */
+.forgot{font-size:12px;color:var(--green);cursor:pointer;text-align:right;display:block;margin-top:-8px;margin-bottom:16px}
+.forgot:hover{text-decoration:underline}
+
+.footer-text{text-align:center;font-size:11px;color:var(--text3);margin-top:24px;line-height:1.6}
+.footer-text a{color:var(--green)}
+.footer-text a:hover{text-decoration:underline}
+
+/* Secure */
+.secure{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;color:var(--text3);margin-top:20px;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="gl"><i></i></div>
+
+<div class="card">
+  <!-- Logo -->
+  <a href="/" class="logo" style="text-decoration:none">
+    <svg width="30" height="30" viewBox="0 0 28 28">
+      <line x1="14" y1="14" x2="6" y2="6" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.4s ease-in-out infinite"/>
+      <line x1="14" y1="14" x2="22" y2="6" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.65s ease-in-out infinite 0.35s"/>
+      <line x1="14" y1="14" x2="6" y2="22" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.85s ease-in-out infinite 0.7s"/>
+      <line x1="14" y1="14" x2="22" y2="22" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 2.05s ease-in-out infinite 0.15s"/>
+      <line x1="6" y1="6" x2="22" y2="6" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.55s ease-in-out infinite 0.25s"/>
+      <line x1="22" y1="6" x2="22" y2="22" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.35s ease-in-out infinite 0.9s"/>
+      <line x1="22" y1="22" x2="6" y2="22" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.75s ease-in-out infinite 1.3s"/>
+      <line x1="6" y1="22" x2="6" y2="6" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.15s ease-in-out infinite 1.6s"/>
+      <line x1="6" y1="6" x2="22" y2="22" stroke="var(--green)" stroke-width="0.6" stroke-dasharray="20" style="animation:sE1 3.1s ease-in-out infinite 2.1s"/>
+      <line x1="22" y1="6" x2="6" y2="22" stroke="var(--green)" stroke-width="0.6" stroke-dasharray="20" style="animation:sE1 2.9s ease-in-out infinite 0.5s"/>
+      <rect x="2" y="2" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.4s ease-in-out infinite;transform-origin:5.5px 5.5px"/>
+      <rect x="19" y="2" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.65s ease-in-out infinite 0.35s;transform-origin:22.5px 5.5px"/>
+      <rect x="2" y="19" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.85s ease-in-out infinite 0.7s;transform-origin:5.5px 22.5px"/>
+      <rect x="19" y="19" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 2.05s ease-in-out infinite 0.15s;transform-origin:22.5px 22.5px"/>
+      <rect x="9.5" y="9.5" width="9" height="9" rx="2" fill="var(--green)" style="animation:cPulse 1.8s ease-in-out infinite;transform-origin:14px 14px"/>
+    </svg>
+    Coldflows
+  </a>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('signin')">Sign in</div>
+    <div class="tab" onclick="switchTab('signup')">Create account</div>
+  </div>
+
+  <!-- SIGN IN FORM -->
+  <div class="form active" id="form-signin">
+    <button class="btn-google" onclick="googleAuth()">
+      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="divider">or</div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="si-email" placeholder="you@company.com">
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="si-pw" placeholder="Enter your password">
+        <span class="pw-toggle" onclick="togglePw('si-pw',this)">show</span>
+      </div>
+    </div>
+
+    <a class="forgot">Forgot password?</a>
+
+    <button class="btn" onclick="handleSignIn()">Sign in</button>
+  </div>
+
+  <!-- SIGN UP FORM -->
+  <div class="form" id="form-signup">
+    <button class="btn-google" onclick="googleAuth()">
+      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="divider">or</div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>First name</label>
+        <input type="text" id="su-first" placeholder="Thomas">
+      </div>
+      <div class="field">
+        <label>Last name</label>
+        <input type="text" id="su-last" placeholder="Flood">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="su-email" placeholder="you@company.com">
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="su-pw" placeholder="Min 8 characters">
+        <span class="pw-toggle" onclick="togglePw('su-pw',this)">show</span>
+      </div>
+    </div>
+
+    <button class="btn" onclick="handleSignUp()">Create account</button>
+  </div>
+
+  <div class="footer-text">
+    By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+  </div>
+
+  <div class="secure">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    256-bit SSL encrypted
+  </div>
+</div>
+
+<script>
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.form').forEach(function(f){f.classList.remove('active');});
+  if(tab==='signin'){
+    document.querySelectorAll('.tab')[0].classList.add('active');
+    document.getElementById('form-signin').classList.add('active');
+  }else{
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    document.getElementById('form-signup').classList.add('active');
+  }
+}
+
+function togglePw(id,el){
+  var inp=document.getElementById(id);
+  if(inp.type==='password'){inp.type='text';el.textContent='hide';}
+  else{inp.type='password';el.textContent='show';}
+}
+
+function googleAuth(){
+  // TODO: Wire up Google OAuth
+  alert('Google sign-in will be connected here');
+}
+
+function handleSignIn(){
+  var email=document.getElementById('si-email').value;
+  var pw=document.getElementById('si-pw').value;
+  if(!email||!pw){alert('Please fill in all fields');return;}
+  // TODO: Wire up auth
+  window.location.href='/dashboard.html';
+}
+
+function handleSignUp(){
+  var first=document.getElementById('su-first').value;
+  var last=document.getElementById('su-last').value;
+  var email=document.getElementById('su-email').value;
+  var pw=document.getElementById('su-pw').value;
+  if(!first||!last||!email||!pw){alert('Please fill in all fields');return;}
+  if(pw.length<8){alert('Password must be at least 8 characters');return;}
+  // TODO: Wire up auth — after account creation, redirect to onboarding
+  window.location.href='/onboarding.html';
+}
+
+// Check URL params — if coming from pricing, default to signup tab
+if(window.location.search.includes('signup')){
+  switchTab('signup');
+}
+</script>
+</body>
+</html>

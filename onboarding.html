@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Get started — Coldflows</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><rect x='2' y='2' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='19' y='2' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='2' y='19' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='19' y='19' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='10.5' y='10.5' width='7' height='7' rx='1.2' fill='%23006949'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f5f5f5;--bg2:#fff;--bg3:#ebebeb;--border:#e5e5e5;--border2:#d4d4d4;--text:#171717;--text2:#525252;--text3:#a3a3a3;--green:#006949;--green2:#008f5d;--green-bg:rgba(0,105,73,0.05);--green-bd:rgba(0,105,73,0.15);--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+.gl{position:fixed;top:0;left:50%;transform:translateX(-50%);width:1088px;height:100vh;pointer-events:none;z-index:0;opacity:0.5}
+.gl::before,.gl::after{content:'';position:absolute;top:0;bottom:0;width:1px;background:var(--border)}.gl::before{left:0}.gl::after{right:0}
+.gl i{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--border)}
+@keyframes cPulse{0%,100%{opacity:0.9;transform:scale(1)}30%{opacity:1;transform:scale(1.05)}60%{opacity:0.25;transform:scale(0.9)}80%{opacity:0.7;transform:scale(1)}}
+@keyframes sL1{0%{stroke-dashoffset:12;opacity:0}10%{opacity:0.6}30%{stroke-dashoffset:0;opacity:0.5}70%{opacity:0.15}85%{opacity:0}90%{stroke-dashoffset:12}100%{stroke-dashoffset:12;opacity:0}}
+@keyframes sN1{0%,25%{opacity:0.1;transform:scale(0.8)}30%{opacity:0.7;transform:scale(1.15)}35%{transform:scale(1)}70%{opacity:0.5}85%{opacity:0.1;transform:scale(0.8)}100%{opacity:0.1;transform:scale(0.8)}}
+@keyframes sE1{0%{stroke-dashoffset:16;opacity:0}15%{opacity:0.3}35%{stroke-dashoffset:0;opacity:0.2}75%{opacity:0.05}90%{stroke-dashoffset:16;opacity:0}100%{opacity:0}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.wrap{max-width:520px;margin:0 auto;padding:60px 24px 60px;position:relative;z-index:1}
+.logo{display:flex;align-items:center;gap:10px;font-weight:500;font-size:20px;letter-spacing:-0.5px;margin-bottom:40px;text-decoration:none;color:var(--text)}
+.steps{display:flex;gap:6px;margin-bottom:32px}
+.step{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .3s}
+.step.done{background:var(--green)}
+.step.active{background:var(--green);opacity:0.5}
+
+h1{font-size:26px;font-weight:600;letter-spacing:-0.8px;margin-bottom:6px}
+.sub{font-size:14px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+
+label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.3px}
+input,textarea,select{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:14px;color:var(--text);background:var(--bg2);outline:none;transition:border-color .15s}
+input:focus,textarea:focus{border-color:var(--green)}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+.field{margin-bottom:18px}
+
+.plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.plan{border:2px solid var(--border);border-radius:8px;padding:16px;cursor:pointer;transition:all .15s;position:relative;text-align:center}
+.plan:hover{border-color:var(--border2)}
+.plan.sel{border-color:var(--green);background:var(--green-bg)}
+.pn{font-size:13px;font-weight:700;margin-bottom:2px}
+.pp{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);margin-bottom:2px}
+.pm{font-size:11px;color:var(--text3)}
+.pi{font-size:10px;color:var(--text2);margin-top:6px;line-height:1.4}
+.pb{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;background:var(--green);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap}
+
+.guarantee{padding:12px 16px;border:1px solid var(--green-bd);border-radius:6px;background:var(--green-bg);font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+
+.btn{width:100%;padding:13px;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:background .15s}
+.btn:hover{background:#005238}
+.btn-back{background:none;border:1px solid var(--border);color:var(--text2);margin-bottom:8px}
+.btn-back:hover{background:var(--bg3)}
+
+.summary{border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:20px;background:var(--bg2)}
+.sr{display:flex;justify-content:space-between;padding:8px 0;font-size:13px}
+.sr+.sr{border-top:1px solid var(--border)}
+.sl{color:var(--text2)}
+.sv{font-weight:600;max-width:240px;text-align:right}
+.st{font-weight:700;color:var(--green);font-family:var(--mono);font-size:15px}
+
+.page{display:none}
+.page.active{display:block;animation:fadeIn .3s ease-out}
+</style>
+</head>
+<body>
+<div class="gl"><i></i></div>
+
+<div class="wrap">
+  <a href="/" class="logo">
+    <svg width="28" height="28" viewBox="0 0 28 28">
+      <line x1="14" y1="14" x2="6" y2="6" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.4s ease-in-out infinite"/>
+      <line x1="14" y1="14" x2="22" y2="6" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.65s ease-in-out infinite 0.35s"/>
+      <line x1="14" y1="14" x2="6" y2="22" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.85s ease-in-out infinite 0.7s"/>
+      <line x1="14" y1="14" x2="22" y2="22" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 2.05s ease-in-out infinite 0.15s"/>
+      <line x1="6" y1="6" x2="22" y2="6" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.55s ease-in-out infinite 0.25s"/>
+      <line x1="22" y1="6" x2="22" y2="22" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.35s ease-in-out infinite 0.9s"/>
+      <line x1="22" y1="22" x2="6" y2="22" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.75s ease-in-out infinite 1.3s"/>
+      <line x1="6" y1="22" x2="6" y2="6" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.15s ease-in-out infinite 1.6s"/>
+      <line x1="6" y1="6" x2="22" y2="22" stroke="var(--green)" stroke-width="0.6" stroke-dasharray="20" style="animation:sE1 3.1s ease-in-out infinite 2.1s"/>
+      <line x1="22" y1="6" x2="6" y2="22" stroke="var(--green)" stroke-width="0.6" stroke-dasharray="20" style="animation:sE1 2.9s ease-in-out infinite 0.5s"/>
+      <rect x="2" y="2" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.4s ease-in-out infinite;transform-origin:5.5px 5.5px"/>
+      <rect x="19" y="2" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.65s ease-in-out infinite 0.35s;transform-origin:22.5px 5.5px"/>
+      <rect x="2" y="19" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.85s ease-in-out infinite 0.7s;transform-origin:5.5px 22.5px"/>
+      <rect x="19" y="19" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 2.05s ease-in-out infinite 0.15s;transform-origin:22.5px 22.5px"/>
+      <rect x="9.5" y="9.5" width="9" height="9" rx="2" fill="var(--green)" style="animation:cPulse 1.8s ease-in-out infinite;transform-origin:14px 14px"/>
+    </svg>
+    Coldflows
+  </a>
+
+  <!-- Progress -->
+  <div class="steps">
+    <div class="step done" id="s1"></div>
+    <div class="step active" id="s2"></div>
+    <div class="step" id="s3"></div>
+  </div>
+
+  <!-- PAGE 1: Business info -->
+  <div class="page active" id="p1">
+    <h1>Tell us about your business</h1>
+    <p class="sub">We use this to write your email copy, source the right leads, and build campaigns that convert.</p>
+
+    <div class="field">
+      <label>Business name</label>
+      <input type="text" id="biz" placeholder="Acme Digital">
+    </div>
+
+    <div class="field">
+      <label>What does your business do?</label>
+      <textarea id="service" placeholder="We build custom Shopify stores for e-commerce brands doing $1M+ in revenue. We handle design, development, and migration from other platforms."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Who do you want to reach?</label>
+      <textarea id="target" placeholder="E-commerce brand owners doing $1M-$10M revenue, currently on WooCommerce or Magento, based in Australia and New Zealand."></textarea>
+    </div>
+
+    <button class="btn" onclick="goTo(2)">Continue</button>
+  </div>
+
+  <!-- PAGE 2: Pick plan -->
+  <div class="page" id="p2">
+    <h1>Choose your plan</h1>
+    <p class="sub">Add more mailboxes or upgrade anytime from your dashboard.</p>
+
+    <div class="plans">
+      <div class="plan" onclick="pickPlan(this,'starter')" data-plan="starter">
+        <div class="pn">Starter</div>
+        <div class="pp">$1,000</div>
+        <div class="pm">per month</div>
+        <div class="pi">4 mailboxes · 2 campaigns<br>~2,000 emails/wk</div>
+      </div>
+      <div class="plan sel" onclick="pickPlan(this,'growth')" data-plan="growth">
+        <div class="pb">Most popular</div>
+        <div class="pn">Growth</div>
+        <div class="pp">$2,500</div>
+        <div class="pm">per month</div>
+        <div class="pi">12 mailboxes · 4 campaigns<br>~6,000 emails/wk</div>
+      </div>
+      <div class="plan" onclick="pickPlan(this,'scale')" data-plan="scale">
+        <div class="pn">Scale</div>
+        <div class="pp">$5,000</div>
+        <div class="pm">per month</div>
+        <div class="pi">30 mailboxes · 10 campaigns<br>~15,000 emails/wk</div>
+      </div>
+    </div>
+
+    <div class="guarantee"><span style="font-size:16px">✓</span><span>30-day results guarantee. No contracts, cancel anytime.</span></div>
+
+    <button class="btn-back btn" onclick="goTo(1)">Back</button>
+    <button class="btn" onclick="goTo(3)" style="margin-top:8px">Review and pay</button>
+  </div>
+
+  <!-- PAGE 3: Review -->
+  <div class="page" id="p3">
+    <h1>Confirm and pay</h1>
+    <p class="sub">Review your details, then proceed to secure checkout.</p>
+
+    <div class="summary">
+      <div class="sr"><span class="sl">Business</span><span class="sv" id="rv-biz"></span></div>
+      <div class="sr"><span class="sl">Service</span><span class="sv" id="rv-svc" style="font-size:12px;line-height:1.5"></span></div>
+      <div class="sr"><span class="sl">Target market</span><span class="sv" id="rv-tgt" style="font-size:12px;line-height:1.5"></span></div>
+      <div class="sr"><span class="sl">Plan</span><span class="sv" id="rv-plan"></span></div>
+      <div class="sr"><span class="sl">Monthly total</span><span class="sv st" id="rv-price"></span></div>
+    </div>
+
+    <button class="btn-back btn" onclick="goTo(2)">Back</button>
+    <button class="btn" onclick="checkout()" style="margin-top:8px">Proceed to payment →</button>
+
+    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Secure checkout powered by Stripe
+    </div>
+  </div>
+</div>
+
+<script>
+var plan='growth';
+var planData={
+  starter:{name:'Starter',price:'$1,000/mo',mailboxes:'4',campaigns:'2'},
+  growth:{name:'Growth',price:'$2,500/mo',mailboxes:'12',campaigns:'4'},
+  scale:{name:'Scale',price:'$5,000/mo',mailboxes:'30',campaigns:'10'},
+};
+
+// TODO: Replace with your actual Stripe payment links
+var stripeLinks={
+  starter:'https://buy.stripe.com/REPLACE_STARTER',
+  growth:'https://buy.stripe.com/REPLACE_GROWTH',
+  scale:'https://buy.stripe.com/REPLACE_SCALE',
+};
+
+function pickPlan(el,p){
+  plan=p;
+  document.querySelectorAll('.plan').forEach(function(e){e.classList.remove('sel');});
+  el.classList.add('sel');
+}
+
+function goTo(page){
+  // Validate
+  if(page===2){
+    if(!document.getElementById('biz').value||!document.getElementById('service').value||!document.getElementById('target').value){
+      alert('Please fill in all fields');return;
+    }
+  }
+  if(page===3){
+    // Fill review
+    var pd=planData[plan];
+    document.getElementById('rv-biz').textContent=document.getElementById('biz').value;
+    document.getElementById('rv-svc').textContent=document.getElementById('service').value.substring(0,120)+(document.getElementById('service').value.length>120?'...':'');
+    document.getElementById('rv-tgt').textContent=document.getElementById('target').value.substring(0,120)+(document.getElementById('target').value.length>120?'...':'');
+    document.getElementById('rv-plan').textContent=pd.name+' — '+pd.mailboxes+' mailboxes';
+    document.getElementById('rv-price').textContent=pd.price;
+  }
+
+  // Update steps
+  document.querySelectorAll('.step').forEach(function(s,i){
+    s.className='step';
+    if(i<page) s.classList.add('done');
+    if(i===page-1) s.classList.add('active');
+  });
+
+  // Switch page
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('p'+page).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function checkout(){
+  // TODO: Store business info (webhook to Google Sheet / Airtable / DB)
+  // Then redirect to Stripe
+  var link=stripeLinks[plan];
+  if(link.includes('REPLACE')){
+    alert('Stripe payment links not configured yet. Replace stripeLinks in onboarding.html with your actual Stripe URLs.');
+    return;
+  }
+  window.location.href=link;
+}
+</script>
+</body>
+</html>
