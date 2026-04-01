@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Set up your campaigns — Coldflows</title>
+<title>Get started — Coldflows</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><rect x='2' y='2' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='19' y='2' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='2' y='19' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='19' y='19' width='7' height='7' rx='1.2' fill='%23006949' opacity='0.5'/><rect x='10.5' y='10.5' width='7' height='7' rx='1.2' fill='%23006949'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#f5f5f5;--bg2:#fff;--bg3:#ebebeb;--border:#e5e5e5;--border2:#d4d4d4;--text:#171717;--text2:#525252;--text3:#a3a3a3;--green:#006949;--green2:#008f5d;--green-bg:rgba(0,105,73,0.05);--green-bd:rgba(0,105,73,0.15);--red:#dc2626;--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;--mw:1088px}
+:root{--bg:#f5f5f5;--bg2:#fff;--bg3:#ebebeb;--border:#e5e5e5;--border2:#d4d4d4;--text:#171717;--text2:#525252;--text3:#a3a3a3;--green:#006949;--green2:#008f5d;--green-bg:rgba(0,105,73,0.05);--green-bd:rgba(0,105,73,0.15);--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;--mw:1088px}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;
   background-image:radial-gradient(circle,var(--border) 1px,transparent 1px);background-size:24px 24px}
 .gl{position:fixed;top:0;left:50%;transform:translateX(-50%);width:var(--mw);height:100vh;pointer-events:none;z-index:0;opacity:0.5}
@@ -21,48 +21,47 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 @keyframes sN1{0%,25%{opacity:0.1;transform:scale(0.8)}30%{opacity:0.7;transform:scale(1.15)}35%{transform:scale(1)}70%{opacity:0.5}85%{opacity:0.1;transform:scale(0.8)}100%{opacity:0.1;transform:scale(0.8)}}
 @keyframes sE1{0%{stroke-dashoffset:16;opacity:0}15%{opacity:0.3}35%{stroke-dashoffset:0;opacity:0.2}75%{opacity:0.05}90%{stroke-dashoffset:16;opacity:0}100%{opacity:0}}
 @keyframes cPulse{0%,100%{opacity:0.9;transform:scale(1)}30%{opacity:1;transform:scale(1.05)}60%{opacity:0.25;transform:scale(0.9)}80%{opacity:0.7;transform:scale(1)}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInSlow{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 
 .wrap{max-width:560px;margin:0 auto;padding:48px 24px 60px;position:relative;z-index:1}
-.logo{display:flex;align-items:center;gap:10px;font-weight:500;font-size:20px;letter-spacing:-0.5px;margin-bottom:36px;text-decoration:none;color:var(--text)}
+.logo-svg{width:26px;height:26px}
 
-/* Steps */
-.steps{display:flex;gap:4px;margin-bottom:32px}
+/* WELCOME SCREEN */
+.welcome{text-align:center;padding:80px 0 40px;animation:fadeIn .6s ease-out}
+.welcome-icon{width:64px;height:64px;margin:0 auto 32px}
+.welcome h1{font-size:32px;font-weight:700;letter-spacing:-1.2px;line-height:1.2;margin-bottom:12px}
+.welcome h1 span{color:var(--green)}
+.welcome p{font-size:15px;color:var(--text2);line-height:1.7;max-width:400px;margin:0 auto 8px}
+.welcome .tagline{font-family:var(--mono);font-size:12px;color:var(--green);background:var(--green-bg);border:1px solid var(--green-bd);display:inline-block;padding:6px 16px;border-radius:100px;margin-bottom:32px;animation:fadeIn .8s ease-out .3s both}
+.welcome .btn-begin{animation:slideUp .6s ease-out .5s both}
+
+/* Steps bar */
+.steps{display:flex;gap:4px;margin-bottom:8px}
 .step{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .3s}
 .step.done{background:var(--green)}
-.step-labels{display:flex;justify-content:space-between;margin-bottom:24px;font-size:11px;color:var(--text3)}
-.step-labels span.active{color:var(--green);font-weight:600}
+.step-info{display:flex;justify-content:space-between;margin-bottom:28px;font-size:11px;color:var(--text3)}
+.step-info .current{color:var(--green);font-weight:600}
 
-h1{font-size:24px;font-weight:600;letter-spacing:-0.8px;margin-bottom:4px}
-.sub{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+h2{font-size:22px;font-weight:600;letter-spacing:-0.6px;margin-bottom:4px}
+.sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6}
 
-/* Form elements */
 label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.3px}
-input,textarea,select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);background:var(--bg2);outline:none;transition:border-color .15s}
+input,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);background:var(--bg2);outline:none;transition:border-color .15s}
 input:focus,textarea:focus{border-color:var(--green)}
 input::placeholder,textarea::placeholder{color:var(--text3)}
-textarea{resize:vertical;min-height:72px;line-height:1.6}
-select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+textarea{resize:vertical;min-height:64px;line-height:1.6}
 .field{margin-bottom:16px}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-/* Tag/chip selector */
-.chip-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:100px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;background:var(--bg2);color:var(--text2);user-select:none}
+/* Chips */
+.chip-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 12px;border-radius:100px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;background:var(--bg2);color:var(--text2);user-select:none}
 .chip:hover{border-color:var(--border2);color:var(--text)}
 .chip.sel{background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:600}
-.chip-add{border-style:dashed;color:var(--text3)}
-.chip-add:hover{border-color:var(--green);color:var(--green)}
-.chip-x{font-size:14px;line-height:1;margin-left:2px;cursor:pointer}
-
-/* Custom tag input */
-.tag-input-wrap{display:none;margin-top:8px}
-.tag-input-wrap.show{display:flex;gap:8px}
-.tag-input-wrap input{flex:1}
-.tag-input-wrap button{padding:8px 16px;border-radius:6px;background:var(--green);color:#fff;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);white-space:nowrap}
 
 /* Plans */
-.plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
 .plan{border:2px solid var(--border);border-radius:8px;padding:14px;cursor:pointer;transition:all .15s;position:relative;text-align:center}
 .plan:hover{border-color:var(--border2)}
 .plan.sel{border-color:var(--green);background:var(--green-bg)}
@@ -73,143 +72,163 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:u
 .pb{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;background:var(--green);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap}
 
 /* Summary */
-.summary{border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px;background:var(--bg2)}
-.sr{display:flex;justify-content:space-between;padding:7px 0;font-size:12px}
+.summary{border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;background:var(--bg2)}
+.sr{display:flex;justify-content:space-between;padding:7px 0;font-size:12px;gap:12px}
 .sr+.sr{border-top:1px solid var(--border)}
-.sl{color:var(--text2)}
-.sv{font-weight:600;max-width:260px;text-align:right;line-height:1.5}
-.stags{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.sl{color:var(--text2);flex-shrink:0}
+.sv{font-weight:600;text-align:right;line-height:1.5}
+.stags{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-end}
 .stag{padding:2px 8px;border-radius:100px;background:var(--green-bg);color:var(--green);font-size:10px;font-weight:600}
 
-/* Buttons */
 .btn{width:100%;padding:12px;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:background .15s}
 .btn:hover{background:#005238}
 .btn:disabled{opacity:0.5;cursor:not-allowed}
 .btn-back{background:none;border:1px solid var(--border);color:var(--text2);margin-bottom:8px}
 .btn-back:hover{background:var(--bg3)}
+.btn-begin{padding:14px 40px;font-size:16px;width:auto;border-radius:10px}
 
 .guarantee{padding:10px 14px;border:1px solid var(--green-bd);border-radius:6px;background:var(--green-bg);font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 
 .page{display:none}
-.page.active{display:block;animation:fadeIn .3s ease-out}
+.page.active{display:block;animation:fadeIn .35s ease-out}
 
 .err{padding:10px 14px;border-radius:6px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;font-size:12px;margin-bottom:16px;display:none}
+
+.secure{text-align:center;font-size:10px;color:var(--text3);margin-top:14px;display:flex;align-items:center;justify-content:center;gap:5px}
 </style>
 </head>
 <body>
 <div class="gl"><i></i></div>
 
 <div class="wrap">
-  <a href="/" class="logo">
-    <svg width="26" height="26" viewBox="0 0 28 28">
-      <line x1="14" y1="14" x2="6" y2="6" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.4s ease-in-out infinite"/>
-      <line x1="14" y1="14" x2="22" y2="6" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.65s ease-in-out infinite 0.35s"/>
-      <line x1="14" y1="14" x2="6" y2="22" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.85s ease-in-out infinite 0.7s"/>
-      <line x1="14" y1="14" x2="22" y2="22" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 2.05s ease-in-out infinite 0.15s"/>
-      <line x1="6" y1="6" x2="22" y2="6" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.55s ease-in-out infinite 0.25s"/>
-      <line x1="22" y1="6" x2="22" y2="22" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.35s ease-in-out infinite 0.9s"/>
-      <line x1="22" y1="22" x2="6" y2="22" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.75s ease-in-out infinite 1.3s"/>
-      <line x1="6" y1="22" x2="6" y2="6" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.15s ease-in-out infinite 1.6s"/>
-      <rect x="2" y="2" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.4s ease-in-out infinite;transform-origin:5.5px 5.5px"/>
-      <rect x="19" y="2" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.65s ease-in-out infinite 0.35s;transform-origin:22.5px 5.5px"/>
-      <rect x="2" y="19" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.85s ease-in-out infinite 0.7s;transform-origin:5.5px 22.5px"/>
-      <rect x="19" y="19" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 2.05s ease-in-out infinite 0.15s;transform-origin:22.5px 22.5px"/>
-      <rect x="9.5" y="9.5" width="9" height="9" rx="2" fill="var(--green)" style="animation:cPulse 1.8s ease-in-out infinite;transform-origin:14px 14px"/>
-    </svg>
-    Coldflows
-  </a>
-
-  <div class="steps"><div class="step done" id="s1"></div><div class="step" id="s2"></div><div class="step" id="s3"></div><div class="step" id="s4"></div></div>
-  <div class="step-labels">
-    <span class="active" id="sl1">Your business</span>
-    <span id="sl2">Targeting</span>
-    <span id="sl3">Plan</span>
-    <span id="sl4">Review</span>
-  </div>
 
   <div id="err" class="err"></div>
 
+  <!-- WELCOME SCREEN -->
+  <div class="page active" id="p0">
+    <div class="welcome">
+      <svg class="welcome-icon" viewBox="0 0 28 28">
+        <line x1="14" y1="14" x2="6" y2="6" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.4s ease-in-out infinite"/>
+        <line x1="14" y1="14" x2="22" y2="6" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.65s ease-in-out infinite 0.35s"/>
+        <line x1="14" y1="14" x2="6" y2="22" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 1.85s ease-in-out infinite 0.7s"/>
+        <line x1="14" y1="14" x2="22" y2="22" stroke="var(--green)" stroke-width="1.2" stroke-dasharray="12" style="animation:sL1 2.05s ease-in-out infinite 0.15s"/>
+        <line x1="6" y1="6" x2="22" y2="6" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.55s ease-in-out infinite 0.25s"/>
+        <line x1="22" y1="6" x2="22" y2="22" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.35s ease-in-out infinite 0.9s"/>
+        <line x1="22" y1="22" x2="6" y2="22" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.75s ease-in-out infinite 1.3s"/>
+        <line x1="6" y1="22" x2="6" y2="6" stroke="var(--green)" stroke-width="0.8" stroke-dasharray="16" style="animation:sE1 2.15s ease-in-out infinite 1.6s"/>
+        <rect x="2" y="2" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.4s ease-in-out infinite;transform-origin:5.5px 5.5px"/>
+        <rect x="19" y="2" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.65s ease-in-out infinite 0.35s;transform-origin:22.5px 5.5px"/>
+        <rect x="2" y="19" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 1.85s ease-in-out infinite 0.7s;transform-origin:5.5px 22.5px"/>
+        <rect x="19" y="19" width="7" height="7" rx="1.2" fill="var(--green)" style="animation:sN1 2.05s ease-in-out infinite 0.15s;transform-origin:22.5px 22.5px"/>
+        <rect x="9.5" y="9.5" width="9" height="9" rx="2" fill="var(--green)" style="animation:cPulse 1.8s ease-in-out infinite;transform-origin:14px 14px"/>
+      </svg>
+
+      <div class="tagline">Your outbound engine is almost ready</div>
+
+      <h1>Warm leads are about to start landing <span>straight in your inbox.</span></h1>
+      <p>All you have to do is hit reply.</p>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:40px">We handle the domains, mailboxes, warmup, copy, leads, and optimisation. You just close deals.</p>
+
+      <div class="btn-begin">
+        <button class="btn btn-begin" onclick="goTo(1)">Let's set it up →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- STEP 1: YOUR BUSINESS -->
-  <div class="page active" id="p1">
-    <h1>Tell us about your business</h1>
-    <p class="sub">We use this to write personalised email copy that converts.</p>
+  <div class="page" id="p1">
+    <div class="steps"><div class="step done"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+    <div class="step-info"><span class="current">Your business</span><span>Campaign</span><span>Plan</span><span>Review</span></div>
+
+    <h2>Tell us about your business</h2>
+    <p class="sub">We use this to write email copy that sounds like you.</p>
 
     <div class="field">
       <label>Business name</label>
       <input type="text" id="f-biz" placeholder="Acme Digital">
     </div>
     <div class="field">
-      <label>Your website (optional)</label>
+      <label>Website (optional)</label>
       <input type="text" id="f-url" placeholder="https://acme.com">
     </div>
     <div class="field">
       <label>What does your business do?</label>
-      <textarea id="f-svc" placeholder="We build custom Shopify stores for e-commerce brands doing $1M+ in revenue. We handle design, development, and migration from other platforms."></textarea>
+      <textarea id="f-svc" placeholder="We build custom Shopify stores for e-commerce brands. Design, development, and migration from other platforms."></textarea>
     </div>
     <div class="field">
-      <label>What are you offering / selling to prospects?</label>
-      <textarea id="f-offer" placeholder="Full Shopify store build starting at $15K. 6-week turnaround. Free migration from WooCommerce or Magento." style="min-height:56px"></textarea>
+      <label>What are you offering to prospects?</label>
+      <textarea id="f-offer" placeholder="Full Shopify store build starting at $15K. 6-week turnaround. Free migration." style="min-height:56px"></textarea>
     </div>
     <button class="btn" onclick="goTo(2)">Continue</button>
   </div>
 
-  <!-- STEP 2: TARGETING -->
+  <!-- STEP 2: FIRST CAMPAIGN -->
   <div class="page" id="p2">
-    <h1>Who do you want to reach?</h1>
-    <p class="sub">Define your ideal customer. We'll source verified leads matching these criteria.</p>
+    <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step"></div><div class="step"></div></div>
+    <div class="step-info"><span>Your business</span><span class="current">Campaign</span><span>Plan</span><span>Review</span></div>
+
+    <h2>Set up your first campaign</h2>
+    <p class="sub">Who should we reach out to? You can add more campaigns from your dashboard later.</p>
 
     <div class="field">
-      <label>Job titles</label>
+      <label>Campaign name</label>
+      <input type="text" id="f-camp" placeholder="e.g. E-commerce founders, Marketing directors">
+    </div>
+
+    <div class="field">
+      <label>Job titles to target</label>
       <div class="chip-wrap" id="chips-titles">
         <div class="chip" onclick="toggleChip(this)">CEO</div>
         <div class="chip" onclick="toggleChip(this)">Founder</div>
         <div class="chip" onclick="toggleChip(this)">Managing Director</div>
+        <div class="chip" onclick="toggleChip(this)">Owner</div>
         <div class="chip" onclick="toggleChip(this)">Marketing Director</div>
         <div class="chip" onclick="toggleChip(this)">Head of Marketing</div>
-        <div class="chip" onclick="toggleChip(this)">VP of Sales</div>
         <div class="chip" onclick="toggleChip(this)">CMO</div>
+        <div class="chip" onclick="toggleChip(this)">VP of Sales</div>
+        <div class="chip" onclick="toggleChip(this)">VP of Marketing</div>
         <div class="chip" onclick="toggleChip(this)">CTO</div>
         <div class="chip" onclick="toggleChip(this)">CFO</div>
         <div class="chip" onclick="toggleChip(this)">COO</div>
         <div class="chip" onclick="toggleChip(this)">Director of Operations</div>
-        <div class="chip" onclick="toggleChip(this)">Business Owner</div>
         <div class="chip" onclick="toggleChip(this)">Head of Growth</div>
         <div class="chip" onclick="toggleChip(this)">Sales Manager</div>
         <div class="chip" onclick="toggleChip(this)">Procurement Manager</div>
-        <div class="chip chip-add" onclick="showTagInput('titles')">+ Custom title</div>
       </div>
-      <div class="tag-input-wrap" id="input-titles">
-        <input type="text" placeholder="e.g. Regional Manager" onkeydown="if(event.key==='Enter'){addCustomTag('titles',this)}">
-        <button onclick="addCustomTag('titles',this.previousElementSibling)">Add</button>
+    </div>
+
+    <div class="field">
+      <label>Seniority level</label>
+      <div class="chip-wrap" id="chips-seniority">
+        <div class="chip" onclick="toggleChip(this)">C-Suite</div>
+        <div class="chip" onclick="toggleChip(this)">VP</div>
+        <div class="chip" onclick="toggleChip(this)">Director</div>
+        <div class="chip" onclick="toggleChip(this)">Manager</div>
+        <div class="chip" onclick="toggleChip(this)">Senior</div>
       </div>
     </div>
 
     <div class="field">
       <label>Industries</label>
       <div class="chip-wrap" id="chips-industries">
-        <div class="chip" onclick="toggleChip(this)">SaaS / Software</div>
-        <div class="chip" onclick="toggleChip(this)">E-commerce</div>
-        <div class="chip" onclick="toggleChip(this)">Real Estate</div>
+        <div class="chip" onclick="toggleChip(this)">Technology</div>
+        <div class="chip" onclick="toggleChip(this)">Software / SaaS</div>
+        <div class="chip" onclick="toggleChip(this)">E-commerce / Retail</div>
         <div class="chip" onclick="toggleChip(this)">Financial Services</div>
+        <div class="chip" onclick="toggleChip(this)">Real Estate</div>
         <div class="chip" onclick="toggleChip(this)">Healthcare</div>
-        <div class="chip" onclick="toggleChip(this)">Legal</div>
+        <div class="chip" onclick="toggleChip(this)">Legal Services</div>
         <div class="chip" onclick="toggleChip(this)">Construction</div>
         <div class="chip" onclick="toggleChip(this)">Manufacturing</div>
         <div class="chip" onclick="toggleChip(this)">Marketing / Advertising</div>
-        <div class="chip" onclick="toggleChip(this)">Hospitality</div>
+        <div class="chip" onclick="toggleChip(this)">Hospitality / Food</div>
         <div class="chip" onclick="toggleChip(this)">Education</div>
-        <div class="chip" onclick="toggleChip(this)">Consulting</div>
-        <div class="chip" onclick="toggleChip(this)">Retail</div>
+        <div class="chip" onclick="toggleChip(this)">Professional Services</div>
         <div class="chip" onclick="toggleChip(this)">Insurance</div>
         <div class="chip" onclick="toggleChip(this)">Accounting</div>
-        <div class="chip" onclick="toggleChip(this)">Logistics / Supply Chain</div>
-        <div class="chip" onclick="toggleChip(this)">Recruitment / Staffing</div>
-        <div class="chip" onclick="toggleChip(this)">IT Services</div>
-        <div class="chip chip-add" onclick="showTagInput('industries')">+ Custom industry</div>
-      </div>
-      <div class="tag-input-wrap" id="input-industries">
-        <input type="text" placeholder="e.g. Automotive" onkeydown="if(event.key==='Enter'){addCustomTag('industries',this)}">
-        <button onclick="addCustomTag('industries',this.previousElementSibling)">Add</button>
+        <div class="chip" onclick="toggleChip(this)">Logistics / Transport</div>
+        <div class="chip" onclick="toggleChip(this)">Recruitment / HR</div>
+        <div class="chip" onclick="toggleChip(this)">Media / Entertainment</div>
       </div>
     </div>
 
@@ -220,8 +239,10 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:u
         <div class="chip" onclick="toggleChip(this)">11-50</div>
         <div class="chip" onclick="toggleChip(this)">51-200</div>
         <div class="chip" onclick="toggleChip(this)">201-500</div>
-        <div class="chip" onclick="toggleChip(this)">501-1000</div>
-        <div class="chip" onclick="toggleChip(this)">1000+</div>
+        <div class="chip" onclick="toggleChip(this)">501-1,000</div>
+        <div class="chip" onclick="toggleChip(this)">1,001-5,000</div>
+        <div class="chip" onclick="toggleChip(this)">5,001-10,000</div>
+        <div class="chip" onclick="toggleChip(this)">10,000+</div>
       </div>
     </div>
 
@@ -230,28 +251,20 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:u
       <div class="chip-wrap" id="chips-locations">
         <div class="chip" onclick="toggleChip(this)">United States</div>
         <div class="chip" onclick="toggleChip(this)">United Kingdom</div>
-        <div class="chip" onclick="toggleChip(this)">Australia</div>
         <div class="chip" onclick="toggleChip(this)">Canada</div>
+        <div class="chip" onclick="toggleChip(this)">Australia</div>
         <div class="chip" onclick="toggleChip(this)">New Zealand</div>
-        <div class="chip" onclick="toggleChip(this)">UAE / Dubai</div>
+        <div class="chip" onclick="toggleChip(this)">UAE</div>
         <div class="chip" onclick="toggleChip(this)">Singapore</div>
         <div class="chip" onclick="toggleChip(this)">Germany</div>
         <div class="chip" onclick="toggleChip(this)">Netherlands</div>
         <div class="chip" onclick="toggleChip(this)">Ireland</div>
+        <div class="chip" onclick="toggleChip(this)">France</div>
+        <div class="chip" onclick="toggleChip(this)">India</div>
         <div class="chip" onclick="toggleChip(this)">Europe (all)</div>
-        <div class="chip" onclick="toggleChip(this)">Asia Pacific</div>
+        <div class="chip" onclick="toggleChip(this)">Asia Pacific (all)</div>
         <div class="chip" onclick="toggleChip(this)">Global</div>
-        <div class="chip chip-add" onclick="showTagInput('locations')">+ Custom location</div>
       </div>
-      <div class="tag-input-wrap" id="input-locations">
-        <input type="text" placeholder="e.g. South Africa" onkeydown="if(event.key==='Enter'){addCustomTag('locations',this)}">
-        <button onclick="addCustomTag('locations',this.previousElementSibling)">Add</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Anything else we should know about your ideal customer? (optional)</label>
-      <textarea id="f-notes" placeholder="e.g. Must be using WooCommerce, minimum $1M revenue, recently raised funding..." style="min-height:56px"></textarea>
     </div>
 
     <button class="btn btn-back" onclick="goTo(1)">Back</button>
@@ -260,24 +273,27 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:u
 
   <!-- STEP 3: PLAN -->
   <div class="page" id="p3">
-    <h1>Choose your plan</h1>
-    <p class="sub">Add more mailboxes or upgrade anytime from your dashboard.</p>
+    <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step"></div></div>
+    <div class="step-info"><span>Your business</span><span>Campaign</span><span class="current">Plan</span><span>Review</span></div>
+
+    <h2>Choose your plan</h2>
+    <p class="sub">You can add more mailboxes or upgrade anytime.</p>
 
     <div class="plans">
-      <div class="plan" onclick="pickPlan(this,'starter')" data-plan="starter">
+      <div class="plan" onclick="pickPlan(this,'starter')">
         <div class="pn">Starter</div>
         <div class="pp">$690</div>
         <div class="pm">USD / month</div>
         <div class="pi">4 mailboxes<br>2 campaigns<br>~2,000 emails/wk</div>
       </div>
-      <div class="plan sel" onclick="pickPlan(this,'growth')" data-plan="growth">
+      <div class="plan sel" onclick="pickPlan(this,'growth')">
         <div class="pb">Most popular</div>
         <div class="pn">Growth</div>
         <div class="pp">$1,750</div>
         <div class="pm">USD / month</div>
         <div class="pi">12 mailboxes<br>4 campaigns<br>~6,000 emails/wk</div>
       </div>
-      <div class="plan" onclick="pickPlan(this,'scale')" data-plan="scale">
+      <div class="plan" onclick="pickPlan(this,'scale')">
         <div class="pn">Scale</div>
         <div class="pp">$3,500</div>
         <div class="pm">USD / month</div>
@@ -293,25 +309,28 @@ select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:u
 
   <!-- STEP 4: REVIEW -->
   <div class="page" id="p4">
-    <h1>Review and activate</h1>
-    <p class="sub">Confirm your setup, then proceed to payment to launch your campaigns.</p>
+    <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div></div>
+    <div class="step-info"><span>Your business</span><span>Campaign</span><span>Plan</span><span class="current">Review</span></div>
+
+    <h2>You're all set</h2>
+    <p class="sub">Confirm your setup and proceed to payment. Your campaigns will begin building immediately.</p>
 
     <div class="summary">
       <div class="sr"><span class="sl">Business</span><span class="sv" id="rv-biz"></span></div>
-      <div class="sr"><span class="sl">Service</span><span class="sv" id="rv-svc" style="font-size:11px"></span></div>
-      <div class="sr"><span class="sl">Offer</span><span class="sv" id="rv-offer" style="font-size:11px"></span></div>
-      <div class="sr"><span class="sl">Job titles</span><span class="sv"><div class="stags" id="rv-titles"></div></span></div>
+      <div class="sr"><span class="sl">Campaign</span><span class="sv" id="rv-camp"></span></div>
+      <div class="sr"><span class="sl">Titles</span><span class="sv"><div class="stags" id="rv-titles"></div></span></div>
+      <div class="sr"><span class="sl">Seniority</span><span class="sv"><div class="stags" id="rv-sen"></div></span></div>
       <div class="sr"><span class="sl">Industries</span><span class="sv"><div class="stags" id="rv-ind"></div></span></div>
-      <div class="sr"><span class="sl">Company size</span><span class="sv"><div class="stags" id="rv-size"></div></span></div>
+      <div class="sr"><span class="sl">Size</span><span class="sv"><div class="stags" id="rv-size"></div></span></div>
       <div class="sr"><span class="sl">Locations</span><span class="sv"><div class="stags" id="rv-loc"></div></span></div>
-      <div class="sr"><span class="sl">Plan</span><span class="sv" id="rv-plan"></span></div>
-      <div class="sr" style="border-top:2px solid var(--border)"><span class="sl" style="font-weight:700;color:var(--text)">Monthly total</span><span class="sv" style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)" id="rv-price"></span></div>
+      <div class="sr" style="border-top:2px solid var(--border);padding-top:10px"><span class="sl" style="font-weight:700;color:var(--text)">Plan</span><span class="sv" id="rv-plan"></span></div>
+      <div class="sr"><span class="sl" style="font-weight:700;color:var(--text)">Monthly total</span><span class="sv" style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)" id="rv-price"></span></div>
     </div>
 
     <button class="btn btn-back" onclick="goTo(3)">Back</button>
     <button class="btn" onclick="checkout()" style="margin-top:8px" id="btn-pay">Proceed to payment →</button>
 
-    <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:14px;display:flex;align-items:center;justify-content:center;gap:5px">
+    <div class="secure">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
       Secure checkout powered by Stripe
     </div>
@@ -341,36 +360,12 @@ var stripeLinks={
   scale:'https://buy.stripe.com/28E7sLgCz0bf9E42cTcQU03',
 };
 
-function toggleChip(el){
-  if(el.classList.contains('chip-add'))return;
-  el.classList.toggle('sel');
-}
-
-function showTagInput(type){
-  var wrap=document.getElementById('input-'+type);
-  wrap.classList.toggle('show');
-  if(wrap.classList.contains('show'))wrap.querySelector('input').focus();
-}
-
-function addCustomTag(type,input){
-  var val=input.value.trim();
-  if(!val)return;
-  var wrap=document.getElementById('chips-'+type);
-  var addBtn=wrap.querySelector('.chip-add');
-  var chip=document.createElement('div');
-  chip.className='chip sel';
-  chip.innerHTML=val+'<span class="chip-x" onclick="this.parentElement.remove()">×</span>';
-  wrap.insertBefore(chip,addBtn);
-  input.value='';
-}
+function toggleChip(el){el.classList.toggle('sel');}
 
 function getSelected(id){
-  var chips=document.querySelectorAll('#chips-'+id+' .chip.sel');
-  var vals=[];
-  chips.forEach(function(c){
-    vals.push(c.textContent.replace('×','').trim());
-  });
-  return vals;
+  var arr=[];
+  document.querySelectorAll('#chips-'+id+' .chip.sel').forEach(function(c){arr.push(c.textContent.trim());});
+  return arr;
 }
 
 function pickPlan(el,p){
@@ -380,35 +375,33 @@ function pickPlan(el,p){
 }
 
 function showErr(msg){
-  var el=document.getElementById('err');
-  el.textContent=msg;el.style.display='block';
-  window.scrollTo(0,0);
+  var el=document.getElementById('err');el.textContent=msg;el.style.display='block';window.scrollTo(0,0);
+}
+
+function fillTags(id,arr){
+  var el=document.getElementById(id);el.innerHTML='';
+  if(!arr.length){el.innerHTML='<span style="color:var(--text3)">—</span>';return;}
+  arr.forEach(function(t){el.innerHTML+='<span class="stag">'+t+'</span>';});
 }
 
 function goTo(page){
   document.getElementById('err').style.display='none';
 
-  if(page===2){
+  if(page===2&&document.getElementById('p1').classList.contains('active')){
     if(!document.getElementById('f-biz').value||!document.getElementById('f-svc').value){
-      showErr('Please fill in your business name and what you do.');return;
-    }
+      showErr('Please fill in your business name and what you do.');return;}
   }
-  if(page===3){
-    var titles=getSelected('titles');
-    var industries=getSelected('industries');
-    var locations=getSelected('locations');
-    if(titles.length===0){showErr('Please select at least one job title to target.');return;}
-    if(industries.length===0){showErr('Please select at least one industry.');return;}
-    if(locations.length===0){showErr('Please select at least one location.');return;}
+  if(page===3&&document.getElementById('p2').classList.contains('active')){
+    if(!getSelected('titles').length){showErr('Please select at least one job title.');return;}
+    if(!getSelected('industries').length){showErr('Please select at least one industry.');return;}
+    if(!getSelected('locations').length){showErr('Please select at least one location.');return;}
   }
   if(page===4){
     var pd=planData[plan];
     document.getElementById('rv-biz').textContent=document.getElementById('f-biz').value;
-    var svc=document.getElementById('f-svc').value;
-    document.getElementById('rv-svc').textContent=svc.length>100?svc.substring(0,100)+'...':svc;
-    var offer=document.getElementById('f-offer').value;
-    document.getElementById('rv-offer').textContent=offer?offer.length>100?offer.substring(0,100)+'...':offer:'—';
+    document.getElementById('rv-camp').textContent=document.getElementById('f-camp').value||'Campaign 1';
     fillTags('rv-titles',getSelected('titles'));
+    fillTags('rv-sen',getSelected('seniority'));
     fillTags('rv-ind',getSelected('industries'));
     fillTags('rv-size',getSelected('size'));
     fillTags('rv-loc',getSelected('locations'));
@@ -416,61 +409,36 @@ function goTo(page){
     document.getElementById('rv-price').textContent=pd.priceNum+' USD';
   }
 
-  // Update steps
-  for(var i=1;i<=4;i++){
-    var step=document.getElementById('s'+i);
-    var label=document.getElementById('sl'+i);
-    step.className='step';
-    label.className='';
-    if(i<page)step.classList.add('done');
-    if(i<=page)step.classList.add('done');
-    if(i===page)label.className='active';
-  }
-
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.getElementById('p'+page).classList.add('active');
   window.scrollTo(0,0);
 }
 
-function fillTags(id,arr){
-  var el=document.getElementById(id);
-  el.innerHTML='';
-  if(arr.length===0){el.innerHTML='<span style="color:var(--text3)">—</span>';return;}
-  arr.forEach(function(t){
-    el.innerHTML+='<span class="stag">'+t+'</span>';
-  });
-}
-
 async function checkout(){
   if(!currentUser){showErr('Session expired. Please log in again.');return;}
-  
   var btn=document.getElementById('btn-pay');
   btn.disabled=true;btn.textContent='Saving...';
 
-  var data={
+  var{error}=await sb.from('customers').update({
     business_name:document.getElementById('f-biz').value,
     service_description:document.getElementById('f-svc').value,
     target_market:JSON.stringify({
-      offer:document.getElementById('f-offer').value,
       website:document.getElementById('f-url').value,
+      offer:document.getElementById('f-offer').value,
+      campaign_name:document.getElementById('f-camp').value||'Campaign 1',
       job_titles:getSelected('titles'),
+      seniority:getSelected('seniority'),
       industries:getSelected('industries'),
       company_size:getSelected('size'),
-      locations:getSelected('locations'),
-      notes:document.getElementById('f-notes').value
+      locations:getSelected('locations')
     }),
     plan:plan,
-  };
+  }).eq('user_id',currentUser.id);
 
-  var{error}=await sb.from('customers').update(data).eq('user_id',currentUser.id);
-  
   if(error){
-    console.error('Save error:',error);
-    showErr('Error saving your details. Please try again.');
-    btn.disabled=false;btn.textContent='Proceed to payment →';
-    return;
+    showErr('Error saving. Please try again.');
+    btn.disabled=false;btn.textContent='Proceed to payment →';return;
   }
-  
   var link=stripeLinks[plan];
   var sep=link.includes('?')?'&':'?';
   window.location.href=link+sep+'prefilled_email='+encodeURIComponent(currentUser.email);
