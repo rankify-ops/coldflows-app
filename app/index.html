@@ -1254,12 +1254,12 @@ function App(){
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
             <div>
               <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:6}}>Current plan</div>
-              <div style={{fontSize:22,fontWeight:800}}>Growth</div>
-              <div style={{fontSize:13,color:"var(--text2)",marginTop:4}}>12 mailboxes at $208 per mailbox</div>
+              <div style={{fontSize:22,fontWeight:800}}>{custData?custData.plan?custData.plan.charAt(0).toUpperCase()+custData.plan.slice(1):"—":"—"}</div>
+              <div style={{fontSize:13,color:"var(--text2)",marginTop:4}}>{custData&&custData.plan==="starter"?"4 mailboxes":custData&&custData.plan==="growth"?"12 mailboxes":custData&&custData.plan==="scale"?"30 mailboxes":"—"}</div>
             </div>
             <div style={{textAlign:"right"}}>
-              <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:"var(--green)"}}>$2,500</div>
-              <div style={{fontSize:11,color:"var(--text3)"}}>per month</div>
+              <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:"var(--green)"}}>{custData&&custData.plan==="starter"?"$690":custData&&custData.plan==="growth"?"$1,750":custData&&custData.plan==="scale"?"$3,500":"—"}</div>
+              <div style={{fontSize:11,color:"var(--text3)"}}>USD per month</div>
             </div>
           </div>
         </div>
@@ -1303,21 +1303,23 @@ function App(){
         <div style={{border:"1px solid var(--border)",borderRadius:"var(--r)",padding:20,marginBottom:24}}>
           <div style={{fontSize:13,fontWeight:700,marginBottom:14}}>Plan tiers</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
-            <div style={{border:"1px solid var(--border)",borderRadius:"var(--r)",padding:16}}>
+            <div style={{border:custData&&custData.plan==="starter"?"2px solid var(--green)":"1px solid var(--border)",borderRadius:"var(--r)",padding:16,background:custData&&custData.plan==="starter"?"var(--green-bg)":"transparent",position:"relative"}}>
+              {custData&&custData.plan==="starter"&&<div style={{position:"absolute",top:-8,right:12,fontSize:9,fontWeight:700,background:"var(--green)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Current</div>}
               <div style={{fontSize:15,fontWeight:700,marginBottom:2}}>Starter</div>
-              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$1,000<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
-              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>4 mailboxes at $250 each</div>
+              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$690<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
+              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>4 mailboxes · 2 campaigns</div>
             </div>
-            <div style={{border:"2px solid var(--green)",borderRadius:"var(--r)",padding:16,background:"var(--green-bg)",position:"relative"}}>
-              <div style={{position:"absolute",top:-8,right:12,fontSize:9,fontWeight:700,background:"var(--green)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Current</div>
+            <div style={{border:custData&&custData.plan==="growth"?"2px solid var(--green)":"1px solid var(--border)",borderRadius:"var(--r)",padding:16,background:custData&&custData.plan==="growth"?"var(--green-bg)":"transparent",position:"relative"}}>
+              {custData&&custData.plan==="growth"&&<div style={{position:"absolute",top:-8,right:12,fontSize:9,fontWeight:700,background:"var(--green)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Current</div>}
               <div style={{fontSize:15,fontWeight:700,marginBottom:2}}>Growth</div>
-              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$2,500<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
-              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>12 mailboxes at $208 each</div>
+              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$1,750<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
+              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>12 mailboxes · 4 campaigns</div>
             </div>
-            <div style={{border:"1px solid var(--border)",borderRadius:"var(--r)",padding:16}}>
+            <div style={{border:custData&&custData.plan==="scale"?"2px solid var(--green)":"1px solid var(--border)",borderRadius:"var(--r)",padding:16,background:custData&&custData.plan==="scale"?"var(--green-bg)":"transparent",position:"relative"}}>
+              {custData&&custData.plan==="scale"&&<div style={{position:"absolute",top:-8,right:12,fontSize:9,fontWeight:700,background:"var(--green)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Current</div>}
               <div style={{fontSize:15,fontWeight:700,marginBottom:2}}>Scale</div>
-              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$5,000<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
-              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>30 mailboxes at $167 each</div>
+              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--green)"}}>$3,500<span style={{fontSize:11,color:"var(--text3)",fontWeight:400}}>/mo</span></div>
+              <div style={{fontSize:11,color:"var(--text2)",marginTop:4}}>30 mailboxes · 10 campaigns</div>
               <button className="hoverable" style={{marginTop:12,width:"100%",padding:"8px",borderRadius:"var(--r)",border:"1px solid var(--border)",background:"transparent",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)",color:"var(--text2)"}}>Upgrade</button>
             </div>
           </div>
