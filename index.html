@@ -38,9 +38,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:h
 .cf-logo line.le:nth-child(6){animation-delay:1s}
 .cf-logo line.le:nth-child(7){animation-delay:2s}
 .cf-logo line.le:nth-child(8){animation-delay:3s}
-@keyframes borderTrace{0%{background-position:0% 0%}100%{background-position:200% 0%}}
-.hero-terminal{position:relative}
-.hero-terminal::before{content:'';position:absolute;inset:-1px;border-radius:0;background:linear-gradient(90deg,transparent 0%,transparent 30%,var(--green) 50%,transparent 70%,transparent 100%);background-size:200% 100%;animation:borderTrace 4s linear infinite;z-index:1;pointer-events:none;opacity:0.35;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px}
 a{color:inherit;text-decoration:none}
 .ctn{max-width:var(--mw);margin:0 auto;padding:0 32px;position:relative}
 .gl{position:fixed;top:0;left:50%;transform:translateX(-50%);width:var(--mw);height:100vh;pointer-events:none;z-index:0;opacity:0.5}
