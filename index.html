@@ -2,1333 +2,640 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>coldflows</title>
+<title>Coldflows — Cold email that runs itself</title>
+<meta name="description" content="Purchase a package. Tell us your service. We handle everything. AI-powered cold email that runs, optimises, and improves itself.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#f5f5f5;--bg2:#ffffff;--bg3:#e8e8e8;
-  --glass:#ffffff;--glass-h:#f9f9f9;
-  --border:#dedede;--border-h:#d0d0d0;
-  --text:#171717;--text2:#525252;--text3:#a3a3a3;
-  --green:#006949;--green2:#008f5d;--green-bg:rgba(0,105,73,0.05);--green-bd:rgba(0,105,73,0.15);
-  --red:#dc2626;--red-bg:rgba(220,38,38,0.06);
-  --blue:#2563eb;--blue-bg:rgba(37,99,235,0.06);
-  --orange:#d97706;--orange-bg:rgba(217,119,6,0.06);
-  --mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif;
-  --r:6px;--dot-grid:none;
-  --sidebar-bg:#f5f5f5;--chart-grid:#dedede;
-  --chart-text:#a3a3a3;--chart-dot:rgba(0,105,73,0.7);
-  --scroll-thumb:#d4d4d4;
-  --card-shadow:none;
+:root{--bg:#f5f5f5;--bg2:#fff;--bg3:#ebebeb;--border:#e5e5e5;--border2:#d4d4d4;--text:#171717;--text2:#525252;--text3:#a3a3a3;--green:#006949;--green2:#008f5d;--green-bg:rgba(0,105,73,0.05);--green-bd:rgba(0,105,73,0.15);--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;--mw:1088px}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.ctn{max-width:var(--mw);margin:0 auto;padding:0 32px;position:relative}
+.gl{position:fixed;top:0;left:50%;transform:translateX(-50%);width:var(--mw);height:100vh;pointer-events:none;z-index:0;opacity:0.5}
+.gl::before,.gl::after{content:'';position:absolute;top:0;bottom:0;width:1px;background:var(--border)}.gl::before{left:0}.gl::after{right:0}
+.gl i{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--border)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);background:rgba(249,249,249,0.85)}
+.ni{max-width:var(--mw);margin:0 auto;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nl{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:-.3px}
+.nli{width:22px;height:22px;border-radius:5px;background:var(--green);display:flex;align-items:center;justify-content:center}
+.nli svg{width:11px;height:11px}
+.nr{display:flex;align-items:center;gap:28px}
+.nr a{font-size:13px;color:var(--text2);font-weight:500;transition:color .15s}.nr a:hover{color:var(--text)}
+.nc{padding:7px 18px;border-radius:6px;background:var(--text);color:var(--bg);font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:opacity .15s}.nc:hover{opacity:.8}
+.sn{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:12px}.sn::after{content:'';flex:1;height:1px;background:var(--border)}
+.hero{padding:130px 0 60px;position:relative}
+.hb{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;border:1px solid var(--green-bd);background:var(--green-bg);font-size:11px;font-weight:600;color:var(--green);margin-bottom:28px;font-family:var(--mono)}
+.hd{width:5px;height:5px;border-radius:50%;background:var(--green);animation:bk 2s infinite}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(42px,5.5vw,64px);font-weight:500;letter-spacing:-2px;line-height:1.08;margin-bottom:20px}
+.hs{font-size:16px;color:var(--text2);max-width:480px;line-height:1.7;margin-bottom:28px}.hs strong{color:var(--text);font-weight:600}
+.hc{display:flex;gap:12px;align-items:center;margin-bottom:28px}
+.bp{padding:12px 28px;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .15s;display:inline-flex;align-items:center;gap:6px}.bp:hover{background:#005238}
+.bg{padding:12px 28px;border-radius:8px;background:transparent;color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);font-family:var(--sans);transition:all .15s}.bg:hover{border-color:var(--text3);color:var(--text)}
+.cb{border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:580px}
+.cbb{height:32px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 12px;background:var(--bg)}
+.cbd{width:8px;height:8px;border-radius:50%;background:var(--border2)}
+.cbo{padding:16px 20px;font-family:var(--mono);font-size:12px;line-height:1.8;background:var(--bg2);color:var(--text2)}
+.cbo .g{color:var(--green);font-weight:600}.cbo .d{color:var(--text3)}
+@keyframes curBk{0%,100%{opacity:1}50%{opacity:0}}
+.cur{display:inline-block;width:2px;height:1em;background:var(--green);margin-left:2px;animation:curBk 1s infinite;vertical-align:text-bottom}
+.pv{border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;background:var(--bg2)}
+.pv iframe{width:100%;height:480px;border:none;pointer-events:none;display:block}
+.sc{padding:80px 0;border-bottom:1px solid var(--border);position:relative;z-index:1}
+.sl{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--green);font-weight:700;font-family:var(--mono);margin-bottom:8px}
+.st{font-size:clamp(28px,3.5vw,42px);font-weight:500;letter-spacing:-1.5px;margin-bottom:12px;line-height:1.1}
+.sd{font-size:14px;color:var(--text2);max-width:500px;line-height:1.7;margin-bottom:40px}
+.cg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);overflow:hidden}
+.cc{padding:36px}.cc:first-child{border-right:1px solid var(--border)}
+.cl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:20px;font-family:var(--mono)}
+.clo{color:var(--text3)}.clu{color:var(--green)}
+.ci{display:flex;align-items:flex-start;gap:8px;padding:8px 0;font-size:13px;color:var(--text2);line-height:1.5}
+.cx{color:var(--text3);font-weight:600;flex-shrink:0}.ck{color:var(--green);font-weight:700;flex-shrink:0}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border)}
+.sp{padding:32px;border-right:1px solid var(--border)}.sp:last-child{border-right:none}
+.spn{font-family:var(--mono);font-size:11px;color:var(--green);font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:6px}.spn::before{content:'';width:16px;height:1px;background:var(--green)}
+.spt{font-size:18px;font-weight:600;margin-bottom:8px;letter-spacing:-.3px}.spd{font-size:13px;color:var(--text2);line-height:1.7}
+.pg{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border)}
+.ph{padding:28px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}.ph:last-child{border-right:none}
+.phn{font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px}.phw{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:14px}
+.phl{height:2px;background:var(--border);border-radius:1px;margin-bottom:14px;overflow:hidden}.phlf{height:100%;background:var(--green);border-radius:1px}
+.phv{font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-1px;margin-bottom:2px}.php{font-size:10px;color:var(--text3);margin-bottom:12px}.phd{font-size:12px;color:var(--text2);line-height:1.6}
+.prg{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border)}
+.prc{padding:36px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}.prc:last-child{border-right:none}
+.prc.ft{background:var(--green-bg);border-top:2px solid var(--green)}
+.prb{display:inline-block;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-family:var(--mono);padding:3px 8px;border-radius:3px;background:var(--green);color:#fff;margin-bottom:14px}
+.prn{font-size:17px;font-weight:600;margin-bottom:2px}.prd{font-size:11px;color:var(--text3);margin-bottom:20px}
+.pra{font-family:var(--mono);font-size:36px;font-weight:700;letter-spacing:-2px;margin-bottom:2px}.prp{font-size:11px;color:var(--text3);margin-bottom:24px}
+.prf{list-style:none;margin-bottom:28px}.prf li{padding:7px 0;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}.prf li:last-child{border-bottom:none}.prf li span{color:var(--green);font-weight:700;font-size:11px}
+.prcta{width:100%;padding:10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .12s;text-align:center;display:block}
+.pcp{background:var(--green);color:#fff;border:none}.pcp:hover{background:#005238}
+.pcs{background:transparent;color:var(--text);border:1px solid var(--border2)}.pcs:hover{border-color:var(--text3)}
+.fi{border-bottom:1px solid var(--border);padding:20px 0;cursor:pointer;transition:background .1s}.fi:hover{background:rgba(0,0,0,.01)}
+.fq{font-size:15px;font-weight:500;display:flex;justify-content:space-between;align-items:center}.fq span{color:var(--text3);font-size:16px;transition:transform .2s;font-weight:300}
+.fa{font-size:13px;color:var(--text2);line-height:1.8;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
+.fi.open .fa{max-height:200px;padding-top:10px}.fi.open .fq span{transform:rotate(45deg)}
+.hero-eg{padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--bg2);font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all .15s}.hero-eg:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.dash-preview-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--green);text-decoration:none;padding:8px 16px;border:1px solid var(--green-bd);border-radius:6px;background:var(--green-bg);animation:dashPulse 2s ease-in-out infinite;transition:background .15s}
+.dash-preview-link:hover{background:rgba(0,105,73,0.12)}
+@keyframes dashPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,105,73,0.3)}50%{box-shadow:0 0 0 6px rgba(0,105,73,0)}}
+@media(max-width:768px){
+.hero>div>div:first-child{display:block!important;height:auto!important;min-height:auto!important}
+.hero>div>div>div:first-child{padding-right:0!important;padding-bottom:32px;width:100%!important;min-height:auto!important}
+.hero-terminal{position:static!important;width:100%!important;border-left:none!important;border-top:1px solid var(--border)}
+.cg{grid-template-columns:1fr!important}.cc:first-child{border-right:none!important;border-bottom:1px solid var(--border)}
+.sg{grid-template-columns:1fr!important}.sp{border-right:none!important;border-bottom:1px solid var(--border)}.sp:last-child{border-bottom:none}
+.pg{grid-template-columns:1fr 1fr!important}.ph{border-bottom:1px solid var(--border)!important}
+.prg{grid-template-columns:1fr!important}.prc{border-right:none!important;border-bottom:1px solid var(--border)}.prc:last-child{border-bottom:none}
+.nr{display:none!important}
+.hero h1{font-size:36px!important}
+div[style*="display:flex;border-bottom"]{flex-wrap:wrap}div[style*="flex:1;padding:24px 28px"]{min-width:50%!important}
+div[style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr!important}
+div[style*="grid-template-columns:repeat(3,1fr)"]>div{border-right:none!important;border-bottom:1px solid var(--border)}
+div[style*="grid-template-columns:repeat(3,1fr)"]>div:last-child{border-bottom:none}
+div[style*="grid-template-columns:1fr 1fr"]:not(.cg){grid-template-columns:1fr!important}
 }
-.dark{
-  --bg:#0a0a0c;--bg2:#111114;--bg3:#161619;
-  --glass:rgba(255,255,255,0.03);--glass-h:rgba(255,255,255,0.05);
-  --border:rgba(255,255,255,0.08);--border-h:rgba(255,255,255,0.12);
-  --text:#f0f0f2;--text2:#a0a0a8;--text3:#5a5a64;
-  --green:#00d47e;--green2:#00ff99;--green-bg:rgba(0,212,126,0.08);--green-bd:rgba(0,212,126,0.2);
-  --red:#ff4757;--red-bg:rgba(255,71,87,0.08);
-  --blue:#4facfe;--blue-bg:rgba(79,172,254,0.08);
-  --orange:#ffa502;--orange-bg:rgba(255,165,2,0.08);
-  --dot-grid:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);
-  --sidebar-bg:rgba(10,10,12,0.95);--chart-grid:rgba(255,255,255,0.04);
-  --chart-text:rgba(255,255,255,0.2);--chart-dot:rgba(0,212,126,0.6);
-  --scroll-thumb:rgba(255,255,255,0.06);
-  --card-shadow:none;
-}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
-  background-image:var(--dot-grid);background-size:24px 24px;transition:background .2s,color .2s}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:3px}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(0,212,126,0.15)}50%{box-shadow:0 0 40px rgba(0,212,126,0.25)}}
-.fade-in{animation:fadeIn .4s ease both}
-.hoverable{transition:background .12s ease}
-.hoverable:hover{background:var(--bg3)!important}
-.campaign-cell{transition:all .15s ease;border-top:2px solid transparent}
-.campaign-cell:hover{background:var(--bg3)!important;border-top-color:var(--green)!important}
-.campaign-cell:hover .camp-border{border-color:var(--green)!important}
-.campaign-cell .camp-arrow{opacity:0;transform:translateX(-4px);transition:all .15s ease}
-.campaign-cell:hover .camp-arrow{opacity:1;transform:translateX(0)}
-.campaign-cell .camp-icon{transition:transform .3s ease}
-.campaign-cell:hover .camp-icon{transform:rotate(15deg)}
-@keyframes sendPulse{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
+.fc{padding:100px 0;text-align:center;border-bottom:1px solid var(--border)}
+.fc h2{font-size:clamp(32px,4vw,48px);font-weight:500;letter-spacing:-1.5px;margin-bottom:12px}
+.fc p{font-size:14px;color:var(--text2);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.7}
+footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-items:center}
+.ftl{font-size:11px;color:var(--text3)}.ftr{display:flex;gap:20px}.ftr a{font-size:11px;color:var(--text3);transition:color .1s}.ftr a:hover{color:var(--text)}
+.tg{display:inline-block;padding:3px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--text3);font-weight:500;margin:0 4px}
+.tgg{border-color:var(--green-bd);color:var(--green);background:var(--green-bg)}
+/* SCRAMBLE TEXT */
+.scramble{font-family:var(--mono);display:inline-block;color:var(--green);font-weight:500}
+.scramble-tag{position:absolute;font-family:var(--mono);font-size:11px;color:rgba(0,70,50,0.18);font-weight:500;letter-spacing:1px;pointer-events:none;white-space:nowrap}
+.scramble-tag.active{color:var(--green);opacity:0.3}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const {useState,useEffect,useRef} = React;
+<div class="gl"><i></i></div>
+<nav><div class="ni">
+  <div class="nl"><div class="nli"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></div>coldflows</div>
+  <div class="nr"><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><button class="nc" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started</button></div>
+</div></nav>
 
-// Live countdown component — ticks every 100ms with decimal percentage
-function LiveCountdown({targetDay,currentDay,phaseName}){
-  const [now,setNow]=useState(Date.now());
-  useEffect(()=>{
-    const t=setInterval(()=>setNow(Date.now()),100);
-    return ()=>clearInterval(t);
-  },[]);
-
-  // Calculate precise time remaining
-  // Assume each "day" started at account creation, mock: March 15 2026
-  // Account started March 22 2026 — warmup (14 days) ends April 5
-  // Today is March 30, so we're on day 8 of 14 — about 57% through warmup
-  const startDate=new Date('2026-03-22T06:00:00');
-  const phaseEndDate=new Date(startDate.getTime()+targetDay*24*60*60*1000);
-  const phaseStartDate=new Date(startDate.getTime()+currentDay*24*60*60*1000);
-  const totalMs=phaseEndDate.getTime()-phaseStartDate.getTime();
-  const elapsedMs=now-phaseStartDate.getTime();
-  const remainingMs=Math.max(0,phaseEndDate.getTime()-now);
-
-  const days=Math.floor(remainingMs/(24*60*60*1000));
-  const hours=Math.floor((remainingMs%(24*60*60*1000))/(60*60*1000));
-  const mins=Math.floor((remainingMs%(60*60*1000))/(60*1000));
-  const secs=Math.floor((remainingMs%(60*1000))/1000);
-
-  const pct=totalMs>0?Math.min(100,(elapsedMs/totalMs)*100):100;
-
-  return <div style={{display:"flex",alignItems:"center",borderBottom:"1px solid var(--border)"}}>
-    <div style={{flex:1,padding:"16px 24px"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-        <span style={{fontSize:12,fontWeight:600,color:"var(--text)"}}>Time until {phaseName} completed</span>
-        <span style={{fontSize:13,fontFamily:"var(--mono)",color:"var(--green)",fontWeight:700}}>{pct.toFixed(4)}%</span>
+<section class="hero" style="overflow:visible"><div class="ctn" style="position:relative">
+  <div style="position:relative;min-height:560px">
+    <!-- LEFT: Text content — this determines hero height -->
+    <div style="width:50%;padding-right:48px;display:flex;flex-direction:column;justify-content:center;min-height:560px">
+      <div class="hb"><div class="hd"></div>Now accepting clients</div>
+      <h1>Cold email that<br>runs <span class="scramble" data-scramble="itself">itself</span><span class="cur" style="height:0.9em;margin-left:4px"></span></h1>
+      <p class="hs">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> Open your dashboard, track your campaigns, watch them optimise — and reply to your leads.</p>
+      <div class="hc">
+        <button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
+        <button class="bg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
       </div>
-      <div style={{height:5,background:"var(--bg3)",borderRadius:3,overflow:"hidden",marginBottom:6}}>
-        <div style={{height:"100%",width:pct.toFixed(2)+"%",borderRadius:3,background:"var(--green)",transition:"width .1s linear"}}/>
+      <!-- Conviction points -->
+      <div style="margin-top:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 20px">
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Real verified leads guaranteed</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> No complicated setup required</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Moneyback if no leads 30 days after Phase 1</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Dedicated sending domains included</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Trained on millions of cold email responses</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> A/B testing every campaign automatically</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Self-optimising & self-learning AI</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-weight:700">✓</span> Works while you sleep</div>
       </div>
-      <div style={{fontSize:10,color:"var(--text3)"}}>Progress towards next phase</div>
-    </div>
-    <div style={{borderLeft:"1px solid var(--border)",padding:"14px 20px",textAlign:"center",minWidth:200}}>
-      <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:"var(--text)",lineHeight:1,letterSpacing:"-0.5px"}}>
-        {days}<span style={{fontSize:10,fontWeight:400,color:"var(--text3)"}}>d </span>
-        {String(hours).padStart(2,'0')}<span style={{fontSize:10,fontWeight:400,color:"var(--text3)"}}>h </span>
-        {String(mins).padStart(2,'0')}<span style={{fontSize:10,fontWeight:400,color:"var(--text3)"}}>m </span>
-        {String(secs).padStart(2,'0')}<span style={{fontSize:10,fontWeight:400,color:"var(--text3)"}}>s</span>
+      <!-- Flowing digits river -->
+      <div style="margin-top:24px;overflow:hidden;border-radius:8px">
+        <canvas id="heroRiver" width="500" height="160" style="display:block;width:100%;height:160px"></canvas>
       </div>
-      <div style={{fontSize:9,color:"var(--text3)",marginTop:3}}>remaining</div>
     </div>
-    <div style={{borderLeft:"1px solid var(--border)",padding:"14px 20px",minWidth:90}}>
-      <div style={{fontSize:9,color:"var(--text3)"}}>Mailboxes</div>
-      <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:600,color:"var(--text)",lineHeight:1,marginTop:2}}>{D.mbs.length}</div>
-      <div onClick={()=>typeof nav!=='undefined'&&nav("mailboxes")} style={{fontSize:10,color:"var(--green)",cursor:"pointer",marginTop:2,fontWeight:500}}>View →</div>
+    <!-- RIGHT: Interactive terminal — absolute positioned, doesn't affect hero height -->
+    <div class="hero-terminal" style="position:absolute;top:0;right:0;width:50%;border-left:1px solid var(--border);padding:12px 32px 0;display:flex;flex-direction:column;justify-content:flex-start">
+      <div class="cb" style="max-width:100%">
+        <div class="cbb"><div class="cbd"></div><div class="cbd"></div><div class="cbd"></div><span style="margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--mono)">coldflows.ai</span></div>
+        <div class="cbo" style="padding:12px 16px">
+          <!-- Input area -->
+          <div style="margin-bottom:8px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Describe your business and who you want to reach</div>
+            <div id="heroInput" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.6;min-height:44px;position:relative;cursor:text" onclick="document.getElementById('heroRealInput').focus()">
+              <span id="heroTyped"></span><span class="cur"></span>
+              <input id="heroRealInput" style="position:absolute;opacity:0;pointer-events:none" tabindex="-1">
+            </div>
+          </div>
+          <!-- Output area -->
+          <div id="heroOutput" style="font-family:var(--mono);font-size:12px;line-height:1.85"></div>
+          <!-- Dashboard preview link + example buttons -->
+          <div id="dashLink" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);opacity:0;transition:opacity .4s">
+            <a href="./dashboard.html" target="_blank" class="dash-preview-link">Preview example dashboard →</a>
+            <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+              <button class="hero-eg" onclick="runExample(0)">Marketing agency</button>
+              <button class="hero-eg" onclick="runExample(1)">SaaS company</button>
+              <button class="hero-eg" onclick="runExample(2)">Real estate</button>
+              <button class="hero-eg" onclick="runExample(3)">Accounting firm</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>;
+  </div>
+</div></section>
+
+<div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
+  <div style="max-width:var(--mw);margin:0 auto;padding:0">
+    <!-- Stats row like dashboard -->
+    <div style="display:flex;border-bottom:1px solid var(--border)">
+      <div style="flex:1;padding:24px 28px;border-right:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Sent this week</div>
+        <div style="font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-1px">2,147</div>
+      </div>
+      <div style="flex:1;padding:24px 28px;border-right:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Replies</div>
+        <div style="font-family:var(--mono);font-size:28px;font-weight:600;color:var(--green);letter-spacing:-1px">312</div>
+      </div>
+      <div style="flex:1;padding:24px 28px;border-right:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Reply rate</div>
+        <div style="font-family:var(--mono);font-size:28px;font-weight:600;color:var(--green);letter-spacing:-1px">3.6%</div>
+      </div>
+      <div style="flex:1;padding:24px 28px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Warm leads</div>
+        <div style="font-family:var(--mono);font-size:28px;font-weight:600;color:var(--green);letter-spacing:-1px">12</div>
+      </div>
+    </div>
+    <!-- Reply rate chart + recent replies side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr">
+      <div style="padding:28px;border-right:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:16px;font-family:var(--mono)">Reply rate improvement over 6 months</div>
+        <svg width="100%" viewBox="0 0 400 100" style="overflow:visible">
+          <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(0,105,73,0.12)"/><stop offset="100%" stop-color="rgba(0,105,73,0)"/></linearGradient></defs>
+          <line x1="0" y1="100" x2="400" y2="100" stroke="var(--border)" stroke-width="1"/>
+          <line x1="0" y1="50" x2="400" y2="50" stroke="var(--border)" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="0" y1="0" x2="400" y2="0" stroke="var(--border)" stroke-width="1" stroke-dasharray="4"/>
+          <path d="M0,100 L0,92 L67,85 L133,75 L200,60 L267,42 L333,28 L400,10 L400,100 Z" fill="url(#ag)"/>
+          <path d="M0,92 L67,85 L133,75 L200,60 L267,42 L333,28 L400,10" fill="none" stroke="var(--green)" stroke-width="2"/>
+          <circle cx="0" cy="92" r="3" fill="var(--green)"/><circle cx="67" cy="85" r="3" fill="var(--green)"/>
+          <circle cx="133" cy="75" r="3" fill="var(--green)"/><circle cx="200" cy="60" r="3" fill="var(--green)"/>
+          <circle cx="267" cy="42" r="3" fill="var(--green)"/><circle cx="333" cy="28" r="3" fill="var(--green)"/>
+          <circle cx="400" cy="10" r="4" fill="var(--green)"/>
+          <text x="0" y="116" fill="var(--text3)" font-size="9" font-family="var(--mono)">0.8%</text>
+          <text x="200" y="116" fill="var(--text3)" font-size="9" font-family="var(--mono)" text-anchor="middle">2.1%</text>
+          <text x="400" y="116" fill="var(--green)" font-size="9" font-family="var(--mono)" text-anchor="end" font-weight="600">3.6%</text>
+        </svg>
+      </div>
+      <div style="padding:28px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:16px;font-family:var(--mono)">Recent warm replies</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="width:28px;height:28px;border-radius:6px;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">S</div>
+            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">Sarah Chen · Bloom Studio</div><div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">"Yes we've been thinking about rebranding. Can you send examples?"</div></div>
+            <div style="font-size:9px;color:var(--text3);flex-shrink:0">1d ago</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="width:28px;height:28px;border-radius:6px;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">M</div>
+            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">Marcus Webb · Webb Engineering</div><div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">"Our website is definitely overdue. What's your process?"</div></div>
+            <div style="font-size:9px;color:var(--text3);flex-shrink:0">1d ago</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
+            <div style="width:28px;height:28px;border-radius:6px;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">R</div>
+            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">Raj Patel · CloudMetrics</div><div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">"Interesting timing — we just discussed our organic traffic declining."</div></div>
+            <div style="font-size:9px;color:var(--text3);flex-shrink:0">2d ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST BADGES -->
+<div style="border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
+  <div style="max-width:var(--mw);margin:0 auto;padding:16px 32px;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> 95%+ inbox placement</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> 150K+ emails sent</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> AI-powered copy & optimisation</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> SOC 2 compliant infrastructure</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> Cancel anytime</div>
+  </div>
+</div>
+
+<section class="sc" id="why"><div class="ctn rv">
+  <div class="sn">[ 01 / 05 ] · Why Coldflows</div>
+  <div class="st">Other tools make you<br>do all the work</div>
+  <div class="sd">Smartlead, Instantly, Lemlist — they hand you a tool and wish you luck. Coldflows does the actual work.</div>
+  <div class="cg">
+    <div class="cc"><div class="cl clo">Other cold email tools</div>
+      <div class="ci"><span class="cx">✕</span> You buy domains</div><div class="ci"><span class="cx">✕</span> You set up DNS manually</div>
+      <div class="ci"><span class="cx">✕</span> You create mailboxes</div><div class="ci"><span class="cx">✕</span> You write email copy</div>
+      <div class="ci"><span class="cx">✕</span> You run A/B tests</div><div class="ci"><span class="cx">✕</span> You monitor deliverability</div>
+      <div class="ci"><span class="cx">✕</span> You source leads</div><div class="ci"><span class="cx">✕</span> You figure out what works</div>
+    </div>
+    <div class="cc" style="background:var(--green-bg)"><div class="cl clu">Coldflows <span class="tg tgg">AI</span></div>
+      <div class="ci"><span class="ck">✓</span> We purchase domains</div><div class="ci"><span class="ck">✓</span> We configure DNS</div>
+      <div class="ci"><span class="ck">✓</span> We create & warm mailboxes</div><div class="ci"><span class="ck">✓</span> AI generates copy</div>
+      <div class="ci"><span class="ck">✓</span> AI runs A/B tests</div><div class="ci"><span class="ck">✓</span> We monitor 24/7</div>
+      <div class="ci"><span class="ck">✓</span> We source ICP-matched leads</div><div class="ci"><span class="ck">✓</span> AI learns & improves forever</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- SOCIAL PROOF -->
+<section class="sc"><div class="ctn rv">
+  <div class="sn">[ 01b / 05 ] · What clients say</div>
+  <div class="st">Results speak for themselves</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);margin-top:32px">
+    <div style="padding:28px;border-right:1px solid var(--border)">
+      <div style="color:var(--green);font-family:var(--mono);font-size:24px;font-weight:700;margin-bottom:4px">"</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:20px">We were spending $4K/month on an SDR who booked maybe 3 meetings. Coldflows books us 8-12 qualified calls a month on the Growth plan. The ROI isn't even close.</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">JL</div>
+        <div><div style="font-size:12px;font-weight:600">James Lawson</div><div style="font-size:11px;color:var(--text3)">CEO, Apex Digital · SaaS</div></div>
+      </div>
+    </div>
+    <div style="padding:28px;border-right:1px solid var(--border)">
+      <div style="color:var(--green);font-family:var(--mono);font-size:24px;font-weight:700;margin-bottom:4px">"</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:20px">I tried Instantly for 6 months and got nowhere — the setup alone took weeks. Switched to Coldflows and had warm leads in my inbox within 3 weeks. Genuinely hands-off.</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">NP</div>
+        <div><div style="font-size:12px;font-weight:600">Natalie Park</div><div style="font-size:11px;color:var(--text3)">Founder, Park & Co · Marketing</div></div>
+      </div>
+    </div>
+    <div style="padding:28px">
+      <div style="color:var(--green);font-family:var(--mono);font-size:24px;font-weight:700;margin-bottom:4px">"</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:20px">47 warm leads in our first full month. We closed 4 of them — that's $38K in new revenue from a $2,500 spend. We've now been on it for 5 months and it keeps getting better.</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">DM</div>
+        <div><div style="font-size:12px;font-weight:600">Daniel Mitchell</div><div style="font-size:11px;color:var(--text3)">Director, Summit Advisory · Finance</div></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section class="sc" id="how"><div class="ctn rv">
+  <div class="sn">[ 02 / 05 ] · How it works</div>
+  <div class="st">Three steps. That's it.</div><div class="sd" style="margin-bottom:0"></div>
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+  <div class="sg"><div class="sp"><div class="spn">01 Purchase</div><div class="spt">Pick a plan</div><div class="spd">Stripe checkout takes 30 seconds. Your system starts provisioning immediately.</div></div>
+    <div class="sp"><div class="spn">02 Configure</div><div class="spt">Tell us your service</div><div class="spd">What you do, who your ideal customer is, and where they are. 2 minute form.</div></div>
+    <div class="sp"><div class="spn">03 Done</div><div class="spt">We handle everything</div><div class="spd">Domains, mailboxes, warmup, copy, A/B testing, leads, optimisation. You log in and see warm leads.</div></div>
+  </div>
+</div></section>
+
+<section class="sc"><div class="ctn rv">
+  <div class="sn">[ 03 / 05 ] · The system</div>
+  <div class="st">Volume that scales itself</div>
+  <div class="sd">Every account progresses through four phases automatically.</div>
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+  <div class="pg">
+    <div class="ph"><div class="phn">Warmup</div><div class="phw">Week 1–2</div><div class="phl"><div class="phlf" style="width:25%"></div></div><div class="phv">420</div><div class="php">emails / week</div><div class="phd">Mailboxes build sender reputation. No outreach yet.</div></div>
+    <div class="ph"><div class="phn">Phase 1</div><div class="phw">Week 3</div><div class="phl"><div class="phlf" style="width:50%"></div></div><div class="phv">840</div><div class="php">emails / week</div><div class="phd">Live outreach begins. A/B testing enabled.</div></div>
+    <div class="ph"><div class="phn">Phase 2</div><div class="phw">Week 4</div><div class="phl"><div class="phlf" style="width:75%"></div></div><div class="phv">1,400</div><div class="php">emails / week</div><div class="phd">AI copy optimisation. Reply rates compound.</div></div>
+    <div class="ph"><div class="phn">Full capacity</div><div class="phw">Week 5+</div><div class="phl"><div class="phlf" style="width:100%"></div></div><div class="phv">2,100+</div><div class="php">emails / week</div><div class="phd">Self-learning loop. Gets better every week.</div></div>
+  </div>
+</div></section>
+
+<section class="sc" id="pricing"><div class="ctn rv">
+  <div class="sn">[ 04 / 05 ] · Pricing</div>
+  <div class="st">Simple. No hidden fees.</div>
+  <div class="sd">Everything included — domains, mailboxes, warmup, copy, leads, optimisation.</div>
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+  <div class="prg">
+    <div class="prc"><div class="prn">Starter</div><div class="prd">Test the waters</div><div class="pra">$1,000</div><div class="prp">per month</div>
+      <ul class="prf"><li><span>✓</span> 2 mailboxes</li><li><span>✓</span> 2 campaigns</li><li><span>✓</span> ~600 emails/week</li><li><span>✓</span> A/B testing</li><li><span>✓</span> Lead sourcing</li><li><span>✓</span> Dashboard access</li></ul>
+      <button class="prcta pcs">Get started</button></div>
+    <div class="prc ft"><div class="prb">Most popular</div><div class="prn">Growth</div><div class="prd">Serious outbound</div><div class="pra">$2,500</div><div class="prp">per month</div>
+      <ul class="prf"><li><span>✓</span> 4 mailboxes</li><li><span>✓</span> 4 campaigns</li><li><span>✓</span> ~2,100 emails/week</li><li><span>✓</span> AI copy optimisation</li><li><span>✓</span> Priority leads</li><li><span>✓</span> API access</li></ul>
+      <button class="prcta pcp">Get started →</button></div>
+    <div class="prc"><div class="prn">Scale</div><div class="prd">Maximum lead flow</div><div class="pra">$5,000</div><div class="prp">per month</div>
+      <ul class="prf"><li><span>✓</span> 10 mailboxes</li><li><span>✓</span> 10 campaigns</li><li><span>✓</span> ~5,250 emails/week</li><li><span>✓</span> Self-learning AI</li><li><span>✓</span> Dedicated support</li><li><span>✓</span> Full API + webhooks</li></ul>
+      <button class="prcta pcs">Get started</button></div>
+  </div>
+  <!-- GUARANTEE -->
+  <div style="margin-top:24px;border:1px solid var(--green-bd);border-radius:8px;background:var(--green-bg);padding:20px 28px;display:flex;align-items:center;gap:16px">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--bg2);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;color:var(--green);font-weight:700">✓</div>
+    <div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:2px">30-day results guarantee</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">If you don't receive warm leads within your first 30 days of full-capacity sending, we'll extend your next month free. No contracts, no lock-in — cancel anytime.</div>
+    </div>
+  </div>
+</div></section>
+
+<section class="sc" id="faq"><div class="ctn rv">
+  <div class="sn">[ 05 / 05 ] · FAQ</div>
+  <div class="st" style="margin-bottom:32px">Questions</div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">What happens after I purchase?<span>+</span></div><div class="fa">We immediately provision your system — purchase domains, create mailboxes, configure DNS, start warmup. Dashboard login within minutes. Warmup takes ~14 days, then outreach begins automatically.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Do I need to write any email copy?<span>+</span></div><div class="fa">No. Our AI generates all copy based on your service and target market. It A/B tests variations and promotes winners automatically.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Where do the leads come from?<span>+</span></div><div class="fa">We source leads matching your ICP — industry, company size, job title, location. Fresh contacts delivered into your campaigns.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Why does warmup take 14 days?<span>+</span></div><div class="fa">Email providers need to see your mailboxes are legitimate. Skipping warmup means spam. We build reputation properly — 95%+ inbox placement.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">What results can I expect?<span>+</span></div><div class="fa">At full capacity, 2-4% reply rates — 40-80+ warm leads per month on Growth. The AI improves over time. 3+ month clients see significantly higher performance.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Can I connect via API?<span>+</span></div><div class="fa">Yes. Every account includes API access. Read campaign data, metrics, leads. Growth and Scale include write access plus webhooks.</div></div>
+  <div class="fi" onclick="this.classList.toggle('open')"><div class="fq">Is there a contract?<span>+</span></div><div class="fa">No contracts. Cancel anytime. We recommend 3 months to see the full benefit of the self-learning AI.</div></div>
+</div></section>
+
+<section class="fc" style="position:relative;overflow:hidden">
+  <div class="ctn" style="position:relative;z-index:2">
+    <div style="font-family:var(--mono);font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-2px;color:var(--green);margin-bottom:4px">coldflows</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:32px">The easiest way to fill your pipeline</div>
+    <canvas id="flameCanvas" width="700" height="180" style="display:block;margin:0 auto 32px;max-width:100%"></canvas>
+    <h2>Stop doing cold email<br>manually</h2>
+    <p>Purchase a package. Tell us what you do. We take it from there.</p>
+    <button class="bp" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Get started →</button>
+  </div>
+</section>
+
+<footer><div class="ctn fti"><div class="ftl">© 2026 Coldflows</div><div class="ftr"><a href="#">Privacy</a><a href="#">Terms</a><a href="./dashboard.html">Dashboard</a></div></div></footer>
+
+<script>
+const o=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('v')})},{threshold:.1});
+document.querySelectorAll('.rv').forEach(e=>o.observe(e));
+
+const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/~`';
+function scrambleText(el){
+  const target=el.dataset.scramble;
+  if(!target)return;
+  const len=target.length;
+  let iteration=0;
+  const interval=setInterval(()=>{
+    el.textContent=target.split('').map((ch,i)=>{
+      if(i<iteration)return target[i];
+      return chars[Math.floor(Math.random()*chars.length)];
+    }).join('');
+    if(iteration>=len)clearInterval(interval);
+    iteration+=1/2;
+  },30);
 }
+function initScramble(){
+  document.querySelectorAll('[data-scramble]').forEach((el,i)=>{
+    const target=el.dataset.scramble;
+    el.textContent=target.split('').map(()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+    setTimeout(()=>scrambleText(el),300+i*200);
+  });
+}
+initScramble();
 
-const D = {
-  sentToday:187,cap:480,totalSent:14820,replies:312,bounces:89,warm:12,warmup:4200,rr:2.1,
-  account:{
-    daysSinceStart:8,warmupDays:28,
-    plan:"Scale",planPrice:"$5,000/mo",
-    milestones:[
-      {day:0,label:"Account setup",desc:"Domains, mailboxes, targeting configured",done:true,icon:"⚡"},
-      {day:1,label:"Warmup started",desc:"Sending reputation building",done:true,icon:"🔥"},
-      {day:7,label:"First emails sent",desc:"Initial outreach to first leads",done:true,icon:"📧"},
-      {day:14,label:"Ramp up phase 1",desc:"Volume increases to 840 emails/week",done:false,icon:"📈",current:true},
-      {day:21,label:"Ramp up phase 2",desc:"Volume increases to 200 emails/day",done:false,icon:"🚀"},
-      {day:28,label:"Full volume unlocked",desc:"300+ emails/day · A/B testing active",done:false,icon:"⚡"},
-      {day:42,label:"AI optimisation active",desc:"Self-learning copy improvements begin",done:false,icon:"🧠"},
-      {day:60,label:"Optimised performance",desc:"System tuned · Maximum reply rates",done:false,icon:"💎"}
-    ],
-    weeklyVolume:[
-      {week:"Week 1-2",emails:420,max:840,label:"Warmup phase"},
-      {week:"Week 3",emails:0,max:840,label:"Ramp phase 1",upcoming:true},
-      {week:"Week 4",emails:0,max:1400,label:"Ramp phase 2",upcoming:true},
-      {week:"Week 5+",emails:0,max:2100,label:"Full volume",upcoming:true,unlocked:true}
-    ]
+// INTERACTIVE HERO TERMINAL
+const examples=[
+  {
+    input:"I run a digital marketing agency and want to reach e-commerce brands doing $1-10M revenue in the US",
+    service:"Digital marketing agency",
+    icp:"E-commerce brand owners, $1-10M revenue, United States",
+    domains:["outreach-mktg.com","growthflows.co","revenuereach.io","scaledigital.co"],
+    mailboxes:12
   },
-  campaigns:[
-    {id:1,name:"SEO services",st:"testing",sent:412,rep:9,bnc:4,leads:220,prog:41,tgt:1000,day:8,weekly:420,
-      a:{l:"Baseline",sub:"{{company_name}} + SEO",body:"Hey {{first_name}},\n\nQuick question — is {{company_name}} getting leads from Google, or is most of your business coming from referrals?\n\nIf Google isn't pulling its weight, that's usually fixable. I run SEO campaigns starting at $1,500/mo.\n\nWorth a 15 min chat?",sent:206,rep:3,rate:1.5},
-      b:{l:"Challenger",sub:"quick question about {{company_name}}",body:"Hey {{first_name}},\n\nI searched for what {{company_name}} does on Google and you're not showing up in the first few results.\n\nThat means potential customers are finding your competitors instead. I fix that — typically 3-4 months to page 1.\n\nInterested?",sent:206,rep:6,rate:2.9,w:true}},
-    {id:2,name:"Website builds",st:"testing",sent:389,rep:11,bnc:6,leads:200,prog:39,tgt:1000,day:8,weekly:420,
-      a:{l:"Baseline",sub:"website for {{company_name}}",body:"Hey {{first_name}},\n\nIs {{company_name}}'s website working the way you want it to? If it's outdated, slow, or just not converting — I build fast, modern websites.\n\n$5,999 flat rate. 3-4 weeks.\n\nBook a call?",sent:195,rep:4,rate:2.1},
-      b:{l:"Challenger",sub:"{{first_name}}, quick one",body:"Hey {{first_name}},\n\nI looked at {{company_name}}'s website. Honestly — you're losing customers.\n\nSlow load, not mobile-friendly, dated design. I can rebuild it in 3 weeks.\n\nWant to see recent builds?",sent:194,rep:7,rate:3.6,w:true}},
-    {id:3,name:"Logo & branding",st:"active",sent:580,rep:12,bnc:7,leads:300,prog:58,tgt:1000,day:8,weekly:420,
-      a:{l:"Baseline",sub:"branding for {{company_name}}",body:"Hey {{first_name}},\n\nAre you happy with {{company_name}}'s logo and branding?\n\n$499, 48-hour delivery, 100% money-back guarantee. Real designers, not AI.",sent:290,rep:8,rate:2.8,w:true},
-      b:{l:"Challenger",sub:"{{company_name}}'s brand",body:"Hey {{first_name}},\n\nI noticed {{company_name}}'s branding could use a refresh.\n\nProfessional logo + full brand identity for $499. 48 hours. Money-back if you're not happy.",sent:290,rep:4,rate:1.4}},
-    {id:4,name:"Shopify dev",st:"active",sent:466,rep:6,bnc:5,leads:250,prog:47,tgt:1000,day:8,weekly:420,
-      a:{l:"Baseline",sub:"shopify dev for {{company_name}}",body:"Hey {{first_name}},\n\nDo you have a developer for your Shopify store?\n\nMonthly retainer starting at $249/mo — submit requests, I build them. No lock-in.",sent:233,rep:4,rate:1.7,w:true},
-      b:{l:"Challenger",sub:"re: {{company_name}} shopify",body:"Hey {{first_name}},\n\nWhat's on your Shopify store's to-do list right now?\n\nCustom layouts, speed fixes, app integrations — $249/mo. No contracts.",sent:233,rep:2,rate:0.9}},
-    {id:5,name:"Google Ads mgmt",st:"active",sent:1840,rep:42,bnc:12,leads:600,prog:92,tgt:2000,day:18,weekly:840,
-      a:{l:"Baseline",sub:"Google Ads for {{company_name}}",body:"Hey {{first_name}},\n\nAre you running Google Ads? Most businesses I audit are wasting 30-40% of their ad spend.\n\nI manage campaigns starting at $999/mo — real results, transparent reporting.",sent:920,rep:28,rate:3.0,w:true},
-      b:{l:"Challenger",sub:"wasting money on ads?",body:"Hey {{first_name}},\n\nI looked at {{company_name}}'s Google Ads. You're probably overpaying for clicks that don't convert.\n\nI can cut your cost per lead in half. $999/mo, no lock-in.",sent:920,rep:14,rate:1.5}},
-    {id:6,name:"Social media",st:"testing",sent:1620,rep:38,bnc:9,leads:500,prog:81,tgt:2000,day:16,weekly:840,
-      a:{l:"Baseline",sub:"social media for {{company_name}}",body:"Hey {{first_name}},\n\nIs {{company_name}} active on social media? Most businesses know they should be but don't have the time.\n\nWe handle everything — content, posting, engagement. $799/mo.",sent:810,rep:22,rate:2.7,w:true},
-      b:{l:"Challenger",sub:"{{company_name}} on Instagram",body:"Hey {{first_name}},\n\nI noticed {{company_name}} hasn't posted on Instagram in a while. Your competitors are posting 3-4x per week.\n\nWe can fix that. $799/mo, fully managed.",sent:810,rep:16,rate:2.0}},
-    {id:7,name:"Email marketing",st:"active",sent:3200,rep:86,bnc:18,leads:800,prog:80,tgt:4000,day:25,weekly:1400,
-      a:{l:"Baseline",sub:"email marketing for {{company_name}}",body:"Hey {{first_name}},\n\nDo you have an email list? Most businesses sit on a goldmine of past customers and never email them.\n\nI set up automated email flows starting at $699/mo.",sent:1600,rep:52,rate:3.3,w:true},
-      b:{l:"Challenger",sub:"your customers are forgetting you",body:"Hey {{first_name}},\n\nWhen was the last time {{company_name}} emailed its customers? If it's been more than 30 days, you're leaving money on the table.\n\nAutomated flows, $699/mo.",sent:1600,rep:34,rate:2.1}},
-    {id:8,name:"Lead gen — tradies",st:"active",sent:8400,rep:218,bnc:42,leads:2000,prog:84,tgt:10000,day:42,weekly:2100,
-      a:{l:"Baseline",sub:"more jobs for {{company_name}}",body:"Hey {{first_name}},\n\nNeed more jobs? I fill the calendar for tradies like you — plumbers, electricians, builders.\n\nGuaranteed 10+ qualified leads per month or your money back.",sent:4200,rep:142,rate:3.4,w:true},
-      b:{l:"Challenger",sub:"{{first_name}}, quick one about leads",body:"Hey {{first_name}},\n\nI got a {{company_name}} customer a quote request last week. Want me to do the same for you?\n\n10+ leads/month guaranteed. No lock-in.",sent:4200,rep:76,rate:1.8}}
-  ],
-  leads:[
-    {id:1,n:"Sarah Chen",e:"sarah@bloomstudio.com.au",co:"Bloom Studio",ca:"Logo & branding",s:"replied",sq:"2/3",
-      steps:[
-        {seq:1,st:"delivered",dt:"Mar 22, 9:14am",sub:"branding for Bloom Studio",body:"Hey Sarah,\n\nAre you happy with Bloom Studio's logo and branding?\n\n$499, 48-hour delivery, 100% money-back guarantee. Real designers, not AI.",frm:"thomas@outreach.studio"},
-        {seq:2,st:"replied",dt:"Mar 24, 11:20am",sub:"re: branding for Bloom Studio",body:"Sarah — just following up. Most businesses I work with haven't updated their branding in years.",frm:"tom@outreach.studio",rpl:{dt:"Mar 24, 2:45pm",txt:"Hi! Yes we've been thinking about rebranding. Can you send examples? Our current logo feels dated."}},
-        {seq:3,st:"skipped",dt:"—",sub:"re: branding for Bloom Studio",body:"Final one from me Sarah.",frm:"—",note:"Skipped — lead replied"}]},
-    {id:2,n:"Marcus Webb",e:"marcus@webbeng.com.au",co:"Webb Engineering",ca:"Website builds",s:"replied",sq:"1/3",
-      steps:[
-        {seq:1,st:"replied",dt:"Mar 21, 8:07am",sub:"website for Webb Engineering",body:"Hey Marcus,\n\nI looked at Webb Engineering's website. Honestly — you're losing customers.\n\nSlow load, not mobile-friendly, dated design.",frm:"tom@reach.au",rpl:{dt:"Mar 21, 3:12pm",txt:"Our website is definitely overdue. What's your process and can you show recent builds?"}},
-        {seq:2,st:"skipped",dt:"—",sub:"re: website for Webb Engineering",body:"Marcus — just following up.",frm:"—",note:"Skipped — lead replied"},
-        {seq:3,st:"skipped",dt:"—",sub:"re: website for Webb Engineering",body:"Final one from me.",frm:"—",note:"Skipped — lead replied"}]},
-    {id:3,n:"Raj Patel",e:"raj@cloudmetrics.io",co:"CloudMetrics",ca:"SEO services",s:"replied",sq:"2/3",
-      steps:[
-        {seq:1,st:"delivered",dt:"Mar 20, 9:30am",sub:"quick question about CloudMetrics",body:"Hey Raj,\n\nI searched for what CloudMetrics does on Google and you're not showing up in the first few results.",frm:"thomas@outreach.studio"},
-        {seq:2,st:"replied",dt:"Mar 22, 10:15am",sub:"re: quick question about CloudMetrics",body:"Raj — following up. Most businesses don't realise how much revenue they're losing.",frm:"tflood@reach.au",rpl:{dt:"Mar 22, 4:30pm",txt:"Interesting timing — we just discussed our organic traffic declining. Would love to chat. Free Thursday?"}},
-        {seq:3,st:"skipped",dt:"—",sub:"—",body:"—",frm:"—",note:"Skipped — lead replied"}]},
-    {id:4,n:"James Park",e:"james@greenfield.com.au",co:"Greenfield Co",ca:"SEO services",s:"sent",sq:"2/3",
-      steps:[
-        {seq:1,st:"delivered",dt:"Mar 23, 8:45am",sub:"quick question about Greenfield Co",body:"Hey James,\n\nI searched for what Greenfield Co does on Google and you're not showing up.",frm:"tom@outreach.studio"},
-        {seq:2,st:"delivered",dt:"Mar 25, 9:20am",sub:"re: quick question about Greenfield Co",body:"James — following up on my last email.",frm:"thomas@outreach.studio"},
-        {seq:3,st:"pending",dt:"Due Mar 27",sub:"re: quick question about Greenfield Co",body:"Final follow-up.",frm:"—",note:"Scheduled"}]},
-    {id:5,n:"Anna Rivera",e:"anna@designloft.com",co:"Design Loft",ca:"Logo & branding",s:"sent",sq:"1/3",
-      steps:[
-        {seq:1,st:"delivered",dt:"Mar 25, 10:05am",sub:"branding for Design Loft",body:"Hey Anna,\n\nAre you happy with Design Loft's logo and branding?",frm:"tflood@reach.au"},
-        {seq:2,st:"pending",dt:"Due Mar 27",sub:"re: branding for Design Loft",body:"Anna — following up.",frm:"—",note:"Scheduled"},
-        {seq:3,st:"pending",dt:"Due Mar 29",sub:"re: branding for Design Loft",body:"Final one from me.",frm:"—",note:"Scheduled"}]},
-    {id:6,n:"Kim Nguyen",e:"kim@freshfoods.com.au",co:"Fresh Foods",ca:"Shopify dev",s:"bounced",sq:"1/3",
-      steps:[
-        {seq:1,st:"bounced",dt:"Mar 24, 8:30am",sub:"shopify dev for Fresh Foods",body:"Hey Kim,\n\nDo you have a developer for your Shopify store?",frm:"tom@reach.au",note:"554 5.7.1 Spam message rejected"},
-        {seq:2,st:"skipped",dt:"—",sub:"—",body:"—",frm:"—",note:"Skipped — email bounced"},
-        {seq:3,st:"skipped",dt:"—",sub:"—",body:"—",frm:"—",note:"Skipped — email bounced"}]}
-  ],
-  reps:[
-    {nm:"Sarah Chen",co:"Bloom Studio",em:"sarah@bloomstudio.com.au",ca:"Logo & branding",cat:"warm",txt:"Hi! Yes we've been thinking about rebranding. Can you send examples? Our current logo feels dated.",t:"2h ago"},
-    {nm:"Marcus Webb",co:"Webb Engineering",em:"marcus@webbeng.com.au",ca:"Website builds",cat:"warm",txt:"Our website is definitely overdue. What's your process and can you show recent builds?",t:"5h ago"},
-    {nm:"Raj Patel",co:"CloudMetrics",em:"raj@cloudmetrics.io",ca:"SEO services",cat:"warm",txt:"Interesting timing — we just discussed our organic traffic declining. Would love to chat. Free Thursday?",t:"1d ago"},
-    {nm:"Tom Bradley",co:"Bradley Homes",em:"tom@bradleyhomes.com.au",ca:"Website builds",cat:"warm",txt:"Yes our website is pretty bad. We've been quoted $15-20k by agencies. Your price seems reasonable.",t:"1d ago"},
-    {nm:"Lisa Park",co:"Park Dental",em:"lisa@parkdental.com.au",ca:"SEO services",cat:"warm",txt:"We get most patients from referrals but should do better online. What does $1,500/mo include?",t:"2d ago"},
-    {nm:"Dave O'Neil",co:"O'Neil Plumbing",em:"dave@oneil.com.au",ca:"Website builds",cat:"negative",txt:"Not interested. Don't contact me again.",t:"2d ago"},
-    {nm:"Auto-reply",co:"Johnson Legal",em:"info@johnson.com.au",ca:"SEO services",cat:"auto_reply",txt:"Our office is currently closed. We will return Monday.",t:"3d ago"},
-    {nm:"Karen White",co:"White Accounting",em:"karen@white.com.au",ca:"Logo & branding",cat:"unsubscribe",txt:"Please remove me from your mailing list.",t:"3d ago"}
-  ],
-  mbs:[
-    {em:"thomas@outreach.studio",s:12,lim:30,rep:100,inb:98,ws:"Active",wt:1100,day:8},
-    {em:"tom@outreach.studio",s:15,lim:30,rep:100,inb:97,ws:"Active",wt:1050,day:8},
-    {em:"tom@reach.au",s:11,lim:30,rep:98,inb:96,ws:"Active",wt:1020,day:8},
-    {em:"tflood@reach.au",s:9,lim:30,rep:100,inb:99,ws:"Active",wt:1030,day:8},
-    {em:"hello@sendfast.studio",s:28,lim:50,rep:100,inb:99,ws:"Active",wt:4200,day:18},
-    {em:"james@sendfast.studio",s:32,lim:50,rep:100,inb:98,ws:"Active",wt:4100,day:18},
-    {em:"contact@coldmail.au",s:45,lim:50,rep:100,inb:97,ws:"Active",wt:3800,day:16},
-    {em:"info@coldmail.au",s:40,lim:50,rep:99,inb:96,ws:"Active",wt:3600,day:16},
-    {em:"alex@mailflow.io",s:68,lim:75,rep:100,inb:99,ws:"Active",wt:8400,day:25},
-    {em:"support@mailflow.io",s:72,lim:75,rep:100,inb:98,ws:"Active",wt:8200,day:25},
-    {em:"outreach@maxlead.au",s:75,lim:75,rep:100,inb:99,ws:"Active",wt:12600,day:42},
-    {em:"send@maxlead.au",s:74,lim:75,rep:100,inb:98,ws:"Active",wt:12400,day:42}
-  ],
-  exps:[
-    {id:"EXP-007",svc:"SEO",hyp:"Mentioning they're not showing up creates urgency",st:"active",b:"1.5%",c:"2.9%",s:412},
-    {id:"EXP-006",svc:"Websites",hyp:"Being direct about problems converts better",st:"active",b:"2.1%",c:"3.6%",s:389},
-    {id:"EXP-005",svc:"Branding",hyp:"Noticing branding needs refresh is more specific",st:"active",b:"2.8%",c:"1.4%",s:580},
-    {id:"EXP-003",svc:"SEO",hyp:"Specific ranking claims outperform generic questions",st:"done",b:"1.2%",c:"1.5%",learn:"'You're not showing up' created more urgency than asking about lead sources."},
-    {id:"EXP-002",svc:"Websites",hyp:"Price transparency filters for serious buyers",st:"done",b:"0.8%",c:"2.1%",learn:"Price upfront dramatically increased reply rate. Respondents pre-qualified on budget."},
-    {id:"EXP-001",svc:"Branding",hyp:"Money-back guarantee reduces friction",st:"done",b:"1.1%",c:"2.8%",learn:"Money-back + 48hr turnaround increased trust. Real designers not AI resonated."}
-  ],
-  tree:[
-    {gen:1,month:"Oct",svc:"SEO",change:"copy",
-      a:{sub:"SEO for {{company}}",rate:0.8,sent:500,status:"lost",summary:"Generic SEO pitch"},
-      b:{sub:"{{company}} + Google rankings",rate:1.2,sent:500,status:"promoted",summary:"Mentioned Google specifically"},
-      learning:"Mentioning Google by name increased relevance"},
-    {gen:2,month:"Oct",svc:"SEO",change:"copy",
-      a:{sub:"{{company}} + Google rankings",rate:1.2,sent:600,status:"promoted",summary:"Promoted from Gen 1 winner"},
-      b:{sub:"quick question about {{company}}",rate:1.5,sent:600,status:"promoted",summary:"Casual subject line, question format"},
-      learning:"Question-based subjects outperform statements. Promoted challenger."},
-    {gen:3,month:"Nov",svc:"SEO",change:"copy",
-      a:{sub:"quick question about {{company}}",rate:1.5,sent:800,status:"lost",summary:"Promoted from Gen 2"},
-      b:{sub:"{{company}} isn't showing up on Google",rate:2.1,sent:800,status:"promoted",summary:"Direct, specific claim about their visibility"},
-      learning:"Specific negative claims ('you're NOT showing up') dramatically outperform generic questions"},
-    {gen:4,month:"Dec",svc:"SEO",change:"body",
-      a:{sub:"{{company}} isn't showing up on Google",rate:2.1,sent:1000,status:"lost",summary:"Long body with stats and case study"},
-      b:{sub:"{{company}} isn't showing up on Google",rate:2.9,sent:1000,status:"promoted",summary:"Short body, 3 lines max, direct CTA"},
-      learning:"Shorter emails convert better. Removed case study, kept to 3 punchy lines."},
-    {gen:5,month:"Jan",svc:"SEO",change:"copy",
-      a:{sub:"{{company}} isn't showing up on Google",rate:2.9,sent:1200,status:"current",summary:"Current champion — short & direct"},
-      b:{sub:"I searched for {{company}} on Google",rate:3.1,sent:800,status:"testing",summary:"First-person framing, implies research done"},
-      learning:null},
-    {gen:1,month:"Oct",svc:"Websites",change:"copy",
-      a:{sub:"website for {{company}}",rate:0.6,sent:400,status:"lost",summary:"Generic website pitch"},
-      b:{sub:"{{company}}'s website needs work",rate:0.8,sent:400,status:"promoted",summary:"Direct critique approach"},
-      learning:"Direct approach slightly better but both low. Need stronger hook."},
-    {gen:2,month:"Nov",svc:"Websites",change:"copy",
-      a:{sub:"{{company}}'s website needs work",rate:0.8,sent:600,status:"lost",summary:"Critique without specifics"},
-      b:{sub:"website for {{company}} — $5,999",rate:2.1,sent:600,status:"promoted",summary:"Price in subject line"},
-      learning:"Price transparency in first touch dramatically increased replies. Pre-qualifies on budget."},
-    {gen:3,month:"Dec",svc:"Websites",change:"body",
-      a:{sub:"website for {{company}} — $5,999",rate:2.1,sent:800,status:"lost",summary:"Listed features and timeline"},
-      b:{sub:"{{first_name}}, quick one",rate:3.6,sent:800,status:"promoted",summary:"Casual, personal, short. Critique their site directly"},
-      learning:"Casual first-name subject + direct site critique massively outperformed. Feels personal."},
-    {gen:4,month:"Jan",svc:"Websites",change:"copy",
-      a:{sub:"{{first_name}}, quick one",rate:3.6,sent:1000,status:"current",summary:"Current champion — casual & direct"},
-      b:{sub:"I looked at {{company}}'s website",rate:2.8,sent:600,status:"testing",summary:"Research-implied approach"},
-      learning:null}
-  ]
-};
+  {
+    input:"We're a B2B SaaS platform for HR teams — need to book demos with HR directors at mid-market companies",
+    service:"B2B HR SaaS platform",
+    icp:"HR Directors, 200-2000 employees, mid-market, US/UK/AU",
+    domains:["hroutreach.co","talentflows.io","peoplescale.co","hrgrowth.io"],
+    mailboxes:12
+  },
+  {
+    input:"Real estate agency on the Gold Coast, want to find property sellers thinking about listing in the next 6 months",
+    service:"Real estate agency",
+    icp:"Property owners, Gold Coast QLD, homes valued $800K-2M",
+    domains:["gcpropertyreach.com","coastsellers.co","goldcoasthomes.io","listingflow.co"],
+    mailboxes:8
+  },
+  {
+    input:"Accounting firm in Sydney targeting SMB owners who need tax planning and advisory services",
+    service:"Accounting & tax advisory",
+    icp:"SMB owners, 5-50 employees, Sydney metro, revenue $500K-5M",
+    domains:["taxadvisoryreach.com","bizfinanceflow.co","smbaccounting.io","advisorygrowth.co"],
+    mailboxes:8
+  }
+];
 
-const cc={warm:"var(--green)",negative:"var(--red)",auto_reply:"var(--blue)",unsubscribe:"var(--text3)"};
-const cb={warm:"var(--green-bg)",negative:"var(--red-bg)",auto_reply:"var(--blue-bg)",unsubscribe:"rgba(255,255,255,0.03)"};
+let heroRunning=false;
+const typedEl=document.getElementById('heroTyped');
+const outputEl=document.getElementById('heroOutput');
 
-const G={background:"var(--bg)",border:"1px solid var(--border)",borderRadius:0};
-
-function Card({children,style,className,onClick}){
-  return <div onClick={onClick} className={className} style={{...G,transition:"all .15s",...style}}>{children}</div>;
+function typeText(el,text,speed){
+  speed=speed||35;
+  return new Promise(function(resolve){
+    var i=0;
+    el.textContent='';
+    var interval=setInterval(function(){
+      el.textContent=text.substring(0,i+1);
+      i++;
+      if(i>=text.length){clearInterval(interval);resolve();}
+    },speed);
+  });
 }
 
-// Grid cell style — borders extend edge to edge
-function Cell({children,style,border,span}){
-  return <div style={{padding:"20px 24px",borderBottom:border!==false?"1px solid var(--border)":"none",...style}}>{children}</div>;
+function addOutput(html,delay){
+  delay=delay||0;
+  return new Promise(function(resolve){
+    setTimeout(function(){
+      var div=document.createElement('div');
+      div.innerHTML=html;
+      div.style.opacity='0';div.style.transform='translateY(4px)';
+      div.style.transition='all .2s ease';
+      outputEl.appendChild(div);
+      requestAnimationFrame(function(){
+        div.style.opacity='1';div.style.transform='none';
+        var scroller=outputEl.closest('.cbo');
+        if(scroller)scroller.scrollTop=scroller.scrollHeight;
+      });
+      resolve();
+    },delay);
+  });
 }
 
-function Stat({label,val,sub,color,bar,pct}){
-  return <Card style={{padding:"20px 24px"}}>
-    <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:"1.5px",color:"var(--text3)",fontWeight:600,marginBottom:10}}>{label}</div>
-    <div style={{fontFamily:"var(--mono)",fontSize:30,fontWeight:700,color:color||"var(--text)",lineHeight:1}}>{val}</div>
-    {sub&&<div style={{fontSize:11,color:"var(--text2)",marginTop:6,fontFamily:"var(--mono)"}}>{sub}</div>}
-    {bar&&<div style={{height:3,background:"var(--bg3)",borderRadius:2,marginTop:14,overflow:"hidden"}}>
-      <div style={{height:"100%",width:Math.min(pct,100)+"%",borderRadius:2,background:"var(--green)",}}/>
-    </div>}
-  </Card>;
+async function runExample(idx){
+  if(heroRunning)return;
+  heroRunning=true;
+  var ex=examples[idx];
+  outputEl.innerHTML='';
+  typedEl.textContent='';
+  document.getElementById('dashLink').style.opacity='0';
+
+  // Highlight active button
+  document.querySelectorAll('.hero-eg').forEach(function(b,i){
+    b.style.borderColor=i===idx?'var(--green)':'';
+    b.style.color=i===idx?'var(--green)':'';
+  });
+
+  await typeText(typedEl,ex.input,20);
+  await new Promise(function(r){setTimeout(r,400)});
+
+  await addOutput('<span class="d">\u2192</span> <span class="g">Analyzing</span> your business...');
+  await new Promise(function(r){setTimeout(r,500)});
+  await addOutput('<span class="d">  Service:</span> '+ex.service);
+  await addOutput('<span class="d">  ICP:</span> '+ex.icp);
+  await new Promise(function(r){setTimeout(r,300)});
+
+  await addOutput('<br><span class="g">\u2713</span> '+ex.domains.length+' domains purchased <span class="d">('+ex.domains.slice(0,2).join(', ')+'...)</span>',200);
+  await addOutput('<span class="g">\u2713</span> '+ex.mailboxes+' mailboxes created',250);
+  await addOutput('<span class="g">\u2713</span> DNS configured \u2014 SPF, DKIM, DMARC',250);
+  await addOutput('<span class="g">\u2713</span> Warmup started \u2014 Phase 1 in 14 days',250);
+  await addOutput('<span class="g">\u2713</span> AI copy generated \u2014 6 variants, A/B testing enabled',250);
+  await addOutput('<span class="g">\u2713</span> Verified leads sourced \u2014 2,400 contacts loaded',250);
+  await new Promise(function(r){setTimeout(r,300)});
+  await addOutput('<br><span class="d">\u2192</span> Dashboard: <span class="g">https://app.coldflows.ai/dash</span>');
+  await addOutput('<span class="d">\u2192</span> <span class="g" style="font-weight:600">You\'re live. First leads in ~14 days.</span>');
+
+  document.getElementById('dashLink').style.opacity='1';
+
+  heroRunning=false;
 }
 
-function getPhase(day){
-  if(day>=28)return{name:"Full capacity",color:"var(--green)",weekly:2100};
-  if(day>=21)return{name:"Phase 2",color:"var(--green)",weekly:1400};
-  if(day>=14)return{name:"Phase 1",color:"var(--green)",weekly:840};
-  return{name:"Warmup",color:"var(--orange)",weekly:420};
-}
+setTimeout(function(){runExample(0)},1200);
 
-function CampaignCard({c,onClick}){
-  const rr=c.sent>0?(c.rep/c.sent*100).toFixed(1):"0.0";
-  const phase=getPhase(c.day);
-  return <div onClick={onClick} className="campaign-cell" style={{cursor:"pointer",position:"relative"}}>
-    <div style={{padding:"14px 20px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10}}>
-        {/* Animated campaign icon */}
-        <div className="camp-icon" style={{width:28,height:28,borderRadius:6,background:"var(--green-bg)",border:"1px solid var(--green-bd)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/>
-          </svg>
-        </div>
-        <div>
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <span style={{fontSize:14,fontWeight:600}}>{c.name}</span>
-            <span className="camp-arrow" style={{color:"var(--green)",fontSize:12,fontWeight:600}}>→</span>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3}}>
-            <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,fontWeight:600,
-              background:phase.name==="Warmup"?"var(--orange-bg)":"var(--green-bg)",
-              color:phase.color}}>{phase.name}</span>
-            <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
-          </div>
-        </div>
-      </div>
-      <div style={{textAlign:"right"}}>
-        <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:600,color:"var(--text)"}}>{c.weekly.toLocaleString()}</div>
-        <div style={{fontSize:9,color:"var(--text3)"}}>/week</div>
-      </div>
-    </div>
-    <div style={{display:"flex",borderTop:"1px solid var(--border)"}}>
-      {[{v:c.sent,l:"Sent"},{v:c.rep,l:"Replies",c:"var(--green)"},{v:rr+"%",l:"Rate"},{v:c.bnc,l:"Bounced"}].map((s,i)=>
-        <div key={i} style={{flex:1,padding:"10px 8px",textAlign:"center",borderRight:i<3?"1px solid var(--border)":"none"}}>
-          <div style={{fontFamily:"var(--mono)",fontSize:15,fontWeight:600,color:s.c||"var(--text)"}}>{s.v}</div>
-          <div style={{fontSize:9,color:"var(--text3)",marginTop:2}}>{s.l}</div>
-        </div>)}
-    </div>
-    <div style={{display:"flex",borderTop:"1px solid var(--border)"}}>
-      {[{side:c.a,label:"A",color:"var(--blue)"},{side:c.b,label:"B",color:"var(--green)"}].map(({side,label,color},i)=>
-        <div key={i} style={{flex:1,padding:"10px 16px",borderRight:i===0?"1px solid var(--border)":"none"}}>
-          <div style={{fontSize:9,letterSpacing:"1px",fontWeight:600,color,marginBottom:3}}>{side.l}</div>
-          <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:600}}>{side.rate}%</div>
-          <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{side.rep}/{side.sent}</div>
-        </div>)}
-    </div>
-    <div style={{padding:"10px 20px",borderTop:"1px solid var(--border)"}}>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text3)",marginBottom:4}}>
-        <span>Test progress</span><span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
-      </div>
-      <div style={{height:2,background:"var(--border)",borderRadius:1,overflow:"hidden"}}>
-        <div style={{height:"100%",width:c.prog+"%",borderRadius:1,background:"var(--green)"}}/>
-      </div>
-    </div>
-  </div>;
-}
+// FLOWING DIGITS RIVER
+function createRiver(canvasId){
+  var c=document.getElementById(canvasId);
+  if(!c)return;
+  var ctx=c.getContext('2d');
+  var W=c.width,H=c.height;
+  var chars='··..-:++XX··..-:+X'.split('');
+  var tick=0;
 
-function Reply({r}){
-  return <div className="hoverable" style={{display:"flex",gap:14,padding:"16px 4px",borderBottom:"1px solid var(--border)",marginLeft:-4,marginRight:-4,borderRadius:4}}>
-    <div style={{width:36,height:36,borderRadius:10,background:cb[r.cat],color:cc[r.cat],display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,flexShrink:0}}>{r.nm[0]}</div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{fontSize:13,fontWeight:600}}>{r.nm}</span>
-        <span style={{fontSize:8,padding:"3px 8px",borderRadius:20,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.5px",background:cb[r.cat],color:cc[r.cat]}}>{r.cat.replace("_"," ")}</span>
-      </div>
-      <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{r.co} · {r.ca}</div>
-      <div style={{fontSize:12,color:"var(--text2)",marginTop:6,lineHeight:1.6,maxHeight:48,overflow:"hidden"}}>{r.txt}</div>
-      <div style={{fontSize:10,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{r.t}</div>
-    </div>
-  </div>;
-}
-
-function Modal({c,onClose}){
-  if(!c)return null;
-  const [expandedExp,setExpandedExp]=useState(null);
-  const [selectedPhase,setSelectedPhase]=useState(null);
-  const cr=D.reps.filter(r=>r.ca===c.name);
-
-  // Per-phase historical experiment data
-  const phaseHistory={
-    "Warmup":{summary:"Reputation building phase — no outreach sent",experiments:[],stats:{sent:0,replies:0,rate:"—",mailboxes:4,inbox:"Building"},desc:"During this phase, mailboxes were warming up with simulated email exchanges. No outreach was sent to prospects. Sender reputation was being established with Gmail, Outlook, and Yahoo."},
-    "Phase 1":{summary:"Initial outreach with first A/B tests",experiments:[
-      {id:"EXP-01",test:"Generic intro vs Pain point opener",baseline:0.8,challenger:1.2,winner:"challenger",learning:"Leading with a specific pain point outperformed generic introductions."},
-      {id:"EXP-02",test:"Pain point vs + Price upfront",baseline:1.2,challenger:1.8,winner:"challenger",learning:"Adding price in the first email pre-qualifies leads and increases reply quality."},
-      {id:"EXP-03",test:"Price upfront vs + Social proof",baseline:1.8,challenger:1.6,winner:"baseline",learning:"Social proof didn't improve rates — prospects prefer directness over testimonials."}
-    ],stats:{sent:2520,replies:38,rate:"1.5%",mailboxes:4,inbox:"97%"},desc:"First live outreach began. A/B testing established baseline copy performance. Three experiments ran during this phase, improving reply rate from 0.8% to 1.8%."},
-    "Phase 2":{summary:"Volume ramp-up with AI copy optimisation",experiments:[
-      {id:"EXP-04",test:"Price upfront vs + Competitor mention",baseline:1.8,challenger:2.3,winner:"challenger",learning:"Mentioning competitors created urgency. Biggest single jump in reply rate."},
-      {id:"EXP-05",test:"Competitor mention vs + Question format",baseline:2.3,challenger:2.1,winner:"baseline",learning:"Direct statements outperform questions in subject lines for this ICP."},
-      {id:"EXP-06",test:"Competitor mention vs + Shorter copy",baseline:2.3,challenger:2.7,winner:"challenger",learning:"Cutting email length by 40% increased replies. Less is more."}
-    ],stats:{sent:5880,replies:147,rate:"2.5%",mailboxes:4,inbox:"98%"},desc:"Volume increased and AI copy optimisation kicked in. Three more experiments ran, pushing reply rate from 1.8% to 2.7%. The system started learning what works for this specific market."},
-    "Full capacity":{summary:"Peak performance with self-learning loop",experiments:[
-      {id:"EXP-07",test:"Short copy vs + Personalised opener",baseline:2.7,challenger:2.5,winner:"baseline",learning:"Generic personalisation tokens didn't help — specificity matters more."},
-      {id:"EXP-08",test:"Short copy vs + Soft CTA",baseline:2.7,challenger:3.1,winner:"challenger",learning:"Soft CTA ('worth a look?') beat hard CTA ('book a call'). Lower commitment = higher reply."},
-      {id:"EXP-09",test:"Soft CTA vs + Send time optimisation",baseline:3.1,challenger:3.4,winner:"challenger",learning:"Tuesday 9am sends outperform all other time slots by 15%."},
-      {id:"EXP-10",test:"Tue 9am vs + Follow-up timing",baseline:3.4,challenger:3.6,winner:"challenger",learning:"3-day follow-up gap beats 2-day. Gives prospects time to think."}
-    ],stats:{sent:14700,replies:529,rate:"3.6%",mailboxes:4,inbox:"99%"},desc:"Full volume achieved. Self-learning loop running continuously. Four experiments pushed reply rate from 2.7% to 3.6%. System now fully optimised for this market."}
-  };
-  const phase=getPhase(c.day);
-  const phases=[
-    {name:"Warmup",weekly:420,day:0,endDay:14},
-    {name:"Phase 1",weekly:840,day:14,endDay:21},
-    {name:"Phase 2",weekly:"1,400",day:21,endDay:28},
-    {name:"Full capacity",weekly:"2,100+",day:28,endDay:60}
-  ];
-  const nextPhase=phases.find(p=>c.day<p.day);
-  const daysToNext=nextPhase?nextPhase.day-c.day:0;
-
-  // 6 months of mock A/B test history — reply rate climbing with each optimisation
-  const testHistory=[
-    {id:"EXP-01",month:"Oct",week:"W1-2",baseline:{sub:"Generic intro",rate:0.8},challenger:{sub:"Pain point opener",rate:1.2},winner:"challenger",learning:"Leading with a specific pain point outperformed generic introductions",rateAfter:1.2},
-    {id:"EXP-02",month:"Oct",week:"W3-4",baseline:{sub:"Pain point opener",rate:1.2},challenger:{sub:"+ Price upfront",rate:1.8},winner:"challenger",learning:"Adding price in the first email pre-qualifies leads and increases reply quality",rateAfter:1.8},
-    {id:"EXP-03",month:"Nov",week:"W1-2",baseline:{sub:"Price upfront",rate:1.8},challenger:{sub:"+ Social proof",rate:1.6},winner:"baseline",learning:"Social proof didn't improve rates — prospects prefer directness over testimonials",rateAfter:1.8},
-    {id:"EXP-04",month:"Nov",week:"W3-4",baseline:{sub:"Price upfront",rate:1.8},challenger:{sub:"+ Competitor mention",rate:2.3},winner:"challenger",learning:"Mentioning they're losing to competitors created urgency. Biggest jump so far",rateAfter:2.3},
-    {id:"EXP-05",month:"Dec",week:"W1-2",baseline:{sub:"Competitor mention",rate:2.3},challenger:{sub:"+ Question format",rate:2.1},winner:"baseline",learning:"Direct statements outperform questions in subject lines for this ICP",rateAfter:2.3},
-    {id:"EXP-06",month:"Dec",week:"W3-4",baseline:{sub:"Competitor mention",rate:2.3},challenger:{sub:"+ Shorter copy",rate:2.7},winner:"challenger",learning:"Cutting email length by 40% increased replies. Less is more",rateAfter:2.7},
-    {id:"EXP-07",month:"Jan",week:"W1-2",baseline:{sub:"Short + competitor",rate:2.7},challenger:{sub:"+ Personalised opener",rate:2.5},winner:"baseline",learning:"Generic personalisation tokens didn't help — specificity matters more than {{first_name}}",rateAfter:2.7},
-    {id:"EXP-08",month:"Jan",week:"W3-4",baseline:{sub:"Short + competitor",rate:2.7},challenger:{sub:"+ CTA variation",rate:3.1},winner:"challenger",learning:"Soft CTA ('worth a look?') beat hard CTA ('book a call'). Lower commitment = higher reply",rateAfter:3.1},
-    {id:"EXP-09",month:"Feb",week:"W1-2",baseline:{sub:"Soft CTA",rate:3.1},challenger:{sub:"+ Send time test",rate:3.4},winner:"challenger",learning:"Tuesday 9am sends outperform all other time slots by 15%",rateAfter:3.4},
-    {id:"EXP-10",month:"Feb",week:"W3-4",baseline:{sub:"Tue 9am + soft CTA",rate:3.4},challenger:{sub:"+ Follow-up timing",rate:3.6},winner:"challenger",learning:"3-day follow-up gap beats 2-day. Gives prospects time to think",rateAfter:3.6},
-    {id:"CURRENT",month:"Mar",week:"W1-2",baseline:{sub:c.a.l,rate:c.a.rate},challenger:{sub:c.b.l,rate:c.b.rate},winner:c.b.w?"challenger":c.a.w?"baseline":"testing",learning:"Currently testing...",rateAfter:Math.max(c.a.rate,c.b.rate),active:true}
+  // River path control points — snakes across the canvas
+  var path=[
+    {x:0,y:0.45},{x:0.08,y:0.35},{x:0.16,y:0.5},{x:0.25,y:0.6},
+    {x:0.35,y:0.5},{x:0.45,y:0.35},{x:0.55,y:0.45},{x:0.65,y:0.6},
+    {x:0.75,y:0.5},{x:0.85,y:0.35},{x:0.95,y:0.45},{x:1.0,y:0.5}
   ];
 
-  // Rate progression for the visual chart
-  const rates=testHistory.map(t=>t.rateAfter);
-  const maxRate=Math.max(...rates)+0.5;
-  const chartW=820;
-  const chartH=120;
+  function getPoint(t){
+    var n=path.length-1;
+    var i=Math.min(Math.floor(t*n),n-1);
+    var f=(t*n)-i;
+    var p0=path[Math.max(i-1,0)],p1=path[i],p2=path[Math.min(i+1,n)],p3=path[Math.min(i+2,n)];
+    var f2=f*f,f3=f2*f;
+    return{
+      x:0.5*((2*p1.x)+(p2.x-p0.x)*f+(2*p0.x-5*p1.x+4*p2.x-p3.x)*f2+(3*p1.x-p0.x-3*p2.x+p3.x)*f3),
+      y:0.5*((2*p1.y)+(p2.y-p0.y)*f+(2*p0.y-5*p1.y+4*p2.y-p3.y)*f2+(3*p1.y-p0.y-3*p2.y+p3.y)*f3)
+    };
+  }
 
-  return <div onClick={e=>{if(e.target===e.currentTarget)onClose()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:30,overflowY:"auto"}}>
-    <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:960,animation:"fadeIn .3s ease"}}>
+  // Pre-generate fixed particle positions along the river
+  var particles=[];
+  for(var i=0;i<600;i++){
+    var t=Math.random();
+    var pt=getPoint(t);
+    // Spread perpendicular to path
+    var tNext=Math.min(t+0.01,1);
+    var ptNext=getPoint(tNext);
+    var dx=ptNext.x-pt.x,dy=ptNext.y-pt.y;
+    var len=Math.sqrt(dx*dx+dy*dy)||0.001;
+    var perpX=-dy/len,perpY=dx/len;
+    // Gaussian-ish spread from center
+    var spread=(Math.random()+Math.random()+Math.random())/3-0.5;
+    var width=0.06+Math.sin(t*Math.PI)*0.04;
+    particles.push({
+      t:t,
+      offX:perpX*spread*width,
+      offY:perpY*spread*width,
+      char:chars[Math.floor(Math.random()*chars.length)],
+      phase:Math.random()*Math.PI*2,
+      speed:0.3+Math.random()*0.7,
+      baseAlpha:0.35+Math.random()*0.55
+    });
+  }
 
-      {/* HEADER */}
-      <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div>
-          <h2 style={{fontSize:20,fontWeight:800}}>{c.name}</h2>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
-            <span style={{fontSize:9,padding:"3px 8px",borderRadius:6,fontWeight:700,textTransform:"uppercase",background:"var(--green-bg)",color:"var(--green)",border:"1px solid var(--green-bd)"}}>{phase.name}</span>
-            <span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
-            <span style={{fontSize:11,color:"var(--text3)"}}>·</span>
-            <span style={{fontFamily:"var(--mono)",fontSize:11,fontWeight:600,color:"var(--text)"}}>{c.weekly.toLocaleString()}/week</span>
-          </div>
-        </div>
-        <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-      </div>
+  function draw(){
+    tick++;
+    ctx.clearRect(0,0,W,H);
+    ctx.font='10px JetBrains Mono,monospace';
+    ctx.textAlign='center';
 
-      <div style={{padding:"24px 28px"}}>
+    for(var i=0;i<particles.length;i++){
+      var p=particles[i];
+      // Flow: each particle's position oscillates along the river
+      var wave=Math.sin(tick*0.015*p.speed+p.phase)*0.04;
+      var flowT=(p.t+tick*0.0008*p.speed)%1;
+      var pt=getPoint(flowT);
+      var x=(pt.x+p.offX+wave)*W;
+      var y=(pt.y+p.offY)*H;
 
-        {/* PHASE CARDS */}
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>
-          Campaign phase {nextPhase&&<span style={{color:"var(--green)",fontWeight:600,textTransform:"none",letterSpacing:0,marginLeft:8}}>→ {nextPhase.name} in {daysToNext} days</span>}
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:0}}>
-          {phases.map((p,i)=>{
-            const done=c.day>=p.endDay;
-            const active=c.day>=p.day&&c.day<p.endDay;
-            const future=c.day<p.day;
-            const isSelected=selectedPhase===p.name;
-            return <div key={i} className="hoverable" onClick={()=>!future&&setSelectedPhase(isSelected?null:p.name)} style={{padding:"10px 12px",borderRadius:0,cursor:future?"default":"pointer",
-              background:isSelected?"var(--green-bg)":active?"var(--green-bg)":done?"transparent":"transparent",
-              border:"1px solid "+(isSelected?"var(--green-bd)":active?"var(--green-bd)":done?"var(--border)":"var(--border)"),
-              borderBottom:isSelected?"2px solid var(--green)":"1px solid var(--border)",
-              opacity:future?0.35:1}}>
-              <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
-                <div style={{width:7,height:7,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)"}}/>
-                <span style={{fontSize:9,fontWeight:700,textTransform:"uppercase",color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
-                {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:4,background:"var(--green)",color:"#000",fontWeight:800}}>NOW</span>}
-              </div>
-              <div style={{fontFamily:"var(--mono)",fontSize:15,fontWeight:700,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:8,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
-              {(done||active)&&<div style={{fontSize:8,color:"var(--green)",marginTop:3}}>View history →</div>}
-            </div>;})}
-        </div>
+      // Pulsing opacity — some chars bright, some dim, shifting over time
+      var pulse=Math.sin(tick*0.02+p.phase*3)*0.3+0.7;
+      var edgeFade=1-Math.abs(p.offX)/(0.08)*1.5;
+      edgeFade=Math.max(0,Math.min(1,edgeFade));
+      var alpha=p.baseAlpha*pulse*edgeFade*1.4;
+      if(alpha<0.03)continue;
 
-        {/* Phase history panel — shows when a phase card is clicked */}
-        {selectedPhase&&phaseHistory[selectedPhase]&&(()=>{
-          const ph=phaseHistory[selectedPhase];
-          return <div style={{border:"1px solid var(--green-bd)",borderTop:"none",padding:20,marginBottom:24,background:"var(--green-bg)",borderRadius:"0 0 6px 6px"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
-              <div>
-                <div style={{fontSize:12,fontWeight:700,color:"var(--green)"}}>{selectedPhase} — Historical data</div>
-                <div style={{fontSize:11,color:"var(--text2)",marginTop:2}}>{ph.summary}</div>
-              </div>
-              <button onClick={()=>setSelectedPhase(null)} style={{fontSize:10,color:"var(--text3)",background:"none",border:"none",cursor:"pointer"}}>✕ close</button>
-            </div>
-            <p style={{fontSize:11,color:"var(--text2)",lineHeight:1.6,marginBottom:14}}>{ph.desc}</p>
-
-            {/* Phase stats */}
-            <div style={{display:"flex",borderTop:"1px solid var(--border)",borderBottom:"1px solid var(--border)",marginBottom:14}}>
-              {[{l:"Emails sent",v:ph.stats.sent.toLocaleString()},{l:"Replies",v:ph.stats.replies},{l:"Reply rate",v:ph.stats.rate,c:"var(--green)"},{l:"Mailboxes",v:ph.stats.mailboxes},{l:"Inbox rate",v:ph.stats.inbox}].map((s,i,a)=>
-                <div key={i} style={{flex:1,padding:"10px 12px",textAlign:"center",borderRight:i<a.length-1?"1px solid var(--border)":"none"}}>
-                  <div style={{fontFamily:"var(--mono)",fontSize:14,fontWeight:600,color:s.c||"var(--text)"}}>{s.v}</div>
-                  <div style={{fontSize:8,color:"var(--text3)",marginTop:2}}>{s.l}</div>
-                </div>)}
-            </div>
-
-            {/* Phase experiments */}
-            {ph.experiments.length>0?<>
-              <div style={{fontSize:10,fontWeight:600,color:"var(--text2)",marginBottom:8}}>Experiments during this phase ({ph.experiments.length})</div>
-              {ph.experiments.map((e,i)=>{
-                const won=e.winner==="challenger";
-                return <div key={i} style={{display:"flex",gap:10,paddingBottom:8,marginBottom:8,borderBottom:i<ph.experiments.length-1?"1px solid var(--border)":"none"}}>
-                  <div style={{width:20,height:20,borderRadius:6,background:won?"var(--green-bg)":"transparent",border:"1px solid "+(won?"var(--green-bd)":"var(--border)"),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
-                    <span style={{fontSize:8,fontWeight:700,color:won?"var(--green)":"var(--text3)"}}>{won?"↑":"="}</span>
-                  </div>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <span style={{fontSize:11,fontWeight:600}}>{e.id}: {e.test}</span>
-                      <div style={{display:"flex",alignItems:"center",gap:4}}>
-                        <span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>{e.baseline}%</span>
-                        <span style={{fontSize:10,color:won?"var(--green)":"var(--text3)"}}>→</span>
-                        <span style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600,color:won?"var(--green)":"var(--text3)"}}>{e.challenger}%</span>
-                      </div>
-                    </div>
-                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{e.learning}</div>
-                  </div>
-                </div>;})}
-            </>:<div style={{fontSize:11,color:"var(--text3)",fontStyle:"italic"}}>No outreach experiments during this phase — mailboxes were building reputation.</div>}
-          </div>;
-        })()}
-
-        {!selectedPhase&&<div style={{marginBottom:24}}/>}
-
-        {/* REPLY RATE CHART — visual improvement over time */}
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>
-          Reply rate improvement <span style={{color:"var(--green)",fontWeight:600,textTransform:"none",letterSpacing:0,marginLeft:8}}>0.8% → {Math.max(c.a.rate,c.b.rate)}% (+{(Math.max(c.a.rate,c.b.rate)-0.8).toFixed(1)}%)</span>
-        </div>
-        <Card style={{padding:"20px 24px 16px",marginBottom:24}}>
-          <svg width="100%" viewBox={`0 0 ${chartW} ${chartH+30}`} style={{overflow:"visible"}}>
-            {/* Grid lines */}
-            {[0,1,2,3,4].map(v=><g key={v}>
-              <line x1={0} y1={chartH-(v/maxRate)*chartH} x2={chartW} y2={chartH-(v/maxRate)*chartH} stroke="var(--chart-grid)" strokeWidth={1}/>
-              <text x={-4} y={chartH-(v/maxRate)*chartH+4} fill="var(--chart-text)" fontSize={9} textAnchor="end" fontFamily="'JetBrains Mono',monospace">{v}%</text>
-            </g>)}
-
-            {/* Area fill */}
-            <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(0,212,126,0.15)"/><stop offset="100%" stopColor="rgba(0,212,126,0)"/>
-            </linearGradient></defs>
-            <path d={`M0,${chartH} ${rates.map((r,i)=>`L${i*(chartW/(rates.length-1))},${chartH-(r/maxRate)*chartH}`).join(' ')} L${chartW},${chartH} Z`} fill="url(#areaGrad)"/>
-
-            {/* Line */}
-            <path d={rates.map((r,i)=>`${i===0?'M':'L'}${i*(chartW/(rates.length-1))},${chartH-(r/maxRate)*chartH}`).join(' ')} fill="none" stroke="var(--green)" strokeWidth={2} style={{filter:"drop-shadow(0 0 4px rgba(0,212,126,0.4))"}}/>
-
-            {/* Dots + labels */}
-            {rates.map((r,i)=>{
-              const x=i*(chartW/(rates.length-1));
-              const y=chartH-(r/maxRate)*chartH;
-              const t=testHistory[i];
-              return <g key={i}>
-                <circle cx={x} cy={y} r={t.active?5:3} fill={t.active?"var(--green)":"var(--chart-dot)"} style={{filter:t.active?"drop-shadow(0 0 6px rgba(0,212,126,0.6))":"none"}}/>
-                <text x={x} y={chartH+14} fill="var(--chart-text)" fontSize={8} textAnchor="middle" fontFamily="'JetBrains Mono',monospace">{t.month}</text>
-                <text x={x} y={y-8} fill="var(--text2)" fontSize={8} textAnchor="middle" fontFamily="'JetBrains Mono',monospace">{r}%</text>
-              </g>;})}
-          </svg>
-        </Card>
-
-        {/* CURRENT A/B TEST — sits above history */}
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>Current A/B test</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:14,marginBottom:12}}>
-          {[c.a,c.b].map((s,i)=><Card key={i} style={{padding:18,borderColor:i===0?"rgba(79,172,254,0.15)":"var(--green-bd)",background:i===0?"rgba(79,172,254,0.04)":"var(--green-bg)"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <span style={{fontSize:9,textTransform:"uppercase",letterSpacing:"1px",fontWeight:700,padding:"3px 8px",borderRadius:6,background:i===0?"var(--blue-bg)":"var(--green-bg)",color:i===0?"var(--blue)":"var(--green)"}}>{s.l} ({i===0?"A":"B"})</span>
-              {s.w&&<span style={{fontSize:9,color:"var(--green)",fontWeight:700}}>★ WINNING</span>}
-            </div>
-            <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:6}}>Subject: {s.sub}</div>
-            <div style={{fontSize:11,lineHeight:1.7,color:"var(--text3)",whiteSpace:"pre-wrap",maxHeight:100,overflow:"hidden"}}>{s.body}</div>
-            <div style={{display:"flex",gap:16,marginTop:12,paddingTop:12,borderTop:"1px solid var(--border)"}}>
-              {[{v:s.sent,l:"Sent"},{v:s.rep,l:"Replies",c:"var(--green)"},{v:s.rate+"%",l:"Rate"}].map((m,j)=>
-                <div key={j} style={{textAlign:"center"}}>
-                  <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:600,color:m.c||"var(--text)"}}>{m.v}</div>
-                  <div style={{fontSize:8,color:"var(--text3)",marginTop:2,textTransform:"uppercase"}}>{m.l}</div>
-                </div>)}
-            </div>
-          </Card>)}
-        </div>
-
-        {/* Test progress */}
-        <div style={{marginBottom:24}}>
-          <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text3)",marginBottom:6}}>
-            <span>Test progress — evaluates at {c.tgt} sends</span>
-            <span style={{fontFamily:"var(--mono)"}}>{c.sent}/{c.tgt}</span>
-          </div>
-          <div style={{height:4,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
-            <div style={{height:"100%",width:c.prog+"%",borderRadius:2,background:"var(--green)"}}/>
-          </div>
-        </div>
-
-        {/* A/B TEST HISTORY — most recent first, clickable */}
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>
-          Optimisation history — {testHistory.filter(t=>!t.active).length} past experiments
-        </div>
-        <div style={{maxHeight:400,overflowY:"auto",marginBottom:24}}>
-          {[...testHistory].filter(t=>!t.active).reverse().map((t,i,arr)=>{
-            const isLast=i===arr.length-1;
-            const won=t.winner==="challenger";
-            const lost=t.winner==="baseline";
-            const isExpanded=expandedExp===t.id;
-            return <div key={t.id}>
-              <div className="hoverable" onClick={()=>setExpandedExp(isExpanded?null:t.id)} style={{display:"flex",gap:12,position:"relative",cursor:"pointer",padding:"4px 0",borderRadius:4}}>
-              {/* Timeline line */}
-              {!isLast&&<div style={{position:"absolute",left:11,top:28,bottom:-4,width:2,
-                background:"var(--border)"}}/>}
-              {/* Dot */}
-              <div style={{width:24,height:24,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
-                background:won?"var(--green-bg)":"rgba(255,255,255,0.03)",
-                border:"1px solid "+(won?"rgba(0,212,126,0.15)":"var(--border)"),
-                marginTop:2}}>
-                <span style={{fontSize:9,fontWeight:700,color:won?"var(--green)":"var(--text3)"}}>{won?"↑":"="}</span>
-              </div>
-              {/* Content */}
-              <div style={{flex:1,paddingBottom:8,borderBottom:isLast?"none":"1px solid var(--border)"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontSize:12,fontWeight:600}}>{t.id}</span>
-                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{t.month} {t.week}</span>
-                  </div>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>{t.baseline.rate}%</span>
-                    <span style={{fontSize:10,color:won?"var(--green)":"var(--text3)"}}>→</span>
-                    <span style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600,color:won?"var(--green)":"var(--text3)"}}>{t.challenger.rate}%</span>
-                    {won&&<span style={{fontSize:8,padding:"1px 5px",borderRadius:4,background:"var(--green-bg)",color:"var(--green)",fontWeight:700}}>↑</span>}
-                    <span style={{fontSize:10,color:"var(--text3)",transform:isExpanded?"rotate(180deg)":"rotate(0)",transition:"transform .2s"}}>▾</span>
-                  </div>
-                </div>
-                <div style={{fontSize:11,color:"var(--text3)",marginTop:3,lineHeight:1.5}}>{t.learning}</div>
-              </div>
-              </div>
-
-              {/* Expanded A/B copy detail */}
-              {isExpanded&&<div style={{marginLeft:36,marginBottom:12,padding:16,border:"1px solid var(--border)",borderRadius:6,background:"var(--bg)"}}>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12}}>
-                  <div style={{padding:12,borderRadius:6,background:"var(--blue-bg)",border:"1px solid rgba(79,172,254,0.1)"}}>
-                    <div style={{fontSize:9,fontWeight:700,color:"var(--blue)",marginBottom:6}}>BASELINE (A) {!won&&lost?"— WINNER":""}</div>
-                    <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:4}}>Subject: {t.baseline.sub}</div>
-                    <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:600,marginTop:8}}>{t.baseline.rate}%<span style={{fontSize:10,color:"var(--text3)",fontWeight:400}}> reply rate</span></div>
-                  </div>
-                  <div style={{padding:12,borderRadius:6,background:won?"var(--green-bg)":"rgba(255,255,255,0.02)",border:"1px solid "+(won?"var(--green-bd)":"var(--border)")}}>
-                    <div style={{fontSize:9,fontWeight:700,color:won?"var(--green)":"var(--text3)",marginBottom:6}}>CHALLENGER (B) {won?"— WINNER":""}</div>
-                    <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:4}}>Subject: {t.challenger.sub}</div>
-                    <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:600,marginTop:8}}>{t.challenger.rate}%<span style={{fontSize:10,color:"var(--text3)",fontWeight:400}}> reply rate</span></div>
-                  </div>
-                </div>
-              </div>}
-            </div>;})}
-        </div>
-
-        {/* REPLIES */}
-        {cr.length>0&&<><div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:10}}>Replies from this campaign</div>
-        {cr.map((r,i)=><Reply key={i} r={r}/>)}</>}
-      </div>
-    </div>
-  </div>;
+      ctx.fillStyle='rgba(0,105,73,'+alpha.toFixed(2)+')';
+      ctx.fillText(p.char,x,y);
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
 }
+createRiver('heroRiver');
 
-function WarmupProgress({compact}){
-  const a=D.account;
-  const pct=Math.round(a.daysSinceStart/a.warmupDays*100);
-  const daysLeft=Math.max(0,a.warmupDays-a.daysSinceStart);
-
-  if(compact) return <Card style={{padding:24,marginBottom:32,borderColor:"var(--green-bd)",background:"linear-gradient(135deg,rgba(0,212,126,0.04),rgba(0,212,126,0.01))"}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
-      <div>
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:4}}>Account warmup</div>
-        <div style={{fontSize:22,fontWeight:800}}>{daysLeft>0?daysLeft+" days remaining":"Warmup complete"}</div>
-        <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>Day {a.daysSinceStart} of {a.warmupDays} · {pct}% complete</div>
-      </div>
-      <div style={{textAlign:"right"}}>
-        <div style={{fontSize:11,color:"var(--text3)"}}>Current volume</div>
-        <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:700,color:"var(--green)"}}>{D.cap}/day</div>
-        <div style={{fontSize:10,color:"var(--text3)"}}>→ 300/day at full ramp</div>
-      </div>
-    </div>
-    <div style={{height:6,background:"var(--bg3)",borderRadius:3,overflow:"hidden",marginBottom:16}}>
-      <div style={{height:"100%",width:pct+"%",borderRadius:3,background:"var(--green)",transition:"width 1s ease"}}/>
-    </div>
-    <div style={{display:"flex",gap:0}}>
-      {a.milestones.map((m,i)=>{
-        const mPct=Math.round(m.day/a.warmupDays*100);
-        return <div key={i} style={{flex:1,textAlign:"center",position:"relative"}}>
-          <div style={{width:m.current?14:10,height:m.current?14:10,borderRadius:"50%",margin:"0 auto 6px",
-            background:m.done?"var(--green)":m.current?"var(--green)":"var(--border)",
-            boxShadow:"none",
-            border:m.current?"2px solid var(--green2)":"none",
-            opacity:m.done?1:m.current?1:0.4}}/>
-          <div style={{fontSize:9,color:m.done||m.current?"var(--text2)":"var(--text3)",fontWeight:m.current?700:400,lineHeight:1.3}}>{m.label}</div>
-        </div>;})}
-    </div>
-  </Card>;
-
-  // Full version for dedicated section
-  return <div style={{marginBottom:32}}>
-    <div style={{fontSize:13,fontWeight:700,marginBottom:14,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)"}}>Account progress</div>
-
-    {/* Main progress card */}
-    <Card style={{padding:28,marginBottom:14,borderColor:"var(--green-bd)",background:"linear-gradient(135deg,rgba(0,212,126,0.04),rgba(0,212,126,0.01))"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
-        <div>
-          <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:6}}>Warmup progress</div>
-          <div style={{fontSize:28,fontWeight:800}}>{daysLeft>0?<>{daysLeft} <span style={{fontSize:14,color:"var(--text2)",fontWeight:500}}>days remaining</span></>:<span style={{color:"var(--green)"}}>Complete</span>}</div>
-        </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)"}}>Day {a.daysSinceStart}/{a.warmupDays}</div>
-          <div style={{fontFamily:"var(--mono)",fontSize:28,fontWeight:700,color:"var(--green)"}}>{pct}%</div>
-        </div>
-      </div>
-      <div style={{height:8,background:"var(--bg3)",borderRadius:4,overflow:"hidden"}}>
-        <div style={{height:"100%",width:pct+"%",borderRadius:4,background:"var(--green)",transition:"width 1s ease"}}/>
-      </div>
-    </Card>
-
-    {/* Milestone timeline */}
-    <Card style={{padding:24,marginBottom:14}}>
-      <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:16}}>Milestones</div>
-      {a.milestones.map((m,i)=>{
-        const isLast=i===a.milestones.length-1;
-        return <div key={i} style={{display:"flex",gap:14,paddingBottom:isLast?0:16,position:"relative"}}>
-          {!isLast&&<div style={{position:"absolute",left:11,top:24,bottom:0,width:2,
-            background:m.done?"var(--green)":"var(--border)",
-            boxShadow:"none"}}/>}
-          <div style={{width:24,height:24,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,
-            background:m.done?"var(--green-bg)":m.current?"var(--green-bg)":"rgba(255,255,255,0.03)",
-            border:m.current?"1px solid var(--green-bd)":"1px solid "+(m.done?"var(--green-bd)":"var(--border)"),
-            boxShadow:"none"}}>{m.done?"✓":m.icon}</div>
-          <div style={{flex:1}}>
-            <div style={{fontSize:13,fontWeight:m.current?700:500,color:m.done||m.current?"var(--text)":"var(--text3)"}}>{m.label}
-              {m.current&&<span style={{fontSize:9,marginLeft:8,padding:"2px 6px",borderRadius:6,background:"var(--green-bg)",color:"var(--green)",fontWeight:700}}>CURRENT</span>}
-            </div>
-            <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{m.desc}</div>
-            <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>Day {m.day}</div>
-          </div>
-        </div>;})}
-    </Card>
-
-    {/* Weekly volume unlock */}
-    <Card style={{padding:24}}>
-      <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:16}}>Volume unlocks</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10}}>
-        {a.weeklyVolume.map((w,i)=><div key={i} style={{padding:16,borderRadius:12,
-          background:w.upcoming?"rgba(255,255,255,0.02)":"var(--green-bg)",
-          border:"1px solid "+(w.upcoming?w.unlocked?"var(--green-bd)":"var(--border)":"var(--green-bd)"),
-          opacity:w.upcoming&&!w.unlocked?0.5:1}}>
-          <div style={{fontSize:11,fontWeight:600,color:w.upcoming?"var(--text3)":"var(--green)",marginBottom:6}}>{w.week}</div>
-          <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:w.upcoming?"var(--text3)":"var(--text)"}}>
-            {w.upcoming?w.max.toLocaleString():w.emails.toLocaleString()}<span style={{fontSize:11,fontWeight:400,color:"var(--text3)"}}> /{w.max.toLocaleString()}</span>
-          </div>
-          <div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>{w.label}{w.unlocked?" ✨":""}</div>
-          {!w.upcoming&&<div style={{height:3,background:"var(--bg3)",borderRadius:2,marginTop:8,overflow:"hidden"}}>
-            <div style={{height:"100%",width:Math.round(w.emails/w.max*100)+"%",borderRadius:2,background:"var(--green)",}}/>
-          </div>}
-        </div>)}
-      </div>
-    </Card>
-  </div>;
+// Flame canvas for CTA section
+function createUpflow(canvasId,speed){
+  var c=document.getElementById(canvasId);
+  if(!c)return;
+  var ctx=c.getContext('2d');
+  var W=c.width,H=c.height;
+  var cellW=10,cellH=14;
+  var cols=Math.floor(W/cellW),rows=Math.floor(H/cellH);
+  var field=new Float32Array(cols*rows);
+  var ascii=' .\u00b7:;+=*#@'.split('');
+  var tick=0;
+  function step(){
+    tick++;field.fill(0);
+    for(var x=0;x<cols;x++){for(var y=0;y<rows;y++){
+      var cx=x/cols-0.5,cy=y/rows;
+      var wave=Math.sin(x*0.15+tick*0.02)*0.3+Math.cos(x*0.08-tick*0.015)*0.2;
+      var rise=Math.max(0,1-cy-0.1+wave*0.3);
+      var flicker=Math.sin(tick*0.05+x*0.3+y*0.2)*0.15+0.85;
+      var center=Math.max(0,1-Math.abs(cx)*2.5);
+      field[y*cols+x]=rise*center*flicker*0.6;
+    }}
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='center';
+    for(var y=0;y<rows;y++){for(var x=0;x<cols;x++){
+      var h=Math.min(field[y*cols+x],1);
+      if(h<0.03)continue;
+      var ci=Math.min(Math.floor(h*(ascii.length-1)),ascii.length-1);
+      var g=Math.round(105+h*60);
+      ctx.fillStyle='rgba(0,'+g+','+Math.round(73-h*20)+','+h*0.5+')';
+      ctx.fillText(ascii[ci],x*cellW+cellW/2,y*cellH+cellH);
+    }}
+  }
+  var last=0;
+  function go(ts){if(ts-last>speed){step();draw();last=ts;}requestAnimationFrame(go);}
+  requestAnimationFrame(go);
 }
-
-function LeadDetail({lead,onClose}){
-  if(!lead)return null;
-  const stColor={delivered:"var(--green)",replied:"var(--green)",pending:"var(--text3)",skipped:"var(--text3)",bounced:"var(--red)"};
-  const stGlow={delivered:"0 0 12px rgba(0,212,126,0.4)",replied:"0 0 12px rgba(0,212,126,0.6)",bounced:"0 0 12px rgba(255,71,87,0.4)"};
-  const stLabel={delivered:"Delivered",replied:"Replied",pending:"Pending",skipped:"Skipped",bounced:"Bounced"};
-
-  return <div onClick={e=>{if(e.target===e.currentTarget)onClose()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:40,overflowY:"auto"}}>
-    <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:700,animation:"fadeIn .3s ease"}}>
-      {/* Header */}
-      <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div>
-          <h2 style={{fontSize:20,fontWeight:800}}>{lead.n}</h2>
-          <div style={{fontSize:12,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{lead.e}</div>
-          <div style={{fontSize:12,color:"var(--text2)",marginTop:2}}>{lead.co} · {lead.ca}</div>
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:9,padding:"4px 10px",borderRadius:20,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.5px",
-            background:lead.s==="replied"?"var(--green-bg)":lead.s==="bounced"?"var(--red-bg)":"rgba(255,255,255,0.04)",
-            color:lead.s==="replied"?"var(--green)":lead.s==="bounced"?"var(--red)":"var(--text2)",
-            border:"1px solid "+(lead.s==="replied"?"var(--green-bd)":lead.s==="bounced"?"rgba(255,71,87,0.2)":"var(--border)")}}>{lead.s}</span>
-          <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-        </div>
-      </div>
-
-      {/* Sequence Flow */}
-      <div style={{padding:"28px 28px"}}>
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:24}}>Email sequence flow</div>
-
-        <div style={{position:"relative"}}>
-          {lead.steps.map((step,i)=>{
-            const isLast=i===lead.steps.length-1;
-            const isActive=step.st==="delivered"||step.st==="replied";
-            const hasReply=!!step.rpl;
-
-            return <div key={i} style={{position:"relative",paddingLeft:40,paddingBottom:isLast?0:32,minHeight:isLast?'auto':80}}>
-
-              {/* Vertical connecting line */}
-              {!isLast&&<div style={{position:"absolute",left:15,top:32,bottom:0,width:2,
-                background:isActive?"var(--green)":"var(--border)",
-                boxShadow:"none"}}/>}
-
-              {/* Node dot */}
-              <div style={{position:"absolute",left:8,top:8,width:16,height:16,borderRadius:"50%",
-                background:stColor[step.st]||"var(--text3)",
-                border:"2px solid "+(stColor[step.st]||"var(--text3)"),
-                boxShadow:stGlow[step.st]||"none",
-                display:"flex",alignItems:"center",justifyContent:"center"}}>
-                {step.st==="delivered"&&<div style={{width:6,height:6,borderRadius:"50%",background:"#000"}}/>}
-                {step.st==="replied"&&<div style={{width:0,height:0,borderLeft:"5px solid #000",borderTop:"3px solid transparent",borderBottom:"3px solid transparent",marginLeft:1}}/>}
-                {step.st==="bounced"&&<div style={{color:"#000",fontSize:10,fontWeight:800,lineHeight:1}}>!</div>}
-              </div>
-
-              {/* Step content card */}
-              <Card style={{padding:16,background:isActive?"var(--glass-h)":"var(--glass)",borderColor:step.st==="replied"?"var(--green-bd)":step.st==="bounced"?"rgba(255,71,87,0.15)":"var(--border)"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:10,fontWeight:700,color:stColor[step.st],textTransform:"uppercase",letterSpacing:"0.5px"}}>{stLabel[step.st]}</span>
-                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Sequence {step.seq}/3</span>
-                  </div>
-                  <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{step.dt}</span>
-                </div>
-
-                {step.st!=="skipped"&&step.st!=="pending"&&<>
-                  <div style={{fontSize:12,fontWeight:600,color:"var(--text)",marginBottom:6}}>Subject: {step.sub}</div>
-                  <div style={{fontSize:11,lineHeight:1.6,color:"var(--text3)",whiteSpace:"pre-wrap",maxHeight:80,overflow:"hidden"}}>{step.body}</div>
-                  {step.frm!=="—"&&<div style={{fontSize:10,color:"var(--text3)",marginTop:6,fontFamily:"var(--mono)"}}>From: {step.frm}</div>}
-                </>}
-
-                {(step.st==="skipped"||step.st==="pending")&&<div style={{fontSize:11,color:"var(--text3)",fontStyle:"italic"}}>{step.note||"Pending"}</div>}
-
-                {step.st==="bounced"&&step.note&&<div style={{fontSize:10,color:"var(--red)",marginTop:6,fontFamily:"var(--mono)"}}>{step.note}</div>}
-              </Card>
-
-              {/* Reply card with green accent */}
-              {hasReply&&<div style={{marginTop:12,marginLeft:20,position:"relative"}}>
-                {/* Reply connector line */}
-                <div style={{position:"absolute",left:-20,top:0,width:20,height:20,borderLeft:"2px solid var(--green)",borderBottom:"2px solid var(--green)",borderBottomLeftRadius:8,boxShadow:"none"}}/>
-
-                <Card style={{padding:14,borderColor:"var(--green-bd)",background:"var(--green-bg)"}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                    <span style={{fontSize:10,fontWeight:700,color:"var(--green)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Lead replied</span>
-                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{step.rpl.dt}</span>
-                  </div>
-                  <div style={{fontSize:12,lineHeight:1.6,color:"var(--text)"}}>{step.rpl.txt}</div>
-                </Card>
-              </div>}
-            </div>;
-          })}
-        </div>
-
-        {/* Reply action */}
-        {lead.s==="replied"&&<div style={{marginTop:24,display:"flex",gap:10}}>
-          <a href={"mailto:"+lead.e} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 20px",borderRadius:10,background:"var(--green)",color:"#000",fontSize:12,fontWeight:700,textDecoration:"none",cursor:"pointer",}}>Reply to {lead.n.split(" ")[0]}</a>
-          <button style={{padding:"10px 20px",borderRadius:10,background:"var(--glass)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12,fontWeight:600,cursor:"pointer"}}>Copy email</button>
-        </div>}
-      </div>
-    </div>
-  </div>;
-}
-
-function App(){
-  const [pg,setPg]=useState("overview");
-  const [md,setMd]=useState(null);
-  const [rf,setRf]=useState("all");
-  const [ld,setLd]=useState(null);
-  const [lf,setLf]=useState("replied");
-  const [showAll,setShowAll]=useState(false);
-  const [showAdd,setShowAdd]=useState(false);
-  const [showPhase,setShowPhase]=useState(null);
-  const [mb,setMb]=useState(null);
-  const [treeFilter,setTreeFilter]=useState("SEO");
-  const [dark,setDark]=useState(false);
-  const toggleTheme=()=>{const next=!dark;setDark(next);document.body.classList.toggle('dark',next);document.body.classList.toggle('light',!next);};
-  const nav=p=>{setPg(p);setMd(null);setLd(null)};
-  const pct=Math.round(D.sentToday/D.cap*100);
-  const wc=D.reps.filter(r=>r.cat==="warm").length;
-  const fl=rf==="all"?D.reps:D.reps.filter(r=>r.cat===rf);
-
-  return <div style={{minHeight:"100vh",display:"flex"}}>
-    {/* Sidebar */}
-    <nav style={{width:220,padding:"24px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"var(--sidebar-bg)",zIndex:10}}>
-      <div style={{fontSize:17,fontWeight:700,letterSpacing:"-0.3px",padding:"0 14px",marginBottom:32,display:"flex",alignItems:"center",gap:8}}>
-        <div style={{width:22,height:22,borderRadius:6,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <span style={{fontSize:11,color:"#000",fontWeight:800}}>⚡</span>
-        </div>
-        <span>coldflows</span>
-      </div>
-
-      {[{id:"overview",l:"Overview"},{id:"campaigns",l:"Campaigns"},{id:"replies",l:"Replies"},{id:"leads",l:"Leads"}].map(n=>
-        <a key={n.id} onClick={()=>nav(n.id)} className="hoverable" style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderRadius:6,color:pg===n.id?"var(--green)":"var(--text2)",fontSize:13,fontWeight:pg===n.id?600:400,cursor:"pointer",marginBottom:1,
-          background:"transparent",border:"1px solid transparent"}}>
-          {n.l}
-          {n.id==="replies"&&wc>0&&<span style={{marginLeft:"auto",fontSize:9,fontFamily:"var(--mono)",color:"var(--green)",background:"var(--green-bg)",padding:"2px 6px",borderRadius:10,fontWeight:700}}>{wc}</span>}
-        </a>)}
-
-      <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:"1.5px",color:"var(--text3)",padding:"24px 14px 8px",fontWeight:600}}>System</div>
-      {[{id:"mailboxes",l:"Mailboxes"},{id:"experiments",l:"Experiments"}].map(n=>
-        <a key={n.id} onClick={()=>nav(n.id)} className="hoverable" style={{display:"flex",alignItems:"center",padding:"8px 14px",borderRadius:6,color:pg===n.id?"var(--green)":"var(--text2)",fontSize:13,fontWeight:pg===n.id?600:400,cursor:"pointer",marginBottom:1,
-          background:"transparent",border:"1px solid transparent"}}>
-          {n.l}
-        </a>)}
-
-      <div style={{marginTop:"auto",padding:"14px",borderTop:"1px solid var(--border)"}}>
-        {/* Theme toggle */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <span style={{fontSize:11,color:"var(--text3)",fontWeight:500}}>{dark?"Dark":"Light"} mode</span>
-          <div onClick={toggleTheme} style={{width:40,height:22,borderRadius:11,padding:2,cursor:"pointer",transition:"background .2s",
-            background:dark?"var(--green)":"var(--border)"}}>
-            <div style={{width:18,height:18,borderRadius:9,background:dark?"#000":"#fff",transition:"transform .2s,background .2s",
-              transform:dark?"translateX(18px)":"translateX(0)",boxShadow:"0 1px 3px rgba(0,0,0,0.2)"}}/>
-          </div>
-        </div>
-        <div style={{fontSize:9,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"1px"}}>Plan</div>
-        <div style={{fontSize:13,fontWeight:700,color:"var(--green)",marginTop:3}}>Scale — $5,000/mo</div>
-      </div>
-    </nav>
-
-    {/* Main */}
-    <main style={{flex:1,marginLeft:220,background:"var(--bg)",borderLeft:"1px solid var(--border)",minHeight:"100vh"}}>
-
-      <div>
-
-      {pg==="overview"&&<div className="fade-in" style={{}}>
-        <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)"}}><h1 style={{fontSize:22,fontWeight:600,letterSpacing:"-0.3px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Last updated 3 minutes ago</p></div>
-
-        {wc>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--green)",borderBottom:"1px solid var(--border)"}}>
-          <div style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>{wc} warm lead{wc>1?"s":""} waiting for follow-up
-        </div>}
-
-        {/* Stats row — grid cells with right borders */}
-        <div style={{display:"flex",borderBottom:"1px solid var(--border)"}}>
-          {[
-            {l:"Sent today",v:D.sentToday+"/"+D.cap},
-            {l:"Total sent",v:D.totalSent.toLocaleString()},
-            {l:"Replies",v:D.replies,c:"var(--green)"},
-            {l:"Warm leads",v:D.warm,c:"var(--green)"},
-            {l:"Bounces",v:D.bounces},
-            {l:"Warmup",v:(D.warmup/1000).toFixed(1)+"k"}
-          ].map((s,i,a)=><div key={i} style={{flex:1,padding:"20px 24px",borderRight:i<a.length-1?"1px solid var(--border)":"none"}}>
-            <div style={{fontSize:11,color:"var(--text3)",marginBottom:8}}>{s.l}</div>
-            <div style={{fontFamily:"var(--mono)",fontSize:24,fontWeight:600,color:s.c||"var(--text)"}}>{s.v}</div>
-          </div>)}
-        </div>
-
-        {/* CAMPAIGNS */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 24px",borderBottom:"1px solid var(--border)"}}>
-          <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>Active campaigns</div>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/12 slots</div>
-            <div onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 12px",borderRadius:6,border:"1px solid var(--border)",color:"var(--green)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
-              <span style={{fontSize:13,lineHeight:1}}>+</span> Add campaign
-            </div>
-          </div>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr"}}>
-          {(showAll?D.campaigns:D.campaigns.slice(0,4)).map((c,i,arr)=><div key={c.id} style={{borderRight:i%4!==3?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
-        </div>
-        {D.campaigns.length>4&&<div onClick={()=>setShowAll(!showAll)} style={{padding:"12px 24px",borderBottom:"1px solid var(--border)",cursor:"pointer",fontSize:12,fontWeight:500,color:"var(--green)"}}>
-          {showAll?"Show less":"View all "+D.campaigns.length+" campaigns →"}
-        </div>}
-
-        {/* MAILBOX PROGRESS + PHASE EXPLAINER */}
-        {(()=>{
-          const a=D.account;
-          const day=a.daysSinceStart;
-          const phases=[
-            {name:"Warmup",range:"Day 1–14",weekly:420,daily:60,day:0,endDay:14},
-            {name:"Phase 1",range:"Day 15–21",weekly:840,daily:120,day:14,endDay:21},
-            {name:"Phase 2",range:"Day 22–28",weekly:"1,400",daily:200,day:21,endDay:28},
-            {name:"Full capacity",range:"Day 29+",weekly:"2,100+",daily:"300+",day:28,endDay:60}
-          ];
-          const currentPhase=phases.reduce((best,p)=>day>=p.day?p:best,phases[0]);
-          const nextPhase=phases.find(p=>day<p.day);
-          const daysToNext=nextPhase?nextPhase.day-day:0;
-
-          return <>
-            {/* Mailbox progress section header */}
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 24px",borderBottom:"1px solid var(--border)"}}>
-              <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>Mailbox progress</div>
-              {nextPhase&&<div style={{fontSize:12,fontWeight:500,color:"var(--green)",fontFamily:"var(--mono)"}}>
-                {daysToNext} day{daysToNext!==1?"s":""} until {nextPhase.name}
-              </div>}
-            </div>
-
-            {/* Live countdown progress bar */}
-            {(()=>{
-              const nextP=phases.find(p=>day<p.endDay);
-              const curP=phases.reduce((best,p)=>day>=p.day?p:best,phases[0]);
-              return <LiveCountdown targetDay={nextP?nextP.endDay:60} currentDay={curP.day} phaseName={curP.name}/>;
-            })()}
-
-            {/* Phase explainer — 4 clickable cells */}
-            <div style={{display:"flex",borderBottom:"1px solid var(--border)"}}>
-              {phases.map((p,i)=>{
-                const done=day>=p.endDay;
-                const active=currentPhase===p;
-                const future=day<p.day;
-                const mbsInPhase=D.mbs.filter(m=>getPhase(m.day).name===p.name).length;
-                const activeMbs=active?D.mbs.length:done?0:0;
-                return <div key={i} className="hoverable" onClick={()=>setShowPhase(p)} style={{flex:1,padding:"14px 20px",borderRight:i<3?"1px solid var(--border)":"none",
-                  opacity:future?0.4:1,background:active?"var(--green-bg)":"transparent",cursor:"pointer"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
-                    <div style={{width:7,height:7,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)"}}/>
-                    <span style={{fontSize:10,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",
-                      color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
-                    {active&&<span style={{fontSize:7,padding:"1px 4px",borderRadius:3,background:"var(--green)",color:"#fff",fontWeight:700}}>NOW</span>}
-                  </div>
-                  <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600,color:done||active?"var(--text)":"var(--text3)"}}>{typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly}<span style={{fontSize:9,fontWeight:400,color:"var(--text3)"}}>/wk</span></div>
-                  <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{p.range}</div>
-                  {active&&<div style={{fontSize:9,color:"var(--green)",marginTop:6,fontWeight:500,display:"flex",alignItems:"center",gap:4}}>
-                    <span style={{width:4,height:4,borderRadius:"50%",background:"var(--green)",display:"inline-block"}}/>{mbsInPhase} mailbox{mbsInPhase!==1?"es":""} active
-                  </div>}
-                  {done&&<div style={{fontSize:9,color:"var(--green)",marginTop:6}}>✓ Complete · {mbsInPhase} mailbox{mbsInPhase!==1?"es":""}</div>}
-                  {future&&<div style={{fontSize:9,color:"var(--text3)",marginTop:6}}>0 mailboxes · unlocks Day {p.day}</div>}
-                  <div style={{fontSize:9,color:"var(--green)",marginTop:4,fontWeight:500}}>Click for details →</div>
-                </div>;})}
-            </div>
-          </>;
-        })()}
-
-        {/* RECENT REPLIES */}
-        <div style={{padding:"16px 24px",borderBottom:"1px solid var(--border)",fontSize:13,fontWeight:600,color:"var(--text2)"}}>Recent replies</div>
-        <div style={{padding:"0 24px"}}>
-          {D.reps.slice(0,4).map((r,i)=><Reply key={i} r={r}/>)}
-        </div>
-      </div>}
-
-      {pg==="campaigns"&&<div className="fade-in" style={{}}>
-        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Campaigns</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Click to view A/B test details</p></div>
-        <WarmupProgress/>
-        <div style={{padding:"16px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>All campaigns</div>
-          <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/12 slots</div>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr"}}>
-          {D.campaigns.map((c,i)=><div key={c.id} style={{borderRight:i%4!==3?"1px solid var(--border)":"none",borderBottom:"1px solid var(--border)"}}><CampaignCard c={c} onClick={()=>setMd(c)}/></div>)}
-        </div>
-      </div>}
-
-      {pg==="replies"&&<div className="fade-in" style={{}}>
-        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Replies</h1></div>
-        <div style={{display:"flex",gap:4,marginBottom:20}}>
-          {[{id:"all",l:"All",n:D.reps.length},{id:"warm",l:"Warm",n:D.reps.filter(r=>r.cat==="warm").length},{id:"negative",l:"Negative",n:D.reps.filter(r=>r.cat==="negative").length},{id:"auto_reply",l:"Auto",n:D.reps.filter(r=>r.cat==="auto_reply").length}].map(t=>
-            <div key={t.id} onClick={()=>setRf(t.id)} style={{padding:"8px 14px",borderRadius:10,fontSize:12,fontWeight:600,cursor:"pointer",
-              color:rf===t.id?"var(--text)":"var(--text3)",
-              background:rf===t.id?"var(--green-bg)":"transparent",
-              border:rf===t.id?"1px solid var(--green-bd)":"1px solid transparent"}}>
-              {t.l} <span style={{fontFamily:"var(--mono)",fontSize:10,opacity:.5}}>{t.n}</span>
-            </div>)}
-        </div>
-        {fl.map((r,i)=><Reply key={i} r={r}/>)}
-      </div>}
-
-      {pg==="leads"&&<div className="fade-in" style={{}}>
-        <div style={{marginBottom:28}}>
-          <h1 style={{fontSize:26,fontWeight:800}}>Leads</h1>
-          <p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Click a lead to view their email sequence flow</p>
-        </div>
-
-        {/* Filter tabs */}
-        <div style={{display:"flex",gap:4,marginBottom:20}}>
-          {[{id:"replied",l:"Replied",n:D.leads.filter(x=>x.s==="replied").length},
-            {id:"all",l:"All leads",n:D.leads.length},
-            {id:"sent",l:"In progress",n:D.leads.filter(x=>x.s==="sent").length},
-            {id:"bounced",l:"Bounced",n:D.leads.filter(x=>x.s==="bounced").length}
-          ].map(t=>
-            <div key={t.id} onClick={()=>setLf(t.id)} style={{padding:"8px 14px",borderRadius:10,fontSize:12,fontWeight:600,cursor:"pointer",
-              color:lf===t.id?"var(--text)":"var(--text3)",
-              background:lf===t.id?"var(--green-bg)":"transparent",
-              border:lf===t.id?"1px solid var(--green-bd)":"1px solid transparent"}}>
-              {t.l} <span style={{fontFamily:"var(--mono)",fontSize:10,opacity:.5}}>{t.n}</span>
-            </div>)}
-        </div>
-
-        {/* Lead list */}
-        {(()=>{
-          const filtered = lf==="all" ? D.leads : D.leads.filter(x=>x.s===lf);
-          return filtered.length > 0 ? <Card style={{padding:0,overflow:"auto"}}>
-            <table style={{width:"100%",borderCollapse:"collapse",minWidth:600}}>
-              <thead><tr>{["Lead","Company","Campaign","Status","Seq"].map(h=><th key={h} style={{textAlign:"left",fontSize:9,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",fontWeight:600,padding:"14px 16px",borderBottom:"1px solid var(--border)"}}>{h}</th>)}</tr></thead>
-              <tbody>
-                {filtered.map((l,i)=><tr key={i} onClick={()=>setLd(l)} className="hoverable" style={{cursor:"pointer"}}>
-                  <td style={{padding:"12px 16px",borderBottom:"1px solid var(--border)"}}>
-                    <div style={{fontWeight:600,fontSize:13}}>{l.n}</div>
-                    <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{l.e}</div>
-                  </td>
-                  <td style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",fontSize:12,color:"var(--text2)"}}>{l.co}</td>
-                  <td style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",fontSize:12,color:"var(--text2)"}}>{l.ca}</td>
-                  <td style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",fontSize:12}}>
-                    <span style={{display:"inline-block",width:7,height:7,borderRadius:"50%",marginRight:6,
-                      background:{sent:"var(--blue)",replied:"var(--green)",bounced:"var(--red)",pending:"var(--text3)"}[l.s]}}/>{l.s}
-                  </td>
-                  <td style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",fontSize:12,fontFamily:"var(--mono)",color:"var(--text2)"}}>{l.sq}</td>
-                </tr>)}
-              </tbody>
-            </table>
-          </Card> : <Card style={{padding:"40px",textAlign:"center"}}><div style={{color:"var(--text3)",fontSize:13}}>No {lf} leads yet</div></Card>;
-        })()}
-      </div>}
-
-      {pg==="mailboxes"&&<div className="fade-in" style={{}}>
-        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Mailboxes</h1></div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:12}}>
-          {D.mbs.map((m,i)=>{
-            const rc=m.rep>=95?"var(--green)":m.rep>=80?"var(--orange)":"var(--red)";
-            return <Card key={i} style={{padding:20}}>
-              <div style={{fontSize:11,fontWeight:700,color:"var(--green)",marginBottom:12,fontFamily:"var(--mono)"}}>{m.em}</div>
-              {[["Sent today",m.s+"/"+m.lim],["Warmup",m.ws],["Inbox rate",m.inb+"%"],["Total sent",m.wt.toLocaleString()]].map(([l,v],j)=>
-                <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text3)",marginBottom:5}}>
-                  <span>{l}</span><span style={{color:l==="Warmup"?"var(--green)":"var(--text)",fontFamily:"var(--mono)",fontWeight:500}}>{v}</span>
-                </div>)}
-              <div style={{marginTop:10}}>
-                <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text3)",marginBottom:4}}>
-                  <span>Reputation</span><span style={{color:rc,fontFamily:"var(--mono)",fontWeight:600}}>{m.rep}/100</span>
-                </div>
-                <div style={{height:3,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:m.rep+"%",borderRadius:2,background:rc,boxShadow:"none"}}/>
-                </div>
-              </div>
-            </Card>;})}
-        </div>
-      </div>}
-
-      {pg==="experiments"&&<div className="fade-in" style={{}}>
-        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Experiments</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Self-learning optimisation</p></div>
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginBottom:12}}>Active</div>
-        {D.exps.filter(e=>e.st==="active").map((e,i)=>
-          <div key={i} style={{display:"flex",gap:14,padding:"14px 0",borderBottom:"1px solid var(--border)"}}>
-            <div style={{width:8,height:8,borderRadius:"50%",background:"var(--green)",marginTop:6,flexShrink:0,}}/>
-            <div>
-              <div style={{fontSize:13,fontWeight:600}}>{e.id} — {e.svc}</div>
-              <div style={{fontSize:11,color:"var(--text3)",marginTop:3}}>{e.hyp}</div>
-              <div style={{fontSize:11,color:"var(--text2)",marginTop:6,fontFamily:"var(--mono)"}}>B: {e.b} → C: {e.c} · {e.s} sent</div>
-            </div>
-          </div>)}
-        <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--text3)",marginTop:28,marginBottom:12}}>Completed</div>
-        {D.exps.filter(e=>e.st==="done").map((e,i)=>
-          <div key={i} style={{display:"flex",gap:14,padding:"14px 0",borderBottom:"1px solid var(--border)"}}>
-            <div style={{width:8,height:8,borderRadius:"50%",background:"var(--green)",marginTop:6,flexShrink:0,opacity:.5}}/>
-            <div>
-              <div style={{fontSize:13,fontWeight:600}}>{e.id} — {e.svc} <span style={{color:"var(--green)",fontSize:10}}>★ won</span></div>
-              <div style={{fontSize:11,color:"var(--text3)",marginTop:2,fontFamily:"var(--mono)"}}>B: {e.b} → C: {e.c}</div>
-              <div style={{fontSize:11,color:"var(--text2)",marginTop:4,fontStyle:"italic",lineHeight:1.5}}>"{e.learn}"</div>
-            </div>
-          </div>)}
-      </div>}
-      </div>
-    </main>
-
-    {md&&<Modal c={md} onClose={()=>setMd(null)}/>}
-    {ld&&<LeadDetail lead={ld} onClose={()=>setLd(null)}/>}
-
-    {/* Phase Detail Modal */}
-    {showPhase&&(()=>{
-      const p=showPhase;
-      const day=D.account.daysSinceStart;
-      const done=day>=p.endDay;
-      const active=day>=p.day&&day<p.endDay;
-      const future=day<p.day;
-      const activeMbs=D.mbs.filter(m=>getPhase(m.day).name===p.name).length;
-
-      const phaseDetails={
-        "Warmup":{
-          title:"Email warmup",
-          desc:"During warmup, your mailboxes send and receive emails between each other and a network of real inboxes. This builds your sender reputation with email providers like Gmail, Outlook, and Yahoo — proving you're a legitimate sender, not a spammer.",
-          whyMatters:"Skipping warmup means your emails land in spam. A properly warmed mailbox achieves 95%+ inbox placement rates. Rushing this process can permanently damage a domain's reputation.",
-          whatHappens:["Mailboxes exchange emails with a warmup network","Open rates and reply rates are simulated naturally","Sender reputation score builds gradually with providers","SPF, DKIM, and DMARC records are validated","Inbox placement is monitored daily"],
-          metrics:[{l:"Target inbox rate",v:"95%+"},{l:"Warmup volume",v:"420/wk"},{l:"Reputation score",v:"Building"},{l:"Status",v:done?"Complete":active?"In progress":"Pending"}],
-          chartData:[5,8,12,18,25,35,48,58,65,72,78,83,87,90,93],
-          chartLabel:"Sender reputation score over 14 days"
-        },
-        "Phase 1":{
-          title:"Initial outreach",
-          desc:"Your mailboxes are now trusted by email providers. Live outreach begins — real emails to real prospects in your target market. Volume reaches 840 emails per week across all mailboxes, with A/B testing enabled to start finding what copy resonates.",
-          whyMatters:"Starting at moderate volume protects your newly built reputation. Jumping straight to high volume would trigger spam filters. This phase establishes your baseline reply rate.",
-          whatHappens:["840 emails per week sent to real prospects","A/B copy testing begins — two versions per campaign","Reply classification active (warm, negative, auto-reply)","Lead sourcing pulls fresh contacts matching your ICP","Bounce monitoring protects sender reputation"],
-          metrics:[{l:"Weekly volume",v:"840/wk"},{l:"A/B testing",v:"Enabled"},{l:"Expected replies",v:"1-2%"},{l:"Campaigns active",v:D.campaigns.length.toString()}],
-          chartData:[0,100,250,370,480,560,670,770,840,840,840,840,840,840],
-          chartLabel:"Weekly send volume ramp (emails/week)"
-        },
-        "Phase 2":{
-          title:"Volume ramp-up",
-          desc:"Send volume increases to 1,400 emails per week. The AI copy optimisation system kicks in — analysing which subject lines, email bodies, and CTAs generate the most replies, then automatically promoting winners and generating new challengers.",
-          whyMatters:"This is where the self-learning system starts compounding. Each A/B test makes the next one smarter. Reply rates typically increase 30-50% during this phase as the system learns what works for your specific market.",
-          whatHappens:["Volume increases to 1,400 emails per week","AI analyses reply patterns across all experiments","Winning copy promoted automatically","New challenger variations generated by AI","Send timing optimised based on open rate data","Advanced targeting refinements applied"],
-          metrics:[{l:"Weekly volume",v:"1,400/wk"},{l:"AI optimisation",v:"Active"},{l:"Expected replies",v:"2-3%"},{l:"Experiments run",v:"4-6"}],
-          chartData:[840,910,1015,1085,1175,1225,1295,1330,1365,1386,1400,1400,1400,1400],
-          chartLabel:"Weekly send volume ramp (emails/week)"
-        },
-        "Full capacity":{
-          title:"Maximum performance",
-          desc:"All systems at full power. Over 2,100 emails per week with the self-learning loop running continuously. The AI has enough data to make statistically significant decisions about copy, timing, and targeting. This is peak performance — the system gets better every week.",
-          whyMatters:"At full capacity, the system is generating maximum lead flow while continuously optimising. Clients who reach this phase typically see reply rates 3-4x higher than their starting rate. The longer it runs, the smarter it gets.",
-          whatHappens:["2,100+ emails per week at full volume","Self-learning copy loop runs continuously","Predictive send timing active","Reply rates compound with each experiment","Warm leads flagged in real-time","Full analytics and reporting available"],
-          metrics:[{l:"Weekly volume",v:"2,100+/wk"},{l:"Self-learning",v:"Continuous"},{l:"Expected replies",v:"3-5%"},{l:"Monthly volume",v:"9,000+"}],
-          chartData:[1400,1540,1680,1785,1855,1925,1974,2030,2065,2086,2100,2100,2100,2100],
-          chartLabel:"Weekly send volume ramp (emails/week)"
-        }
-      };
-
-      const d=phaseDetails[p.name]||phaseDetails["Warmup"];
-      const chartH=80;
-      const maxV=Math.max(...d.chartData)*1.1;
-
-      return <div onClick={e=>{if(e.target===e.currentTarget)setShowPhase(null)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)",zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:40,overflowY:"auto"}}>
-        <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:8,width:"100%",maxWidth:700,animation:"fadeIn .25s ease"}}>
-
-          {/* Header */}
-          <div style={{padding:"20px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-            <div>
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                <div style={{width:8,height:8,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)"}}/>
-                <span style={{fontSize:10,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",color:done||active?"var(--green)":"var(--text3)"}}>{p.name}</span>
-                {active&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:3,background:"var(--green)",color:"#fff",fontWeight:700}}>CURRENT PHASE</span>}
-                {done&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:3,background:"var(--green-bg)",color:"var(--green)",fontWeight:600}}>COMPLETE</span>}
-                {future&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:3,background:"var(--bg3)",color:"var(--text3)",fontWeight:600}}>UPCOMING</span>}
-              </div>
-              <h2 style={{fontSize:20,fontWeight:700}}>{d.title}</h2>
-              <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:4}}>{p.range} · {typeof p.weekly==="number"?p.weekly.toLocaleString():p.weekly} emails/week · {activeMbs} mailbox{activeMbs!==1?"es":""} in this phase</div>
-            </div>
-            <button onClick={()=>setShowPhase(null)} style={{width:30,height:30,borderRadius:6,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-          </div>
-
-          <div style={{padding:"24px 28px"}}>
-
-            {/* Description */}
-            <p style={{fontSize:13,lineHeight:1.8,color:"var(--text2)",marginBottom:20}}>{d.desc}</p>
-
-            {/* Metrics row */}
-            <div style={{display:"flex",borderTop:"1px solid var(--border)",borderBottom:"1px solid var(--border)",marginBottom:20}}>
-              {d.metrics.map((m,i)=><div key={i} style={{flex:1,padding:"14px 16px",borderRight:i<d.metrics.length-1?"1px solid var(--border)":"none",textAlign:"center"}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:600,color:"var(--text)"}}>{m.v}</div>
-                <div style={{fontSize:9,color:"var(--text3)",marginTop:2}}>{m.l}</div>
-              </div>)}
-            </div>
-
-            {/* Chart */}
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:10}}>{d.chartLabel}</div>
-              <div style={{border:"1px solid var(--border)",borderRadius:6,padding:"16px 20px"}}>
-                <svg width="100%" viewBox={`0 0 600 ${chartH+20}`} style={{overflow:"visible"}}>
-                  {/* Grid lines */}
-                  {[0,0.25,0.5,0.75,1].map((v,i)=><line key={i} x1={0} y1={chartH*(1-v)} x2={600} y2={chartH*(1-v)} stroke="var(--border)" strokeWidth={1}/>)}
-
-                  {/* Area */}
-                  <defs><linearGradient id="phaseGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(22,163,74,0.12)"/><stop offset="100%" stopColor="rgba(22,163,74,0)"/>
-                  </linearGradient></defs>
-                  <path d={`M0,${chartH} ${d.chartData.map((v,i)=>`L${i*(600/(d.chartData.length-1))},${chartH-(v/maxV)*chartH}`).join(' ')} L600,${chartH} Z`} fill="url(#phaseGrad)"/>
-
-                  {/* Line */}
-                  <path d={d.chartData.map((v,i)=>`${i===0?'M':'L'}${i*(600/(d.chartData.length-1))},${chartH-(v/maxV)*chartH}`).join(' ')} fill="none" stroke="var(--green)" strokeWidth={2}/>
-
-                  {/* Dots */}
-                  {d.chartData.map((v,i)=><circle key={i} cx={i*(600/(d.chartData.length-1))} cy={chartH-(v/maxV)*chartH} r={2.5} fill="var(--green)"/>)}
-
-                  {/* Day labels */}
-                  {d.chartData.map((v,i)=>i%3===0?<text key={i} x={i*(600/(d.chartData.length-1))} y={chartH+14} fill="var(--text3)" fontSize={8} textAnchor="middle" fontFamily="var(--mono)">D{i+1}</text>:null)}
-                </svg>
-              </div>
-            </div>
-
-            {/* Why this matters */}
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:8}}>Why this matters</div>
-              <p style={{fontSize:12,lineHeight:1.7,color:"var(--text3)"}}>{d.whyMatters}</p>
-            </div>
-
-            {/* What happens */}
-            <div>
-              <div style={{fontSize:11,fontWeight:600,color:"var(--text2)",marginBottom:8}}>What happens during this phase</div>
-              {d.whatHappens.map((item,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0"}}>
-                <div style={{width:5,height:5,borderRadius:"50%",background:done||active?"var(--green)":"var(--text3)",flexShrink:0}}/>
-                <span style={{fontSize:12,color:"var(--text2)"}}>{item}</span>
-              </div>)}
-            </div>
-          </div>
-        </div>
-      </div>;
-    })()}
-
-    {/* Add Campaign / Purchase Slots Modal */}
-    {showAdd&&<div onClick={e=>{if(e.target===e.currentTarget)setShowAdd(false)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
-      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:560,animation:"fadeIn .3s ease"}}>
-        <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <h2 style={{fontSize:18,fontWeight:700}}>Add campaign slot</h2>
-          <button onClick={()=>setShowAdd(false)} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-        </div>
-        <div style={{padding:"24px 28px"}}>
-          <div style={{fontSize:12,color:"var(--text2)",marginBottom:20,lineHeight:1.6}}>
-            You're currently using <span style={{color:"var(--text)",fontWeight:600}}>{D.campaigns.length} of 12</span> campaign slots on your Scale plan. Add more slots to run additional campaigns simultaneously.
-          </div>
-
-          {/* Slot options */}
-          {[
-            {slots:1,price:"$500",desc:"1 additional campaign slot",per:"/mo"},
-            {slots:2,price:"$900",desc:"2 additional campaign slots",per:"/mo",popular:true},
-            {slots:4,price:"$1,600",desc:"4 additional campaign slots",per:"/mo"}
-          ].map((opt,i)=><div key={i} style={{padding:16,borderRadius:12,marginBottom:10,cursor:"pointer",
-            background:opt.popular?"var(--green-bg)":"var(--glass)",
-            border:"1px solid "+(opt.popular?"var(--green-bd)":"var(--border)"),
-            display:"flex",justifyContent:"space-between",alignItems:"center",transition:"all .15s"}}>
-            <div>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:14,fontWeight:700}}>{opt.desc}</span>
-                {opt.popular&&<span style={{fontSize:8,padding:"2px 6px",borderRadius:6,background:"var(--green)",color:"#000",fontWeight:700,textTransform:"uppercase"}}>Best value</span>}
-              </div>
-              <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>Includes dedicated mailboxes, warmup, and A/B testing</div>
-            </div>
-            <div style={{textAlign:"right",flexShrink:0}}>
-              <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:700,color:opt.popular?"var(--green)":"var(--text)"}}>{opt.price}</div>
-              <div style={{fontSize:10,color:"var(--text3)"}}>{opt.per}</div>
-            </div>
-          </div>)}
-
-          <div style={{marginTop:16,fontSize:11,color:"var(--text3)",lineHeight:1.6}}>
-            New slots include fresh sending domains and mailboxes. Warmup begins immediately after purchase. Volume ramps up automatically.
-          </div>
-
-          <div style={{marginTop:20,display:"flex",gap:10}}>
-            <div style={{flex:1,padding:"12px",borderRadius:10,background:"var(--green)",color:"#000",fontSize:13,fontWeight:700,textAlign:"center",cursor:"pointer",}}>Purchase slots</div>
-            <div onClick={()=>setShowAdd(false)} style={{padding:"12px 20px",borderRadius:10,background:"var(--glass)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",textAlign:"center"}}>Cancel</div>
-          </div>
-        </div>
-      </div>
-    </div>}
-  </div>;
-}
-
-ReactDOM.render(<App/>, document.getElementById('root'));
+createUpflow('flameCanvas',160);
 </script>
 </body>
 </html>
