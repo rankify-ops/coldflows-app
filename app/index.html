@@ -937,14 +937,21 @@ function CampaignModal({configCampaign, custData, setCustData, setConfigCampaign
         var painVal=painEl?painEl.value.trim():(campData.pain_point||t.pain_point||'').trim();
         var proofVal=proofEl?proofEl.value.trim():(campData.social_proof||t.social_proof||'').trim();
         var missingIds=[];
+        var missingChips=[];
         if(campNum===1&&(!svcVal||svcVal.length<5))missingIds.push('edit-svc');
         if(!offerVal||offerVal.length<5)missingIds.push('edit-offer');
         if(!painVal||painVal.length<5)missingIds.push('edit-pain');
         if(!proofVal||proofVal.length<5)missingIds.push('edit-proof');
+        // Validate targeting chips — job titles, industries, locations are required
+        if(!campData.job_titles||campData.job_titles.length===0)missingChips.push('job titles');
+        if(!campData.industries||campData.industries.length===0)missingChips.push('industries');
+        if(!campData.locations||campData.locations.length===0)missingChips.push('locations');
+        if(!campData.seniority||campData.seniority.length===0)missingChips.push('seniority');
+        if(!campData.company_size||campData.company_size.length===0)missingChips.push('company size');
         ['edit-svc','edit-offer','edit-pain','edit-proof'].forEach(function(id){
           var el=document.getElementById(id);if(el){el.style.border='1px solid var(--border)';el.style.background='var(--bg)';}
         });
-        if(missingIds.length>0){
+        if(missingIds.length>0||missingChips.length>0){
           var names=[];
           missingIds.forEach(function(id){
             var el=document.getElementById(id);if(el){el.style.border='2px solid var(--red)';el.style.background='var(--red-bg)';}
@@ -953,9 +960,16 @@ function CampaignModal({configCampaign, custData, setCustData, setConfigCampaign
             if(id==='edit-pain')names.push('what problem you solve');
             if(id==='edit-proof')names.push('results or proof');
           });
-          setValidationErr('Please fill in: '+names.join(', ')+'.');
-          var firstInvalid=document.getElementById(missingIds[0]);
-          if(firstInvalid)firstInvalid.scrollIntoView({behavior:'smooth',block:'center'});
+          var allMissing=names.concat(missingChips);
+          setValidationErr('Please fill in: '+allMissing.join(', ')+'. We need this to build your campaign.');
+          if(missingIds.length>0){
+            var firstInvalid=document.getElementById(missingIds[0]);
+            if(firstInvalid)firstInvalid.scrollIntoView({behavior:'smooth',block:'center'});
+          } else {
+            // Scroll to targeting section
+            var modal=document.querySelector('[data-modal-scroll]');
+            if(modal)modal.scrollTo({top:modal.scrollHeight/2,behavior:'smooth'});
+          }
           return;
         }
         setValidationErr(null);
