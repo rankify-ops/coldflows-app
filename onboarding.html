@@ -420,6 +420,52 @@ var currentUser=null;
 sb.auth.getSession().then(function(res){
   if(!res.data.session){window.location.href='/signup.html?signup';return;}
   currentUser=res.data.session.user;
+  
+  // Check if returning user with existing data — pre-fill fields
+  sb.from('customers').select('*').eq('user_id',res.data.session.user.id).single().then(function(r){
+    if(r.data&&r.data.business_name){
+      // Pre-fill business info
+      var d=r.data;
+      if(d.business_name)document.getElementById('f-biz').value=d.business_name;
+      if(d.service_description)document.getElementById('f-svc').value=d.service_description;
+      if(d.lead_email)document.getElementById('f-lead-email').value=d.lead_email;
+      if(d.plan)plan=d.plan;
+      
+      // Pre-fill targeting data
+      var t=null;
+      try{t=typeof d.target_market==='string'?JSON.parse(d.target_market):d.target_market;}catch(e){}
+      if(t){
+        if(t.website)document.getElementById('f-url').value=t.website;
+        if(t.offer)document.getElementById('f-offer').value=t.offer;
+        if(t.campaign_name)document.getElementById('f-camp').value=t.campaign_name;
+        
+        // Pre-select chips
+        function selectChips(chipGroupId,values){
+          if(!values||!values.length)return;
+          document.querySelectorAll('#chips-'+chipGroupId+' .chip').forEach(function(c){
+            if(values.indexOf(c.textContent.trim())!==-1)c.classList.add('sel');
+          });
+        }
+        selectChips('titles',t.job_titles);
+        selectChips('seniority',t.seniority);
+        selectChips('industries',t.industries);
+        selectChips('size',t.company_size);
+        selectChips('locations',t.locations);
+        if(t.location_detail)document.getElementById('f-locdetail').value=t.location_detail;
+      }
+      
+      // Pre-select plan
+      document.querySelectorAll('.plan').forEach(function(e){
+        e.classList.remove('sel');
+        if(e.getAttribute('data-plan')===d.plan)e.classList.add('sel');
+      });
+      
+      // If edit mode — skip welcome screen, go straight to business info
+      if(window.location.search.indexOf('edit=1')!==-1){
+        goTo(1);
+      }
+    }
+  });
 });
 
 var plan='growth';
@@ -523,9 +569,26 @@ async function checkout(){
     showErr('Error saving. Please try again.');
     btn.disabled=false;btn.textContent='Proceed to payment →';return;
   }
+  
+  // If editing (already active user), go back to dashboard
+  if(window.location.search.indexOf('edit=1')!==-1){
+    window.location.href='/app';
+    return;
+  }
+  
   var link=stripeLinks[plan];
   var sep=link.includes('?')?'&':'?';
   window.location.href=link+sep+'prefilled_email='+encodeURIComponent(currentUser.email);
+}
+
+// Edit mode UI updates
+if(window.location.search.indexOf('edit=1')!==-1){
+  // Change button text
+  var payBtn=document.getElementById('btn-pay');
+  if(payBtn)payBtn.textContent='Save changes →';
+  // Change secure text
+  var secureEl=document.querySelector('.secure');
+  if(secureEl)secureEl.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Changes will be saved to your account';
 }
 </script>
 </body>
