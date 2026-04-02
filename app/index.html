@@ -892,6 +892,7 @@ function App(){
   const [mb,setMb]=useState(null);
   const [configCampaign,setConfigCampaign]=useState(null);
   const [editMode,setEditMode]=useState(false);
+  const [validationErr,setValidationErr]=useState(null);
   const [treeFilter,setTreeFilter]=useState("SEO");
   const [dark,setDark]=useState(false);
   const [custData,setCustData]=useState(null);
@@ -1066,7 +1067,7 @@ function App(){
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat("+(custData._limits?custData._limits.campaigns:4)+", 1fr)",gap:12}}>
               {/* Campaign 1 — needs finishing */}
-              <div onClick={()=>setConfigCampaign("view-1")} style={{border:"2px solid var(--orange)",borderRadius:10,padding:16,background:"var(--orange-bg)",cursor:"pointer",transition:"all .15s",position:"relative"}} 
+              <div onClick={()=>{setConfigCampaign("view-1");setValidationErr(null);}} style={{border:"2px solid var(--orange)",borderRadius:10,padding:16,background:"var(--orange-bg)",cursor:"pointer",transition:"all .15s",position:"relative"}} 
                 onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
                 onMouseLeave={e=>e.currentTarget.style.transform="none"}>
                 <div style={{position:"absolute",top:-8,left:12,fontSize:9,fontWeight:700,background:"var(--orange)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Action required</div>
@@ -1784,7 +1785,7 @@ function App(){
       }
       
       return <div onClick={e=>{if(e.target===e.currentTarget){setConfigCampaign(null);setEditMode(false);}}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
-      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:680,maxHeight:"90vh",overflow:"auto",animation:"fadeIn .3s ease"}}>
+      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:680,maxHeight:"90vh",overflow:"auto",animation:"fadeIn .3s ease"}} data-modal-scroll="1">
         
         {/* Header */}
         <div style={{padding:"28px 32px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
@@ -1935,13 +1936,43 @@ function App(){
             }} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)"}}>Save changes</button>
             <button onClick={()=>setEditMode(false)} style={{padding:"14px 24px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Cancel</button>
           </div>:<div>
+            {validationErr&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:8,background:"var(--red-bg)",border:"1px solid var(--red)",fontSize:13,color:"var(--red)",fontWeight:500,display:"flex",alignItems:"center",gap:8}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {validationErr}
+            </div>}
             <button onClick={async()=>{
-              var newTarget=Object.assign({},t);
-              var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
-              var offerEl=document.getElementById('edit-offer');if(offerEl)newTarget.offer=offerEl.value;
-              var painEl=document.getElementById('edit-pain');if(painEl)newTarget.pain_point=painEl.value;
-              var proofEl=document.getElementById('edit-proof');if(proofEl)newTarget.social_proof=proofEl.value;
+              // Validate required fields
               var svcEl=document.getElementById('edit-svc');
+              var offerEl=document.getElementById('edit-offer');
+              var painEl=document.getElementById('edit-pain');
+              var proofEl=document.getElementById('edit-proof');
+              
+              var svcVal=svcEl?svcEl.value.trim():(custData.service_description||'').trim();
+              var offerVal=offerEl?offerEl.value.trim():(t.offer||'').trim();
+              var painVal=painEl?painEl.value.trim():(t.pain_point||'').trim();
+              var proofVal=proofEl?proofEl.value.trim():(t.social_proof||'').trim();
+              
+              var missing=[];
+              if(!svcVal||svcVal.length<5)missing.push('product or service');
+              if(!offerVal||offerVal.length<5)missing.push('your offer');
+              if(!painVal||painVal.length<5)missing.push('what problem you solve');
+              if(!proofVal||proofVal.length<5)missing.push('results or proof');
+              
+              if(missing.length>0){
+                setValidationErr('Please fill in: '+missing.join(', ')+'. We need this information to write effective outreach copy.');
+                // Scroll to top of modal
+                var modal=document.querySelector('[data-modal-scroll]');
+                if(modal)modal.scrollTo({top:0,behavior:'smooth'});
+                return;
+              }
+              setValidationErr(null);
+              
+              var newTarget=Object.assign({},t);
+              var campEl=document.getElementById('edit-camp');
+              var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
+              if(offerEl)newTarget.offer=offerEl.value;
+              if(painEl)newTarget.pain_point=painEl.value;
+              if(proofEl)newTarget.social_proof=proofEl.value;
               var locDetailEl=document.getElementById('edit-locdetail');if(locDetailEl)newTarget.location_detail=locDetailEl.value;
               await sb.from('customers').update({
                 service_description:svcEl?svcEl.value:custData.service_description,
@@ -1954,7 +1985,7 @@ function App(){
                 data._limits=limits[data.plan]||limits.starter;
                 setCustData(data);
               }
-              setConfigCampaign(null);setEditMode(false);
+              setConfigCampaign(null);setEditMode(false);setValidationErr(null);
             }} style={{width:"100%",padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:15,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               Confirm & begin provisioning
