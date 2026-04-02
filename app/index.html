@@ -1892,9 +1892,9 @@ function App(){
       {/* OPS PIPELINE — admin only */}
       {/* OPS PIPELINE — admin only */}
       {pg==="ops"&&custData&&(custData.email==="tomflood1995@gmail.com"||custData.lead_email==="tomflood1995@gmail.com")&&<div className="fade-in" style={{padding:"24px 28px"}}>
-        <div style={{marginBottom:20}}>
-          <h1 style={{fontSize:26,fontWeight:800}}>Ops pipeline</h1>
-          <p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>{custData.business_name} | {custData.email} | {(custData.plan||"").charAt(0).toUpperCase()+(custData.plan||"").slice(1)} plan</p>
+        <div style={{marginBottom:16}}>
+          <h1 style={{fontSize:22,fontWeight:700}}>Ops pipeline</h1>
+          <p style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{custData.business_name} | {custData.email} | {(custData.plan||"").charAt(0).toUpperCase()+(custData.plan||"").slice(1)}</p>
         </div>
 
         {(()=>{
@@ -1907,80 +1907,144 @@ function App(){
           const detail=opsDetail;const setDetail=setOpsDetail;
 
           const nodes=[
-            {id:"stripe",x:300,y:40,label:"Stripe payment",sub:(custData.plan||"").charAt(0).toUpperCase()+(custData.plan||"").slice(1)+" plan",status:"done",
-              info:{title:"Stripe payment",desc:"Customer selects a plan and pays via Stripe payment link. Stripe webhook fires and creates a row in the Supabase customers table with plan, email, and user_id.",data:["Plan: "+(custData.plan||"-"),"Status: "+(custData.plan_status||"active"),"Stripe keys: Coldflows account"],route:"Stripe checkout -> webhook -> Supabase INSERT customers"}},
-            {id:"supabase",x:300,y:120,label:"Customer record",sub:"Supabase row created",status:"done",
-              info:{title:"Customer record created",desc:"Auth user created in Supabase auth.users. Customer row created in public.customers with user_id, email, plan, and empty target_market JSON.",data:["user_id: "+currentUser.id.slice(0,16)+"...","email: "+custData.email,"table: customers"],route:"Stripe webhook -> Supabase auth.users + customers table"}},
-            {id:"onboard",x:300,y:200,label:"Onboarding",sub:"Business + service info",status:"done",
-              info:{title:"Onboarding form",desc:"Customer fills in business name, product/service description, and initial targeting preferences. Saved to customers.target_market JSON and business_name column.",data:["Business: "+(custData.business_name||"-"),"Service: "+(custData.service_description||"-").slice(0,60)],route:"Frontend form -> Supabase UPDATE customers.target_market"}},
-            {id:"campaigns",x:300,y:280,label:"Campaigns",sub:conf.length+"/"+total+" confirmed",status:allDone?"done":"active",
-              info:{title:"Campaign configuration",desc:"Customer configures each campaign with offer, pain point, social proof, and targeting (job titles, seniority, industries, company size, locations). Each campaign must be confirmed before the next unlocks. Campaign 1 data stored at root of target_market, campaigns 2+ stored under campaign_X keys.",data:["Confirmed: ["+conf.join(",")+"]","Total needed: "+total,"Plan: "+(custData.plan||"-")+" = "+total+" campaigns, "+mb+" mailboxes"],route:"Frontend modal -> Supabase UPDATE target_market.campaigns_confirmed[]"}},
-            {id:"gate",x:300,y:360,label:"All confirmed?",sub:allDone?"Yes - trigger":"Waiting...",status:allDone?"done":"pending",
-              info:{title:"Confirmation gate",desc:"Automation only triggers when campaigns_confirmed array length equals the plan\'s campaign limit. This is the handoff point - everything above requires customer input, everything below is fully automated.",data:["Required: "+total+" campaigns","Current: "+conf.length+" confirmed","Gate: "+(allDone?"OPEN":"CLOSED")],route:"Frontend checks campaigns_confirmed.length >= plan.campaigns -> triggers provisioning"}},
-            {id:"domains",x:300,y:440,label:"Purchase domains",sub:mb+" domains via Porkbun",status:allDone?(prov.status==="domains_purchased"?"done":"next"):"pending",
-              info:{title:"Domain registration",desc:"Generate domain name candidates from the business name (name+suffix, prefix+name, name+digits). Check availability via Porkbun API. Register available .com domains. Each mailbox gets its own isolated domain for reputation separation.",data:["Domains needed: "+mb,"Cost: ~$"+(mb*11.08).toFixed(2)+"/year ($"+((mb*11.08)/12).toFixed(2)+"/mo)","API: Porkbun (pk1_a6eef...)","TLD: .com"],route:"provision.js -> Porkbun /domain/checkAvailability -> /domain/register -> Supabase UPDATE provisioning.domains[]"}},
-            {id:"dns",x:300,y:520,label:"DNS records",sub:"MX, SPF, DKIM, DMARC",status:prov.dns_status==="done"?"done":"pending",
-              info:{title:"DNS configuration",desc:"For each registered domain, set DNS records via Porkbun API: MX records pointing to Google (aspmx.l.google.com), SPF record authorising Google, DMARC policy, and DKIM after Google Workspace generates the key. Allow 24-48hrs for propagation.",data:["MX: aspmx.l.google.com (pri 1)","SPF: v=spf1 include:_spf.google.com ~all","DMARC: v=DMARC1; p=none","DKIM: Added after Workspace setup"],route:"provision.js -> Porkbun /dns/create/{domain} per record -> verify propagation"}},
-            {id:"workspace",x:300,y:600,label:"Google Workspace",sub:"Create mailbox accounts",status:prov.workspace_status==="done"?"done":"pending",
-              info:{title:"Google Workspace setup",desc:"Create a Google Workspace account on each domain. Create mailbox user (outreach@domain.com format). Generate DKIM key and add to DNS. Store credentials encrypted in Supabase.",data:["Mailboxes: "+mb,"Format: outreach@[domain].com","Cost: ~$6/user/month","API: Google Admin SDK"],route:"Google Admin SDK -> create domain -> create user -> generate DKIM -> Porkbun DNS -> Supabase UPDATE provisioning.workspace_status"}},
-            {id:"smartlead",x:300,y:680,label:"Smartlead connect",sub:"Add mailboxes + warmup",status:prov.smartlead_status==="done"?"done":"pending",
-              info:{title:"Smartlead integration",desc:"Add each Google Workspace mailbox to Smartlead. Configure warmup settings: start at 2 emails/day, ramp to 40/day over 14-21 days. Assign mailboxes to campaigns (3 per campaign for Growth plan). Create campaign sequences in Smartlead.",data:["Mailboxes per campaign: "+Math.floor(mb/total),"Warmup ramp: 2/day -> 40/day","Duration: 14-21 days","API: Smartlead, $39/mo base"],route:"Smartlead API -> add email accounts -> set warmup config -> assign to campaign sequences"}},
-            {id:"warmup",x:300,y:760,label:"Warmup phase",sub:"14-21 days",status:"pending",
-              info:{title:"Warmup phase",desc:"Smartlead automatically warms each mailbox by exchanging emails with its warmup network. Volume increases gradually from 2/day to 40/day. Inbox placement is monitored daily - target 95%+. SPF/DKIM/DMARC records are validated. Once reputation is established, mailboxes transition to live sending.",data:["Duration: 14-21 days","Start: 2 emails/day","Peak: 40 emails/day","Target inbox rate: 95%+"],route:"Smartlead auto-warmup -> daily monitoring via API -> inbox rate check -> transition to live when ready"}},
-            {id:"leads",x:170,y:840,label:"Lead sourcing",sub:"SmartProspect / Apollo",status:"pending",
-              info:{title:"Lead sourcing",desc:"Pull leads matching each campaign\'s targeting criteria: job titles, seniority levels, industries, company sizes, and locations. Verify email addresses. Filter duplicates across campaigns. Push verified leads into Smartlead campaign sequences.",data:["Sources: SmartProspect, Apollo","Cost: ~$0.03-0.05/lead","Filters: titles, seniority, industries, size, location","Verification: email validation before import"],route:"SmartProspect/Apollo API -> filter by campaign targeting -> verify emails -> Smartlead import to sequences"}},
-            {id:"copy",x:430,y:840,label:"AI email copy",sub:"Claude API sequences",status:"pending",
-              info:{title:"AI email copy generation",desc:"Claude API generates personalised email sequences for each campaign using the offer, pain point, and social proof data. Creates 3-email sequence (initial + 2 follow-ups) with subject lines. Each campaign gets unique copy based on its targeting and offer.",data:["Model: Claude Sonnet","Sequence: 3 emails + subject lines","Inputs: offer, pain_point, social_proof","Per campaign: unique copy"],route:"Claude API -> use campaign offer/pain_point/social_proof -> generate 3-email sequence -> push to Smartlead campaign"}},
-            {id:"launch",x:300,y:920,label:"Campaign launch",sub:"Sequences go live",status:"pending",
-              info:{title:"Campaign launch",desc:"Smartlead sequences activate. Warmed mailboxes begin sending personalised emails to verified leads. Replies are automatically forwarded to the customer\'s lead_email address. Dashboard updates with live stats.",data:["Send volume: ~30-40/mailbox/day","Total daily: ~"+(mb*35)+" emails across "+mb+" mailboxes","Replies to: "+(custData.lead_email||custData.email)],route:"Smartlead sequences active -> emails sent from warmed mailboxes -> replies forwarded to lead_email -> dashboard stats updated"}},
-            {id:"replies",x:300,y:1000,label:"Warm replies",sub:"-> "+(custData.lead_email||custData.email).split("@")[0]+"@...",status:"pending",
-              info:{title:"Reply delivery",desc:"Warm replies from interested prospects are forwarded to the customer\'s inbox. The dashboard shows reply metrics, categories (warm/interested/not interested), and campaign performance. Self-learning optimisation adjusts subject lines, send times, and copy based on what gets the most replies.",data:["Delivery: forwarded to "+(custData.lead_email||custData.email),"Expected reply rate: 2-3%","Categories: warm, interested, not interested","Optimisation: A/B testing on subject lines + copy"],route:"Smartlead reply detection -> categorise -> forward to lead_email -> dashboard metrics update -> A/B test analysis"}},
+            {id:"stripe",label:"Stripe",sub:"Payment",status:"done",
+              info:{title:"Stripe payment",desc:"Customer pays via Stripe payment link. Webhook fires and creates Supabase customers row with plan, email, user_id.",data:["Plan: "+(custData.plan||"-"),"Status: "+(custData.plan_status||"active")],route:"Stripe checkout -> webhook -> Supabase INSERT customers"}},
+            {id:"supabase",label:"Supabase",sub:"Record",status:"done",
+              info:{title:"Customer record",desc:"Auth user + customers row created with user_id, email, plan, empty target_market JSON.",data:["user_id: "+currentUser.id.slice(0,14)+"...","email: "+custData.email],route:"Stripe webhook -> Supabase auth.users + customers"}},
+            {id:"onboard",label:"Onboarding",sub:"Form data",status:"done",
+              info:{title:"Onboarding form",desc:"Customer fills business name, service description, initial targeting. Saved to target_market JSON.",data:["Business: "+(custData.business_name||"-"),"Service: "+(custData.service_description||"-").slice(0,50)],route:"Frontend -> Supabase UPDATE customers.target_market"}},
+            {id:"campaigns",label:"Campaigns",sub:conf.length+"/"+total,status:allDone?"done":"active",
+              info:{title:"Campaign configuration",desc:"Customer configures each campaign: offer, pain point, social proof, targeting chips. Sequential unlock. Data stored in target_market JSON under campaign_X keys.",data:["Confirmed: ["+conf.join(",")+"]","Needed: "+total,"Mailboxes: "+mb],route:"Frontend modal -> Supabase UPDATE target_market.campaigns_confirmed[]"}},
+            {id:"gate",label:"Gate",sub:allDone?"Open":"Closed",status:allDone?"done":"pending",
+              info:{title:"Confirmation gate",desc:"Automation triggers when campaigns_confirmed.length >= plan campaign limit. Everything above = customer input, everything below = automated.",data:["Required: "+total,"Current: "+conf.length,"Gate: "+(allDone?"OPEN":"CLOSED")],route:"Check campaigns_confirmed.length >= plan.campaigns -> trigger provisioning"}},
+            {id:"domains",label:"Domains",sub:mb+"x Porkbun",status:allDone?(prov.status==="domains_purchased"?"done":"next"):"pending",
+              info:{title:"Purchase domains",desc:"Generate domain candidates from business name. Check availability via Porkbun. Register .com domains. Each mailbox gets isolated domain.",data:["Count: "+mb,"Cost: ~$"+(mb*11.08).toFixed(0)+"/yr","API: Porkbun"],route:"provision.js -> Porkbun /domain/register -> Supabase UPDATE provisioning.domains[]"}},
+            {id:"dns",label:"DNS",sub:"MX/SPF/DKIM",status:prov.dns_status==="done"?"done":"pending",
+              info:{title:"DNS records",desc:"Set MX (Google), SPF, DMARC per domain via Porkbun API. DKIM added after Workspace setup. Allow 24-48hrs propagation.",data:["MX: aspmx.l.google.com","SPF: include:_spf.google.com","DMARC: p=none"],route:"Porkbun /dns/create/{domain} -> verify propagation"}},
+            {id:"workspace",label:"Workspace",sub:"Mailboxes",status:prov.workspace_status==="done"?"done":"pending",
+              info:{title:"Google Workspace",desc:"Create mailbox user per domain (outreach@domain.com). Generate DKIM key, add to DNS. Store creds encrypted.",data:["Count: "+mb,"Format: outreach@[domain]","Cost: ~$6/user/mo"],route:"Google Admin SDK -> create user -> DKIM -> Porkbun DNS"}},
+            {id:"smartlead",label:"Smartlead",sub:"Connect",status:prov.smartlead_status==="done"?"done":"pending",
+              info:{title:"Smartlead connect",desc:"Add mailboxes to Smartlead. Configure warmup: 2/day ramp to 40/day. Assign to campaign sequences.",data:["Per campaign: "+Math.floor(mb/total)+" mailboxes","Warmup: 2->40/day","Cost: $39/mo"],route:"Smartlead API -> add accounts -> warmup config -> assign campaigns"}},
+            {id:"warmup",label:"Warmup",sub:"14-21 days",status:"pending",
+              info:{title:"Warmup phase",desc:"Smartlead auto-warms mailboxes. Volume ramps 2/day to 40/day. Monitor inbox rate daily. Target 95%+. Transition to live when ready.",data:["Duration: 14-21 days","Target: 95%+ inbox","Ramp: 2->40 emails/day"],route:"Smartlead auto-warmup -> monitor -> transition"}},
+            {id:"leads",label:"Leads",sub:"Source+verify",status:"pending",
+              info:{title:"Lead sourcing",desc:"Pull leads matching campaign targeting. Verify emails. Filter dupes. Push to Smartlead sequences.",data:["Source: SmartProspect/Apollo","Cost: ~$0.03-0.05/lead","Match: titles, industries, locations"],route:"SmartProspect API -> verify -> Smartlead import"}},
+            {id:"copy",label:"AI copy",sub:"Claude API",status:"pending",
+              info:{title:"AI email copy",desc:"Claude generates 3-email sequences per campaign using offer, pain point, social proof. Subject lines + bodies + follow-ups.",data:["Model: Claude Sonnet","Sequence: 3 emails","Per campaign: unique copy"],route:"Claude API -> generate sequences -> Smartlead campaign"}},
+            {id:"launch",label:"Launch",sub:"Go live",status:"pending",
+              info:{title:"Campaign launch",desc:"Sequences activate. Warmed mailboxes send to verified leads. Replies forwarded to customer inbox.",data:["Volume: ~"+(mb*35)+"/day total","Replies to: "+(custData.lead_email||custData.email)],route:"Smartlead sequences live -> replies forwarded"}},
           ];
 
-          const edges=[
-            {from:"stripe",to:"supabase"},
-            {from:"supabase",to:"onboard"},
-            {from:"onboard",to:"campaigns"},
-            {from:"campaigns",to:"gate"},
-            {from:"gate",to:"domains"},
-            {from:"domains",to:"dns"},
-            {from:"dns",to:"workspace"},
-            {from:"workspace",to:"smartlead"},
-            {from:"smartlead",to:"warmup"},
-            {from:"warmup",to:"leads"},
-            {from:"warmup",to:"copy"},
-            {from:"leads",to:"launch"},
-            {from:"copy",to:"launch"},
-            {from:"launch",to:"replies"},
-          ];
-
-          const statusColor=s=>s==="done"?"var(--green)":s==="active"?"var(--orange)":s==="next"?"#006949":"var(--bg3)";
-          const statusBorder=s=>s==="done"?"var(--green-bd)":s==="active"?"var(--orange)":s==="next"?"#006949":"var(--border)";
-          const nodeW=160,nodeH=52;
-          const getXY=id=>{const n=nodes.find(n=>n.id===id);return n?{x:n.x,y:n.y}:{x:0,y:0};};
+          const sBg=s=>s==="done"?"var(--green)":s==="active"?"var(--orange)":s==="next"?"#006949":"var(--bg3)";
+          const sBd=s=>s==="done"?"var(--green-bd)":s==="active"?"var(--orange)":s==="next"?"var(--green-bd)":"var(--border)";
+          const sTx=s=>s==="done"?"DONE":s==="active"?"ACTIVE":s==="next"?"READY":"PENDING";
 
           return <div>
             {/* Detail panel */}
-            {detail&&<div style={{position:"fixed",top:0,right:0,width:420,height:"100vh",background:"var(--bg2)",borderLeft:"1px solid var(--border)",zIndex:50,overflow:"auto",animation:"fadeIn .2s ease",boxShadow:"-4px 0 20px rgba(0,0,0,0.15)"}}>
-              <div style={{padding:"24px 28px"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
+            {detail&&<div style={{position:"fixed",top:0,right:0,width:380,height:"100vh",background:"var(--bg2)",borderLeft:"1px solid var(--border)",zIndex:50,overflow:"auto",animation:"fadeIn .15s ease",boxShadow:"-2px 0 12px rgba(0,0,0,0.1)"}}>
+              <div style={{padding:"20px 24px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
                   <div>
-                    <div style={{fontSize:9,fontWeight:700,padding:"3px 8px",display:"inline-block",background:statusColor(detail.status),color:"#fff",marginBottom:8}}>{detail.status==="done"?"DONE":detail.status==="active"?"ACTIVE":detail.status==="next"?"READY":"PENDING"}</div>
-                    <h3 style={{fontSize:18,fontWeight:700}}>{detail.info.title}</h3>
+                    <span style={{fontSize:9,fontWeight:700,padding:"2px 8px",background:sBg(detail.status),color:"#fff",display:"inline-block",marginBottom:6}}>{sTx(detail.status)}</span>
+                    <h3 style={{fontSize:16,fontWeight:700,margin:0}}>{detail.info.title}</h3>
                   </div>
-                  <button onClick={()=>setDetail(null)} style={{width:32,height:32,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>X</button>
+                  <button onClick={()=>setDetail(null)} style={{width:28,height:28,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>X</button>
                 </div>
-                <div style={{fontSize:13,color:"var(--text2)",lineHeight:1.7,marginBottom:20}}>{detail.info.desc}</div>
-                <div style={{marginBottom:20}}>
-                  <div style={{fontSize:11,fontWeight:700,marginBottom:8}}>Data</div>
-                  {detail.info.data.map((d,i)=><div key={i} style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--text2)",padding:"4px 0",borderBottom:"1px solid var(--border)"}}>{d}</div>)}
+                <div style={{fontSize:12,color:"var(--text2)",lineHeight:1.7,marginBottom:16}}>{detail.info.desc}</div>
+                <div style={{marginBottom:16}}>
+                  <div style={{fontSize:10,fontWeight:700,marginBottom:6}}>Live data</div>
+                  {detail.info.data.map((d,i)=><div key={i} style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)",padding:"3px 0",borderBottom:"1px solid var(--border)"}}>{d}</div>)}
                 </div>
                 <div>
-                  <div style={{fontSize:11,fontWeight:700,marginBottom:8}}>Route</div>
-                  <div style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--green)",background:"var(--bg)",padding:12,border:"1px solid var(--border)",lineHeight:1.6}}>{detail.info.route}</div>
+                  <div style={{fontSize:10,fontWeight:700,marginBottom:6}}>Data route</div>
+                  <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--green)",background:"var(--bg)",padding:10,border:"1px solid var(--border)",lineHeight:1.6,wordBreak:"break-all"}}>{detail.info.route}</div>
                 </div>
               </div>
             </div>}
+
+            {/* Horizontal flowchart */}
+            <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:"16px 12px",marginBottom:16,overflowX:"auto"}}>
+              <div style={{display:"flex",alignItems:"center",gap:0,minWidth:960}}>
+                {nodes.map((n,i)=>{
+                  const isGate=n.id==="gate";
+                  const isSplit=n.id==="leads"||n.id==="copy";
+                  return <React.Fragment key={i}>
+                    {i>0&&!isSplit&&<div style={{width:20,height:2,background:nodes[i-1].status==="done"?"var(--green)":"var(--border)",flexShrink:0}}/>}
+                    {n.id==="leads"&&<div style={{display:"flex",flexDirection:"column",gap:4,flexShrink:0}}>
+                      {/* Branch connector */}
+                      <div style={{display:"flex",alignItems:"center"}}>
+                        <div style={{width:10,height:2,background:"var(--border)"}}/>
+                        <div onClick={()=>setDetail(nodes.find(x=>x.id==="leads"))} style={{padding:"6px 10px",border:"1px solid var(--border)",background:"var(--bg2)",cursor:"pointer",textAlign:"center",minWidth:64}}>
+                          <div style={{fontSize:9,fontWeight:700,color:"var(--text3)"}}>Leads</div>
+                          <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)"}}>Source</div>
+                        </div>
+                      </div>
+                      <div style={{display:"flex",alignItems:"center"}}>
+                        <div style={{width:10,height:2,background:"var(--border)"}}/>
+                        <div onClick={()=>setDetail(nodes.find(x=>x.id==="copy"))} style={{padding:"6px 10px",border:"1px solid var(--border)",background:"var(--bg2)",cursor:"pointer",textAlign:"center",minWidth:64}}>
+                          <div style={{fontSize:9,fontWeight:700,color:"var(--text3)"}}>AI copy</div>
+                          <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)"}}>Claude</div>
+                        </div>
+                      </div>
+                    </div>}
+                    {n.id!=="leads"&&n.id!=="copy"&&<div onClick={()=>setDetail(n)} style={{
+                      padding:"8px 10px",
+                      border:(n.status==="active"?"2px":"1px")+" solid "+sBd(n.status),
+                      borderRadius:isGate?20:0,
+                      background:n.status==="done"?"var(--green-bg)":n.status==="active"?"var(--orange-bg)":n.status==="next"?"var(--green-bg)":"var(--bg2)",
+                      cursor:"pointer",textAlign:"center",minWidth:68,flexShrink:0,position:"relative",transition:"transform .1s"
+                    }}
+                      onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                      onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                      {n.status==="done"&&<div style={{position:"absolute",top:-6,right:-6,width:14,height:14,borderRadius:7,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",fontWeight:700}}>OK</div>}
+                      <div style={{fontSize:10,fontWeight:700,color:n.status==="pending"?"var(--text3)":"var(--text)"}}>
+                        {n.label}
+                      </div>
+                      <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:1}}>{n.sub}</div>
+                    </div>}
+                  </React.Fragment>;
+                })}
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:9,color:"var(--text3)"}}>
+                <span>Customer input</span>
+                <span style={{borderTop:"1px dashed var(--border)",flex:1,margin:"5px 8px"}}/>
+                <span>Automated</span>
+              </div>
+            </div>
+
+            {/* Data cards */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:16}}>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12}}>
+                <div style={{fontSize:10,fontWeight:700,marginBottom:8}}>Supabase</div>
+                <div style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text2)",lineHeight:1.8}}>
+                  user: {currentUser.id.slice(0,10)}...<br/>plan: {custData.plan}<br/>confirmed: [{conf.join(",")}]<br/>mailboxes: {custData.mailbox_count}
+                </div>
+              </div>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12}}>
+                <div style={{fontSize:10,fontWeight:700,marginBottom:8}}>APIs</div>
+                <div style={{fontSize:9,color:"var(--text2)",lineHeight:1.8}}>
+                  Porkbun (domains)<br/>Google Admin (mailboxes)<br/>Smartlead (warmup+send)<br/>Claude API (copy)
+                </div>
+              </div>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12}}>
+                <div style={{fontSize:10,fontWeight:700,marginBottom:8}}>Monthly cost</div>
+                <div style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text2)",lineHeight:1.8}}>
+                  Domains: ${(mb*11.08/12).toFixed(0)}/mo<br/>Smartlead: $39<br/>Workspace: ${mb*6}<br/><strong>Total: ~${(mb*11.08/12+39+mb*6).toFixed(0)}/mo</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Raw JSON toggle */}
+            <details style={{border:"1px solid var(--border)",background:"var(--bg)"}}>
+              <summary style={{padding:"8px 12px",fontSize:10,fontWeight:700,cursor:"pointer",color:"var(--text2)"}}>Raw target_market JSON</summary>
+              <div style={{padding:"0 12px 12px",maxHeight:200,overflow:"auto"}}>
+                <pre style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text2)",whiteSpace:"pre-wrap",margin:0}}>{JSON.stringify(t,null,2)}</pre>
+              </div>
+            </details>
+          </div>;
+        })()}
+      </div>}
+
 
             {/* SVG Flowchart */}
             <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:"20px 0",marginBottom:24,overflow:"auto"}}>
