@@ -1058,17 +1058,18 @@ function App(){
           <div style={{marginBottom:24}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <div>
-                <div style={{fontSize:15,fontWeight:700}}>Configure your campaigns</div>
-                <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>Set up your remaining campaigns so we can begin outreach as soon as infrastructure is ready</div>
+                <div style={{fontSize:15,fontWeight:700}}>Your campaigns</div>
+                <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>Finish setting up Campaign 1 to unlock the rest of your campaign slots</div>
               </div>
-              <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)",background:"var(--bg2)",padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)"}}>1/{custData._limits?custData._limits.campaigns:4} configured</div>
+              <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)",background:"var(--bg2)",padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)"}}>0/{custData._limits?custData._limits.campaigns:4} confirmed</div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat("+(custData._limits?custData._limits.campaigns:4)+", 1fr)",gap:12}}>
-              {/* Campaign 1 — configured, clickable */}
-              <div onClick={()=>setConfigCampaign("view-1")} style={{border:"1px solid var(--green-bd)",borderRadius:10,padding:16,background:"var(--green-bg)",cursor:"pointer",transition:"all .15s"}}
+              {/* Campaign 1 — needs finishing */}
+              <div onClick={()=>setConfigCampaign("view-1")} style={{border:"2px solid var(--orange)",borderRadius:10,padding:16,background:"var(--orange-bg)",cursor:"pointer",transition:"all .15s",position:"relative"}} 
                 onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
                 onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-                <div style={{fontSize:10,color:"var(--green)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaign 1</div>
+                <div style={{position:"absolute",top:-8,left:12,fontSize:9,fontWeight:700,background:"var(--orange)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Action required</div>
+                <div style={{fontSize:10,color:"var(--orange)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,marginTop:4}}>Campaign 1</div>
                 <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign 1"}</div>
                 <div style={{fontSize:10,color:"var(--text3)"}}>
                   {custData._targeting&&custData._targeting.job_titles?custData._targeting.job_titles.join(", "):""}
@@ -1076,24 +1077,18 @@ function App(){
                 <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>
                   {custData._targeting&&custData._targeting.locations?custData._targeting.locations.join(", "):""}
                 </div>
-                <div style={{marginTop:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:4,background:"var(--orange-bg)",color:"var(--orange)"}}>Provisioning</span>
-                    <span style={{fontSize:9,color:"var(--text3)"}}>{Math.floor((custData._limits?custData._limits.mailboxes:12)/(custData._limits?custData._limits.campaigns:4))} mailboxes</span>
-                  </div>
-                  <span style={{fontSize:10,color:"var(--green)",fontWeight:500}}>View →</span>
+                <div style={{marginTop:10,padding:"8px 0 0",borderTop:"1px solid rgba(217,119,6,0.2)"}}>
+                  <span style={{fontSize:11,color:"var(--orange)",fontWeight:600}}>Finish setup →</span>
                 </div>
               </div>
-              {/* Empty campaign slots */}
+              {/* Locked campaign slots */}
               {Array.from({length:(custData._limits?custData._limits.campaigns:4)-1}).map((_,i)=>
-                <div key={i} onClick={()=>setConfigCampaign(i+2)} style={{border:"2px dashed var(--border)",borderRadius:10,padding:16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",minHeight:130,transition:"all .15s",background:"transparent"}} 
-                  onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--green)";e.currentTarget.style.background="var(--green-bg)"}}
-                  onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.background="transparent"}}>
-                  <div style={{width:40,height:40,borderRadius:"50%",border:"2px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:8}}>
-                    <span style={{fontSize:20,color:"var(--text3)",lineHeight:1}}>+</span>
+                <div key={i} style={{border:"1px solid var(--border)",borderRadius:10,padding:16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:130,background:"var(--bg2)",opacity:0.5,cursor:"not-allowed",position:"relative"}}>
+                  <div style={{width:36,height:36,borderRadius:"50%",background:"var(--bg3)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:8}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                   </div>
-                  <div style={{fontSize:12,fontWeight:600,color:"var(--text2)"}}>Campaign {i+2}</div>
-                  <div style={{fontSize:10,color:"var(--green)",marginTop:2,fontWeight:500}}>Configure now →</div>
+                  <div style={{fontSize:12,fontWeight:600,color:"var(--text3)"}}>Campaign {i+2}</div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Confirm Campaign 1 first</div>
                 </div>
               )}
             </div>
@@ -1756,52 +1751,113 @@ function App(){
       </div>
     </div>}
 
-    {/* View Campaign 1 Detail Modal */}
+    {/* Finish Campaign 1 Setup Modal */}
     {configCampaign==="view-1"&&custData&&custData._targeting&&<div onClick={e=>{if(e.target===e.currentTarget)setConfigCampaign(null)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
-      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:560,animation:"fadeIn .3s ease"}}>
+      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:640,maxHeight:"90vh",overflow:"auto",animation:"fadeIn .3s ease"}}>
         <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
-            <h2 style={{fontSize:18,fontWeight:700}}>{custData._targeting.campaign_name||"Campaign 1"}</h2>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginTop:4}}>
-              <span style={{fontSize:10,fontWeight:600,padding:"3px 8px",borderRadius:10,background:"var(--orange-bg)",color:"var(--orange)"}}>Provisioning</span>
-              <span style={{fontSize:11,color:"var(--text3)"}}>{Math.floor((custData._limits?custData._limits.mailboxes:12)/(custData._limits?custData._limits.campaigns:4))} mailboxes assigned</span>
-            </div>
+            <h2 style={{fontSize:18,fontWeight:700}}>Finish setup — Campaign 1</h2>
+            <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>Review your targeting below, then confirm to begin provisioning</div>
           </div>
           <button onClick={()=>setConfigCampaign(null)} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
         </div>
         <div style={{padding:"24px 28px"}}>
-          <div style={{display:"flex",flexDirection:"column",gap:16}}>
-            {custData._targeting.job_titles&&custData._targeting.job_titles.length>0&&<div>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,fontWeight:600}}>Job titles</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.job_titles.map((t,i)=><span key={i} style={{fontSize:12,padding:"4px 12px",borderRadius:6,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-            </div>}
-            {custData._targeting.seniority&&custData._targeting.seniority.length>0&&<div>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,fontWeight:600}}>Seniority</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.seniority.map((t,i)=><span key={i} style={{fontSize:12,padding:"4px 12px",borderRadius:6,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-            </div>}
-            {custData._targeting.industries&&custData._targeting.industries.length>0&&<div>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,fontWeight:600}}>Industries</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.industries.map((t,i)=><span key={i} style={{fontSize:12,padding:"4px 12px",borderRadius:6,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-            </div>}
-            {custData._targeting.company_size&&custData._targeting.company_size.length>0&&<div>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,fontWeight:600}}>Company size</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.company_size.map((t,i)=><span key={i} style={{fontSize:12,padding:"4px 12px",borderRadius:6,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-            </div>}
-            {custData._targeting.locations&&custData._targeting.locations.length>0&&<div>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,fontWeight:600}}>Locations</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.locations.map((t,i)=><span key={i} style={{fontSize:12,padding:"4px 12px",borderRadius:6,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-            </div>}
-            {custData._targeting.website&&<div>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,fontWeight:600}}>Website</div>
-              <div style={{fontSize:12,fontFamily:"var(--mono)"}}>{custData._targeting.website}</div>
-            </div>}
-            {custData._targeting.offer&&<div>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,fontWeight:600}}>Offer</div>
-              <div style={{fontSize:12}}>{custData._targeting.offer}</div>
-            </div>}
+
+          {/* Your Business */}
+          <div style={{marginBottom:20}}>
+            <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Your business
+            </div>
+            <div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:16}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Business name</div>
+                  <div style={{fontSize:13,fontWeight:600}}>{custData.business_name||"—"}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Website</div>
+                  <div style={{fontSize:13,fontFamily:"var(--mono)"}}>{custData._targeting.website||"—"}</div>
+                </div>
+                <div style={{gridColumn:"1/-1"}}>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What you offer</div>
+                  <div style={{fontSize:13}}>{custData._targeting.offer||custData.service_description||"—"}</div>
+                </div>
+                <div style={{gridColumn:"1/-1"}}>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Replies sent to</div>
+                  <div style={{fontSize:13,fontFamily:"var(--mono)",color:"var(--green)"}}>{custData.lead_email||custData.email}</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div style={{marginTop:24,paddingTop:16,borderTop:"1px solid var(--border)",fontSize:12,color:"var(--text3)",lineHeight:1.6}}>
-            We're building your sending infrastructure for this campaign. You'll receive an email at <strong style={{color:"var(--text2)"}}>{custData.lead_email||custData.email}</strong> when it's ready to go live.
+
+          {/* Who We're Targeting */}
+          <div style={{marginBottom:20}}>
+            <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              Who we're targeting
+            </div>
+            <div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:16}}>
+              <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                {custData._targeting.job_titles&&custData._targeting.job_titles.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Job titles</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.job_titles.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+                {custData._targeting.seniority&&custData._targeting.seniority.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Seniority level</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.seniority.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+                {custData._targeting.industries&&custData._targeting.industries.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Industries</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.industries.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+                {custData._targeting.company_size&&custData._targeting.company_size.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Company size</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.company_size.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+                {custData._targeting.locations&&custData._targeting.locations.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Locations</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.locations.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+              </div>
+            </div>
+          </div>
+
+          {/* Campaign Info */}
+          <div style={{marginBottom:24}}>
+            <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+              Campaign details
+            </div>
+            <div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:16}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
+                <div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Campaign name</div>
+                  <div style={{fontSize:13,fontWeight:600}}>{custData._targeting.campaign_name||"Campaign 1"}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Mailboxes</div>
+                  <div style={{fontSize:13,fontWeight:600}}>{Math.floor((custData._limits?custData._limits.mailboxes:12)/(custData._limits?custData._limits.campaigns:4))}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Status</div>
+                  <span style={{fontSize:10,fontWeight:600,padding:"3px 8px",borderRadius:10,background:"var(--orange-bg)",color:"var(--orange)"}}>Awaiting confirmation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={()=>{setConfigCampaign(null)}} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Confirm & begin provisioning
+            </button>
+            <button onClick={()=>{setConfigCampaign(null);window.location.href='/onboarding.html';}} style={{padding:"14px 20px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Edit</button>
+          </div>
+
+          <div style={{marginTop:12,fontSize:11,color:"var(--text3)",textAlign:"center"}}>
+            Once confirmed, we'll start purchasing domains and setting up your mailboxes. This can't be undone.
           </div>
         </div>
       </div>
