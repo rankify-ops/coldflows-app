@@ -891,6 +891,7 @@ function App(){
   const [showPhase,setShowPhase]=useState(null);
   const [mb,setMb]=useState(null);
   const [configCampaign,setConfigCampaign]=useState(null);
+  const [editMode,setEditMode]=useState(false);
   const [treeFilter,setTreeFilter]=useState("SEO");
   const [dark,setDark]=useState(false);
   const [custData,setCustData]=useState(null);
@@ -1752,14 +1753,40 @@ function App(){
     </div>}
 
     {/* Finish Campaign 1 Setup Modal */}
-    {configCampaign==="view-1"&&custData&&custData._targeting&&<div onClick={e=>{if(e.target===e.currentTarget)setConfigCampaign(null)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
+    {configCampaign==="view-1"&&custData&&custData._targeting&&(()=>{
+      const t=custData._targeting;
+      const allTitles=["CEO","Managing Director","Founder","VP Sales","VP Marketing","Head of Growth","CMO","CTO","Director","Operations Manager","HR Director","CFO","COO","Business Owner","General Manager","Sales Manager"];
+      const allSeniority=["C-Suite","VP","Director","Manager","Senior"];
+      const allIndustries=["Software / SaaS","E-commerce","Marketing / Advertising","Finance","Healthcare","Real Estate","Construction","Education","Legal","Manufacturing","Hospitality","Professional Services","Retail","Logistics","Technology","Media","Consulting","Non-profit"];
+      const allSizes=["1-10","11-50","51-200","201-500","501-1000","1001-5000","5000-10000","10000+"];
+      const allLocations=["Australia","United States","United Kingdom","Canada","New Zealand","Germany","France","Singapore","Hong Kong","UAE","India","Netherlands","Ireland","Sweden","Japan"];
+      
+      function ChipGroup({label,icon,allOptions,selectedKey}){
+        const [sel,setSel]=React.useState(t[selectedKey]||[]);
+        React.useEffect(()=>{if(t[selectedKey])setSel(t[selectedKey])},[]);
+        // Store back to targeting
+        t[selectedKey]=sel;
+        return <div style={{marginBottom:12}}>
+          <div style={{fontSize:10,color:"var(--text3)",marginBottom:6}}>{label}</div>
+          {editMode?<div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+            {allOptions.map((o,i)=>{
+              const active=sel.indexOf(o)!==-1;
+              return <span key={i} onClick={()=>{setSel(active?sel.filter(x=>x!==o):[...sel,o])}} style={{fontSize:11,padding:"4px 10px",borderRadius:6,border:active?"1px solid var(--green)":"1px solid var(--border)",background:active?"var(--green-bg)":"var(--bg2)",color:active?"var(--green)":"var(--text3)",cursor:"pointer",fontWeight:active?600:400,transition:"all .1s"}}>{o}</span>;
+            })}
+          </div>:<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {sel.length?sel.map((v,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{v}</span>):<span style={{fontSize:12,color:"var(--text3)"}}>—</span>}
+          </div>}
+        </div>;
+      }
+      
+      return <div onClick={e=>{if(e.target===e.currentTarget){setConfigCampaign(null);setEditMode(false);}}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
       <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:640,maxHeight:"90vh",overflow:"auto",animation:"fadeIn .3s ease"}}>
         <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <h2 style={{fontSize:18,fontWeight:700}}>Finish setup — Campaign 1</h2>
-            <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>Review your targeting below, then confirm to begin provisioning</div>
+            <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>{editMode?"Edit your targeting below":"Review your targeting below, then confirm to begin provisioning"}</div>
           </div>
-          <button onClick={()=>setConfigCampaign(null)} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+          <button onClick={()=>{setConfigCampaign(null);setEditMode(false);}} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
         </div>
         <div style={{padding:"24px 28px"}}>
 
@@ -1773,19 +1800,19 @@ function App(){
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Business name</div>
-                  <div style={{fontSize:13,fontWeight:600}}>{custData.business_name||"—"}</div>
+                  {editMode?<input defaultValue={custData.business_name||""} id="edit-biz" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontWeight:600}}>{custData.business_name||"—"}</div>}
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Website</div>
-                  <div style={{fontSize:13,fontFamily:"var(--mono)"}}>{custData._targeting.website||"—"}</div>
+                  {editMode?<input defaultValue={t.website||""} id="edit-web" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--mono)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontFamily:"var(--mono)"}}>{t.website||"—"}</div>}
                 </div>
                 <div style={{gridColumn:"1/-1"}}>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What you offer</div>
-                  <div style={{fontSize:13}}>{custData._targeting.offer||custData.service_description||"—"}</div>
+                  {editMode?<textarea defaultValue={t.offer||custData.service_description||""} id="edit-offer" rows="2" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>:<div style={{fontSize:13}}>{t.offer||custData.service_description||"—"}</div>}
                 </div>
                 <div style={{gridColumn:"1/-1"}}>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Replies sent to</div>
-                  <div style={{fontSize:13,fontFamily:"var(--mono)",color:"var(--green)"}}>{custData.lead_email||custData.email}</div>
+                  {editMode?<input defaultValue={custData.lead_email||custData.email||""} id="edit-email" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--mono)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontFamily:"var(--mono)",color:"var(--green)"}}>{custData.lead_email||custData.email}</div>}
                 </div>
               </div>
             </div>
@@ -1798,28 +1825,11 @@ function App(){
               Who we're targeting
             </div>
             <div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:16}}>
-              <div style={{display:"flex",flexDirection:"column",gap:14}}>
-                {custData._targeting.job_titles&&custData._targeting.job_titles.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Job titles</div>
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.job_titles.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-                {custData._targeting.seniority&&custData._targeting.seniority.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Seniority level</div>
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.seniority.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-                {custData._targeting.industries&&custData._targeting.industries.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Industries</div>
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.industries.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-                {custData._targeting.company_size&&custData._targeting.company_size.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Company size</div>
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.company_size.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-                {custData._targeting.locations&&custData._targeting.locations.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Locations</div>
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{custData._targeting.locations.map((t,i)=><span key={i} style={{fontSize:12,padding:"5px 12px",borderRadius:6,background:"var(--bg2)",border:"1px solid var(--border)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-              </div>
+              <ChipGroup label="Job titles" allOptions={allTitles} selectedKey="job_titles"/>
+              <ChipGroup label="Seniority level" allOptions={allSeniority} selectedKey="seniority"/>
+              <ChipGroup label="Industries" allOptions={allIndustries} selectedKey="industries"/>
+              <ChipGroup label="Company size" allOptions={allSizes} selectedKey="company_size"/>
+              <ChipGroup label="Locations" allOptions={allLocations} selectedKey="locations"/>
             </div>
           </div>
 
@@ -1833,7 +1843,7 @@ function App(){
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Campaign name</div>
-                  <div style={{fontSize:13,fontWeight:600}}>{custData._targeting.campaign_name||"Campaign 1"}</div>
+                  {editMode?<input defaultValue={t.campaign_name||"Campaign 1"} id="edit-camp" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontWeight:600}}>{t.campaign_name||"Campaign 1"}</div>}
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Mailboxes</div>
@@ -1848,20 +1858,50 @@ function App(){
           </div>
 
           {/* Action buttons */}
-          <div style={{display:"flex",gap:10}}>
-            <button onClick={()=>{setConfigCampaign(null)}} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+          {editMode?<div style={{display:"flex",gap:10}}>
+            <button onClick={async()=>{
+              // Save edits to Supabase
+              var newTarget=Object.assign({},t);
+              var campEl=document.getElementById('edit-camp');if(campEl)newTarget.campaign_name=campEl.value;
+              var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
+              var offerEl=document.getElementById('edit-offer');if(offerEl)newTarget.offer=offerEl.value;
+              var bizEl=document.getElementById('edit-biz');
+              var emailEl=document.getElementById('edit-email');
+              await sb.from('customers').update({
+                business_name:bizEl?bizEl.value:custData.business_name,
+                lead_email:emailEl?emailEl.value:custData.lead_email,
+                service_description:offerEl?offerEl.value:custData.service_description,
+                target_market:JSON.stringify(newTarget)
+              }).eq('user_id',currentUser.id);
+              // Reload data
+              var{data}=await sb.from('customers').select('*').eq('user_id',currentUser.id).single();
+              if(data){
+                if(data.target_market&&typeof data.target_market==='string')try{data._targeting=JSON.parse(data.target_market)}catch(e){data._targeting=null}
+                var limits={starter:{mailboxes:4,campaigns:2},growth:{mailboxes:12,campaigns:4},scale:{mailboxes:30,campaigns:10}};
+                data._limits=limits[data.plan]||limits.starter;
+                setCustData(data);
+              }
+              setEditMode(false);
+            }} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)"}}>Save changes</button>
+            <button onClick={()=>setEditMode(false)} style={{padding:"14px 20px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Cancel</button>
+          </div>:<div style={{display:"flex",gap:10}}>
+            <button onClick={()=>{setConfigCampaign(null);setEditMode(false);}} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               Confirm & begin provisioning
             </button>
-            <button onClick={()=>{setConfigCampaign(null);window.location.href='/onboarding.html?edit=1';}} style={{padding:"14px 20px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Edit</button>
-          </div>
+            <button onClick={()=>setEditMode(true)} style={{padding:"14px 20px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",gap:6}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+          </div>}
 
-          <div style={{marginTop:12,fontSize:11,color:"var(--text3)",textAlign:"center"}}>
+          {!editMode&&<div style={{marginTop:12,fontSize:11,color:"var(--text3)",textAlign:"center"}}>
             Once confirmed, we'll start purchasing domains and setting up your mailboxes. This can't be undone.
-          </div>
+          </div>}
         </div>
       </div>
-    </div>}
+    </div>;
+    })()}
 
     {/* Configure Campaign Modal */}
     {configCampaign&&configCampaign!=="view-1"&&<div onClick={e=>{if(e.target===e.currentTarget)setConfigCampaign(null)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
