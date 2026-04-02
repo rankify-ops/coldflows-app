@@ -1056,58 +1056,90 @@ function App(){
             </div>
           </div>
 
-          {/* CAMPAIGNS — TOP PRIORITY */}
-          <div style={{marginBottom:24}}>
+          {/* CAMPAIGNS — SEQUENTIAL SETUP */}
+          {(()=>{
+            const confirmed=custData._targeting&&custData._targeting.campaigns_confirmed?custData._targeting.campaigns_confirmed:[];
+            const totalCamps=custData._limits?custData._limits.campaigns:4;
+            const nextToSetup=confirmed.length+1;
+            const allDone=confirmed.length>=totalCamps;
+            const mbPerCamp=Math.floor((custData._limits?custData._limits.mailboxes:12)/totalCamps);
+            return <div style={{marginBottom:24}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <div>
-                <div style={{fontSize:15,fontWeight:700}}>Your campaigns</div>
-                <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>Finish setting up Campaign 1 to unlock the rest of your campaign slots</div>
+                <div style={{fontSize:15,fontWeight:700}}>Setup your campaigns</div>
+                <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>{allDone?"All campaigns configured — provisioning will begin shortly":"Configure Campaign "+nextToSetup+" to continue"}</div>
               </div>
-              <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)",background:"var(--bg2)",padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)"}}>0/{custData._limits?custData._limits.campaigns:4} confirmed</div>
+              <div style={{fontSize:12,fontWeight:600,fontFamily:"var(--mono)",background:allDone?"var(--green-bg)":"var(--bg2)",color:allDone?"var(--green)":"var(--text3)",padding:"4px 12px",borderRadius:6,border:"1px solid "+(allDone?"var(--green-bd)":"var(--border)")}}>{confirmed.length}/{totalCamps} complete</div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat("+(custData._limits?custData._limits.campaigns:4)+", 1fr)",gap:12}}>
-              {/* Campaign 1 — needs finishing */}
-              <div onClick={()=>{setConfigCampaign("view-1");setValidationErr(null);}} style={{border:"2px solid var(--orange)",borderRadius:10,padding:16,background:"var(--orange-bg)",cursor:"pointer",transition:"all .15s",position:"relative"}} 
-                onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
-                onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-                <div style={{position:"absolute",top:-8,left:12,fontSize:9,fontWeight:700,background:"var(--orange)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Action required</div>
-                <div style={{fontSize:10,color:"var(--orange)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,marginTop:4}}>Campaign 1</div>
-                <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign 1"}</div>
-                <div style={{fontSize:10,color:"var(--text3)"}}>
-                  {custData._targeting&&custData._targeting.job_titles?custData._targeting.job_titles.join(", "):""}
-                </div>
-                <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>
-                  {custData._targeting&&custData._targeting.locations?custData._targeting.locations.join(", "):""}
-                </div>
-                <div style={{marginTop:10,padding:"8px 0 0",borderTop:"1px solid rgba(217,119,6,0.2)"}}>
-                  <span style={{fontSize:11,color:"var(--orange)",fontWeight:600}}>Finish setup →</span>
-                </div>
-              </div>
-              {/* Locked campaign slots */}
-              {Array.from({length:(custData._limits?custData._limits.campaigns:4)-1}).map((_,i)=>
-                <div key={i} style={{border:"1px solid var(--border)",borderRadius:10,padding:16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:130,background:"var(--bg2)",opacity:0.5,cursor:"not-allowed",position:"relative"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat("+totalCamps+", 1fr)",gap:12}}>
+              {Array.from({length:totalCamps}).map((_,i)=>{
+                const campNum=i+1;
+                const isConfirmed=confirmed.indexOf(campNum)!==-1;
+                const isNext=campNum===nextToSetup;
+                const isLocked=campNum>nextToSetup;
+                
+                if(isConfirmed){
+                  return <div key={i} onClick={()=>{setConfigCampaign("view-"+campNum);setValidationErr(null);}} style={{border:"1px solid var(--green-bd)",borderRadius:10,padding:16,background:"var(--green-bg)",cursor:"pointer",transition:"all .15s",position:"relative"}}
+                    onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                    onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                    <div style={{position:"absolute",top:-8,right:12,width:20,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
+                    <div style={{fontSize:10,color:"var(--green)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaign {campNum}</div>
+                    <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{campNum===1&&custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign "+campNum}</div>
+                    <div style={{fontSize:10,color:"var(--text3)"}}>{campNum===1&&custData._targeting&&custData._targeting.job_titles?custData._targeting.job_titles.join(", "):""}</div>
+                    <div style={{marginTop:8,display:"flex",alignItems:"center",gap:6}}>
+                      <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:4,background:"var(--green)",color:"#fff"}}>Confirmed</span>
+                      <span style={{fontSize:9,color:"var(--text3)"}}>{mbPerCamp} mailboxes</span>
+                    </div>
+                  </div>;
+                }
+                
+                if(isNext){
+                  return <div key={i} onClick={()=>{setConfigCampaign(campNum===1?"view-1":campNum);setValidationErr(null);}} style={{border:"2px solid var(--orange)",borderRadius:10,padding:16,background:"var(--orange-bg)",cursor:"pointer",transition:"all .15s",position:"relative"}}
+                    onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                    onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                    <div style={{position:"absolute",top:-8,left:12,fontSize:9,fontWeight:700,background:"var(--orange)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Action required</div>
+                    <div style={{fontSize:10,color:"var(--orange)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,marginTop:4}}>Campaign {campNum}</div>
+                    <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{campNum===1&&custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign "+campNum}</div>
+                    <div style={{fontSize:10,color:"var(--text3)"}}>{campNum===1&&custData._targeting&&custData._targeting.job_titles?custData._targeting.job_titles.join(", "):""}</div>
+                    <div style={{marginTop:10,padding:"8px 0 0",borderTop:"1px solid rgba(217,119,6,0.2)"}}>
+                      <span style={{fontSize:11,color:"var(--orange)",fontWeight:600}}>{campNum===1?"Finish setup":"Configure"} →</span>
+                    </div>
+                  </div>;
+                }
+                
+                // Locked
+                return <div key={i} style={{border:"1px solid var(--border)",borderRadius:10,padding:16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:130,background:"var(--bg2)",opacity:0.5,cursor:"not-allowed"}}>
                   <div style={{width:36,height:36,borderRadius:"50%",background:"var(--bg3)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:8}}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                   </div>
-                  <div style={{fontSize:12,fontWeight:600,color:"var(--text3)"}}>Campaign {i+2}</div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Confirm Campaign 1 first</div>
-                </div>
-              )}
+                  <div style={{fontSize:12,fontWeight:600,color:"var(--text3)"}}>Campaign {campNum}</div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Complete Campaign {campNum-1} first</div>
+                </div>;
+              })}
             </div>
-          </div>
+          </div>;
+          })()}
 
           {/* Setup progress + Plan summary side by side */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
             
             {/* Setup progress */}
             <div style={{border:"1px solid var(--border)",borderRadius:10,padding:20,background:"var(--bg2)"}}>
-              <div style={{fontSize:13,fontWeight:700,marginBottom:16}}>Setup progress</div>
-              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              {(()=>{
+                const confirmed=custData._targeting&&custData._targeting.campaigns_confirmed?custData._targeting.campaigns_confirmed:[];
+                const totalCamps=custData._limits?custData._limits.campaigns:4;
+                const allCampsDone=confirmed.length>=totalCamps;
+                return <>
+                <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>Setup progress</div>
+                <div style={{fontSize:11,color:allCampsDone?"var(--green)":"var(--orange)",fontWeight:600,marginBottom:16}}>
+                  {allCampsDone?"All campaigns configured — provisioning starting":"Setup your campaigns ("+confirmed.length+"/"+totalCamps+" complete)"}
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:12}}>
                 {[
                   {label:"Account created",done:true},
                   {label:"Payment confirmed",done:true},
-                  {label:"Campaign targeting saved",done:true},
-                  {label:"Purchasing domains",active:true},
+                  {label:"Campaign setup ("+confirmed.length+"/"+totalCamps+")",done:allCampsDone,active:!allCampsDone},
+                  {label:"Purchasing domains",done:false,active:allCampsDone,pending:!allCampsDone},
                   {label:"Creating "+String(custData._limits?custData._limits.mailboxes:12)+" mailboxes",pending:true},
                   {label:"DNS configuration (SPF, DKIM, DMARC)",pending:true},
                   {label:"Starting warmup sequence",pending:true},
@@ -1121,7 +1153,9 @@ function App(){
                     <span style={{color:s.pending?"var(--text3)":"var(--text)"}}>{s.label}</span>
                   </div>
                 )}
-              </div>
+                </div>
+                </>;
+              })()}
             </div>
 
             {/* Plan summary */}
@@ -1993,6 +2027,9 @@ function App(){
               if(painEl)newTarget.pain_point=painEl.value;
               if(proofEl)newTarget.social_proof=proofEl.value;
               var locDetailEl=document.getElementById('edit-locdetail');if(locDetailEl)newTarget.location_detail=locDetailEl.value;
+              // Mark campaign 1 as confirmed
+              if(!newTarget.campaigns_confirmed)newTarget.campaigns_confirmed=[];
+              if(newTarget.campaigns_confirmed.indexOf(1)===-1)newTarget.campaigns_confirmed.push(1);
               await sb.from('customers').update({
                 service_description:svcEl?svcEl.value:custData.service_description,
                 target_market:JSON.stringify(newTarget)
@@ -2007,9 +2044,9 @@ function App(){
               setConfigCampaign(null);setEditMode(false);setValidationErr(null);
             }} style={{width:"100%",padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:15,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Confirm & begin provisioning
+              Confirm campaign
             </button>
-            <div style={{marginTop:10,fontSize:12,color:"var(--text3)",textAlign:"center"}}>Once confirmed, we'll start purchasing domains and setting up your mailboxes.</div>
+            <div style={{marginTop:10,fontSize:12,color:"var(--text3)",textAlign:"center"}}>{(custData._targeting&&custData._targeting.campaigns_confirmed?custData._targeting.campaigns_confirmed.length:0)<(custData._limits?custData._limits.campaigns:4)-1?"Provisioning begins once all campaigns are confirmed.":"This is your last campaign — provisioning will begin after confirmation."}</div>
           </div>}
         </div>
       </div>
