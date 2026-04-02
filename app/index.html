@@ -1830,6 +1830,14 @@ function App(){
               <ChipGroup label="Industries" allOptions={allIndustries} selectedKey="industries"/>
               <ChipGroup label="Company size" allOptions={allSizes} selectedKey="company_size"/>
               <ChipGroup label="Locations" allOptions={allLocations} selectedKey="locations"/>
+              {/* Location detail — free text for state/city specifics */}
+              <div style={{marginBottom:0}}>
+                <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Specific areas</div>
+                {editMode?<div>
+                  <input defaultValue={t.location_detail||""} id="edit-locdetail" placeholder="e.g. California, New York / Sydney, Melbourne / London, Manchester" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)"}}/>
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:3}}>Add specific states, cities, or regions for more targeted leads</div>
+                </div>:<div style={{fontSize:12}}>{t.location_detail||<span style={{color:"var(--text3)"}}>—</span>}</div>}
+              </div>
             </div>
           </div>
 
@@ -1865,6 +1873,7 @@ function App(){
               var campEl=document.getElementById('edit-camp');if(campEl)newTarget.campaign_name=campEl.value;
               var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
               var offerEl=document.getElementById('edit-offer');if(offerEl)newTarget.offer=offerEl.value;
+              var locDetailEl=document.getElementById('edit-locdetail');if(locDetailEl)newTarget.location_detail=locDetailEl.value;
               var bizEl=document.getElementById('edit-biz');
               var emailEl=document.getElementById('edit-email');
               await sb.from('customers').update({
