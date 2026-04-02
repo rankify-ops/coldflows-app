@@ -1346,8 +1346,9 @@ function App(){
                     onMouseLeave={e=>e.currentTarget.style.transform="none"}>
                     <div style={{position:"absolute",top:-8,right:12,width:20,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
                     <div style={{fontSize:10,color:"var(--green)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaign {campNum}</div>
-                    <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{campNum===1&&custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign "+campNum}</div>
-                    <div style={{fontSize:10,color:"var(--text3)"}}>{campNum===1&&custData._targeting&&custData._targeting.job_titles?custData._targeting.job_titles.join(", "):""}</div>
+                    <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{(()=>{var cd=campNum===1?custData._targeting||{}:(custData._targeting||{})['campaign_'+campNum]||{};return cd.campaign_name||"Campaign "+campNum;})()}</div>
+                    <div style={{fontSize:10,color:"var(--text3)"}}>{(()=>{var cd=campNum===1?custData._targeting||{}:(custData._targeting||{})['campaign_'+campNum]||{};return (cd.job_titles||[]).join(", ");})()}</div>
+                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{(()=>{var cd=campNum===1?custData._targeting||{}:(custData._targeting||{})['campaign_'+campNum]||{};return (cd.locations||[]).join(", ");})()}</div>
                     <div style={{marginTop:8,display:"flex",alignItems:"center",gap:6}}>
                       <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:4,background:"var(--green)",color:"#fff"}}>Confirmed</span>
                       <span style={{fontSize:9,color:"var(--text3)"}}>{mbPerCamp} mailboxes</span>
@@ -1361,8 +1362,8 @@ function App(){
                     onMouseLeave={e=>e.currentTarget.style.transform="none"}>
                     <div style={{position:"absolute",top:-8,left:12,fontSize:9,fontWeight:700,background:"var(--orange)",color:"#fff",padding:"2px 8px",borderRadius:10}}>Action required</div>
                     <div style={{fontSize:10,color:"var(--orange)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6,marginTop:4}}>Campaign {campNum}</div>
-                    <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{campNum===1&&custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign "+campNum}</div>
-                    <div style={{fontSize:10,color:"var(--text3)"}}>{campNum===1&&custData._targeting&&custData._targeting.job_titles?custData._targeting.job_titles.join(", "):""}</div>
+                    <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{(()=>{var cd=campNum===1?custData._targeting||{}:(custData._targeting||{})['campaign_'+campNum]||{};return cd.campaign_name||"Campaign "+campNum;})()}</div>
+                    <div style={{fontSize:10,color:"var(--text3)"}}>{(()=>{var cd=campNum===1?custData._targeting||{}:(custData._targeting||{})['campaign_'+campNum]||{};return (cd.job_titles||[]).join(", ");})()}</div>
                     <div style={{marginTop:10,padding:"8px 0 0",borderTop:"1px solid rgba(217,119,6,0.2)"}}>
                       <span style={{fontSize:11,color:"var(--orange)",fontWeight:600}}>{campNum===1?"Finish setup":"Configure"} →</span>
                     </div>
@@ -1651,8 +1652,8 @@ function App(){
             var campaigns=[];
             for(var c=0;c<totalCampaigns;c++){
               campaigns.push({
-                name:c===0&&custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign "+(c+1),
-                configured:c===0,
+                name:c===0&&custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:custData._targeting&&custData._targeting['campaign_'+(c+1)]&&custData._targeting['campaign_'+(c+1)].campaign_name?custData._targeting['campaign_'+(c+1)].campaign_name:"Campaign "+(c+1),
+                configured:(custData._targeting&&custData._targeting.campaigns_confirmed||[]).indexOf(c+1)!==-1,
                 mailboxes:Array.from({length:mbPerCampaign}).map((_,m)=>({
                   email:"mailbox-"+(c*mbPerCampaign+m+1)+"@pending.coldflows.ai",
                   status:"pending"
