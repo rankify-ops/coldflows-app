@@ -1795,6 +1795,10 @@ function App(){
             <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               Your business
+              {!editMode&&<span onClick={()=>setEditMode(true)} style={{fontSize:10,fontWeight:500,color:"var(--green)",cursor:"pointer",marginLeft:"auto",textTransform:"none",letterSpacing:0,display:"flex",alignItems:"center",gap:4}}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit all
+              </span>}
             </div>
             <div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:16}}>
               <div style={{display:"flex",flexDirection:"column",gap:12}}>
@@ -1805,36 +1809,36 @@ function App(){
                   </div>
                   <div>
                     <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Website <span style={{color:"var(--text3)",fontWeight:400}}>(optional)</span></div>
-                    {editMode?<input defaultValue={t.website||""} id="edit-web" placeholder="e.g. yourcompany.com" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--mono)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontFamily:"var(--mono)"}}>{t.website||"—"}</div>}
+                    {(editMode||!t.website)?<input defaultValue={t.website||""} id="edit-web" placeholder="e.g. yourcompany.com" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--mono)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontFamily:"var(--mono)"}}>{t.website}</div>}
                   </div>
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What's your product or service?</div>
-                  {editMode?<div>
+                  {(editMode||!custData.service_description||custData.service_description.length<10)?<div>
                     <textarea defaultValue={custData.service_description||""} id="edit-svc" rows="2" placeholder="e.g. We build custom Shopify stores for e-commerce brands looking to scale past $50K/mo in revenue" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>
                     <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Be specific — this helps our AI write more relevant copy</div>
-                  </div>:<div style={{fontSize:13}}>{custData.service_description||"—"}</div>}
+                  </div>:<div style={{fontSize:13}}>{custData.service_description}</div>}
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What's your offer? <span style={{color:"var(--green)",fontWeight:500}}>*important for AI copy</span></div>
-                  {editMode?<div>
+                  {(editMode||!t.offer)?<div>
                     <textarea defaultValue={t.offer||""} id="edit-offer" rows="2" placeholder="e.g. Free audit + $4,999 flat rate, 3-week delivery, money-back guarantee" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>
                     <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Include pricing, guarantees, timelines — anything that makes your offer compelling</div>
-                  </div>:<div style={{fontSize:13}}>{t.offer||"—"}</div>}
+                  </div>:<div style={{fontSize:13}}>{t.offer}</div>}
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What problem do you solve for your clients?</div>
-                  {editMode?<div>
+                  {(editMode||!t.pain_point)?<div>
                     <textarea defaultValue={t.pain_point||""} id="edit-pain" rows="2" placeholder="e.g. Most e-commerce brands are losing 30-40% of potential revenue due to poor site speed, broken checkout flows, and outdated design" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>
                     <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>This is what our AI uses to create urgency in your outreach</div>
-                  </div>:<div style={{fontSize:13}}>{t.pain_point||<span style={{color:"var(--text3)"}}>Not provided</span>}</div>}
+                  </div>:<div style={{fontSize:13}}>{t.pain_point}</div>}
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Any results or proof you can reference? <span style={{color:"var(--text3)",fontWeight:400}}>(optional)</span></div>
-                  {editMode?<div>
+                  {(editMode||!t.social_proof)?<div>
                     <textarea defaultValue={t.social_proof||""} id="edit-proof" rows="2" placeholder="e.g. We've built 200+ Shopify stores, average 3.2x ROI for our clients, worked with brands like XYZ" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>
                     <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Numbers, client names, case studies — makes your outreach much more credible</div>
-                  </div>:<div style={{fontSize:13}}>{t.social_proof||<span style={{color:"var(--text3)"}}>Not provided</span>}</div>}
+                  </div>:<div style={{fontSize:13}}>{t.social_proof}</div>}
                 </div>
                 <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Replies sent to</div>
@@ -1849,6 +1853,10 @@ function App(){
             <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",color:"var(--green)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               Who we're targeting
+              {!editMode&&<span onClick={()=>setEditMode(true)} style={{fontSize:10,fontWeight:500,color:"var(--green)",cursor:"pointer",marginLeft:"auto",textTransform:"none",letterSpacing:0,display:"flex",alignItems:"center",gap:4}}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit all
+              </span>}
             </div>
             <div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:16}}>
               <ChipGroup label="Job titles" allOptions={allTitles} selectedKey="job_titles"/>
@@ -1856,13 +1864,13 @@ function App(){
               <ChipGroup label="Industries" allOptions={allIndustries} selectedKey="industries"/>
               <ChipGroup label="Company size" allOptions={allSizes} selectedKey="company_size"/>
               <ChipGroup label="Locations" allOptions={allLocations} selectedKey="locations"/>
-              {/* Location detail — free text for state/city specifics */}
+              {/* Location detail — always editable if empty */}
               <div style={{marginBottom:0}}>
-                <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Specific areas</div>
-                {editMode?<div>
+                <div style={{fontSize:10,color:"var(--text3)",marginBottom:4}}>Specific areas <span style={{color:"var(--text3)",fontWeight:400}}>(states, cities, regions)</span></div>
+                {(editMode||!t.location_detail)?<div>
                   <input defaultValue={t.location_detail||""} id="edit-locdetail" placeholder="e.g. California, New York / Sydney, Melbourne / London, Manchester" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)"}}/>
                   <div style={{fontSize:10,color:"var(--text3)",marginTop:3}}>Add specific states, cities, or regions for more targeted leads</div>
-                </div>:<div style={{fontSize:12}}>{t.location_detail||<span style={{color:"var(--text3)"}}>—</span>}</div>}
+                </div>:<div style={{fontSize:12}}>{t.location_detail}</div>}
               </div>
             </div>
           </div>
@@ -1894,7 +1902,7 @@ function App(){
           {/* Action buttons */}
           {editMode?<div style={{display:"flex",gap:10}}>
             <button onClick={async()=>{
-              // Save edits to Supabase
+              // Save all edits to Supabase
               var newTarget=Object.assign({},t);
               var campEl=document.getElementById('edit-camp');if(campEl)newTarget.campaign_name=campEl.value;
               var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
@@ -1911,7 +1919,6 @@ function App(){
                 service_description:svcEl?svcEl.value:custData.service_description,
                 target_market:JSON.stringify(newTarget)
               }).eq('user_id',currentUser.id);
-              // Reload data
               var{data}=await sb.from('customers').select('*').eq('user_id',currentUser.id).single();
               if(data){
                 if(data.target_market&&typeof data.target_market==='string')try{data._targeting=JSON.parse(data.target_market)}catch(e){data._targeting=null}
@@ -1922,20 +1929,37 @@ function App(){
               setEditMode(false);
             }} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)"}}>Save changes</button>
             <button onClick={()=>setEditMode(false)} style={{padding:"14px 20px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Cancel</button>
-          </div>:<div style={{display:"flex",gap:10}}>
-            <button onClick={()=>{setConfigCampaign(null);setEditMode(false);}} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+          </div>:<div>
+            <button onClick={async()=>{
+              // Save any filled-in fields first, then confirm
+              var newTarget=Object.assign({},t);
+              var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
+              var offerEl=document.getElementById('edit-offer');if(offerEl)newTarget.offer=offerEl.value;
+              var painEl=document.getElementById('edit-pain');if(painEl)newTarget.pain_point=painEl.value;
+              var proofEl=document.getElementById('edit-proof');if(proofEl)newTarget.social_proof=proofEl.value;
+              var svcEl=document.getElementById('edit-svc');if(svcEl)newTarget.service_description=svcEl.value;
+              var locDetailEl=document.getElementById('edit-locdetail');if(locDetailEl)newTarget.location_detail=locDetailEl.value;
+              await sb.from('customers').update({
+                service_description:svcEl?svcEl.value:custData.service_description,
+                target_market:JSON.stringify(newTarget)
+              }).eq('user_id',currentUser.id);
+              var{data}=await sb.from('customers').select('*').eq('user_id',currentUser.id).single();
+              if(data){
+                if(data.target_market&&typeof data.target_market==='string')try{data._targeting=JSON.parse(data.target_market)}catch(e){data._targeting=null}
+                var limits={starter:{mailboxes:4,campaigns:2},growth:{mailboxes:12,campaigns:4},scale:{mailboxes:30,campaigns:10}};
+                data._limits=limits[data.plan]||limits.starter;
+                setCustData(data);
+              }
+              setConfigCampaign(null);setEditMode(false);
+            }} style={{width:"100%",padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               Confirm & begin provisioning
             </button>
-            <button onClick={()=>setEditMode(true)} style={{padding:"14px 20px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",gap:6}}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit
-            </button>
           </div>}
 
-          {!editMode&&<div style={{marginTop:12,fontSize:11,color:"var(--text3)",textAlign:"center"}}>
-            Once confirmed, we'll start purchasing domains and setting up your mailboxes. This can't be undone.
-          </div>}
+          <div style={{marginTop:12,fontSize:11,color:"var(--text3)",textAlign:"center"}}>
+            {editMode?"Your changes will be saved when you click Save changes.":"Once confirmed, we'll start purchasing domains and setting up your mailboxes. This can't be undone."}
+          </div>
         </div>
       </div>
     </div>;
