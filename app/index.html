@@ -1271,7 +1271,7 @@ function App(){
             return <div style={{marginBottom:24}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <div>
-                <div style={{fontSize:15,fontWeight:700}}>Setup your campaigns <span style={{fontSize:11,fontWeight:500,color:"var(--text3)",marginLeft:6}}>(the only part we need you for)</span></div>
+                <div style={{fontSize:15,fontWeight:700}}>Setup your campaigns</div>
                 <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>{allDone?"All campaigns configured — provisioning will begin shortly":"Configure Campaign "+nextToSetup+" to continue"}</div>
               </div>
               <div style={{fontSize:12,fontWeight:600,fontFamily:"var(--mono)",background:allDone?"var(--green-bg)":"var(--bg2)",color:allDone?"var(--green)":"var(--text3)",padding:"4px 12px",borderRadius:6,border:"1px solid "+(allDone?"var(--green-bd)":"var(--border)")}}>{confirmed.length}/{totalCamps} complete</div>
@@ -1343,7 +1343,7 @@ function App(){
                 {[
                   {label:"Account created",done:true},
                   {label:"Payment confirmed",done:true},
-                  {label:"Campaign setup ("+confirmed.length+"/"+totalCamps+")",done:allCampsDone,active:!allCampsDone},
+                  {label:"Campaign setup ("+confirmed.length+"/"+totalCamps+") — the only part we need you for",done:allCampsDone,active:!allCampsDone},
                   {label:"Purchasing domains",done:false,active:allCampsDone,pending:!allCampsDone},
                   {label:"Creating "+String(custData._limits?custData._limits.mailboxes:12)+" mailboxes",pending:true},
                   {label:"DNS configuration (SPF, DKIM, DMARC)",pending:true},
