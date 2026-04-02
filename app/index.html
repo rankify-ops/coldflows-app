@@ -1808,7 +1808,7 @@ function App(){
     </div>}
 
     {/* Configure Campaign Modal */}
-    {configCampaign&&<div onClick={e=>{if(e.target===e.currentTarget)setConfigCampaign(null)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
+    {configCampaign&&configCampaign!=="view-1"&&<div onClick={e=>{if(e.target===e.currentTarget)setConfigCampaign(null)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
       <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:600,maxHeight:"90vh",overflow:"auto",animation:"fadeIn .3s ease"}}>
         <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <h2 style={{fontSize:18,fontWeight:700}}>Configure Campaign {configCampaign}</h2>
