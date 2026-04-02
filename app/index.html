@@ -1889,10 +1889,11 @@ function App(){
       </div>}
 
       {/* OPS PIPELINE — admin only */}
+      {/* OPS PIPELINE — admin only */}
       {pg==="ops"&&custData&&(custData.email==="tomflood1995@gmail.com"||custData.lead_email==="tomflood1995@gmail.com")&&<div className="fade-in" style={{padding:"24px 28px"}}>
-        <div style={{marginBottom:8}}>
-          <h1 style={{fontSize:26,fontWeight:800}}>Ops Pipeline</h1>
-          <p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Full customer lifecycle from payment to live campaigns</p>
+        <div style={{marginBottom:20}}>
+          <h1 style={{fontSize:26,fontWeight:800}}>Ops pipeline</h1>
+          <p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Full provisioning lifecycle — {custData.business_name} ({custData.email})</p>
         </div>
 
         {(()=>{
@@ -1900,77 +1901,256 @@ function App(){
           const conf=t.campaigns_confirmed||[];
           const total=custData._limits?custData._limits.campaigns:4;
           const allDone=conf.length>=total;
-          const steps=[
-            {id:"payment",label:"Stripe Payment",status:"done",detail:"Plan: "+((custData.plan||"").charAt(0).toUpperCase()+(custData.plan||"").slice(1))+", Status: "+(custData.plan_status||"active"),sub:"Stripe webhook creates Supabase customers row with plan + email"},
-            {id:"supabase",label:"Customer Record",status:"done",detail:"user_id: "+currentUser.id.slice(0,8)+"..., email: "+custData.email,sub:"Supabase auth.users + public.customers table"},
-            {id:"onboarding",label:"Onboarding Form",status:"done",detail:"Business: "+(custData.business_name||"-")+", Service: "+(custData.service_description||"-").slice(0,50),sub:"Saves business_name, service_description, target_market JSON"},
-            {id:"campaigns",label:"Campaign Config",status:allDone?"done":"active",detail:conf.length+"/"+total+" confirmed — campaigns_confirmed: ["+conf.join(",")+"]",sub:"Each campaign saves offer, pain_point, social_proof + targeting chips to target_market"},
-            {id:"domains",label:"Purchase Domains",status:allDone?"next":"pending",detail:(custData._limits?custData._limits.mailboxes:12)+" domains via Porkbun",sub:"Porkbun API key: pk1_a6eef... | Register .com domains | Store in domains table"},
-            {id:"dns",label:"DNS Records",status:"pending",detail:"MX + SPF + DKIM + DMARC per domain",sub:"Porkbun DNS API | Set records | Verify propagation (allow 24-48hrs)"},
-            {id:"workspace",label:"Google Workspace",status:"pending",detail:"Create mailbox user on each domain",sub:"Google Admin SDK | admin.googleapis.com | Store credentials encrypted"},
-            {id:"smartlead",label:"Smartlead Connect",status:"pending",detail:"Add mailboxes + configure warmup schedule",sub:"Smartlead API | Base plan $39/mo | Set warmup: 2/day ramp to 40/day"},
-            {id:"warmup",label:"Warmup Phase",status:"pending",detail:"14-21 days gradual reputation building",sub:"Smartlead auto-warmup | Monitor inbox rate daily | Target: 95%+"},
-            {id:"leads",label:"Lead Sourcing",status:"pending",detail:"Pull leads matching each campaign targeting",sub:"SmartProspect/Apollo API | Filter by job_titles, industries, locations, company_size"},
-            {id:"copy",label:"AI Email Copy",status:"pending",detail:"Generate sequences per campaign",sub:"Claude API | Use offer, pain_point, social_proof | 3-email sequence + follow-ups"},
-            {id:"launch",label:"Go Live",status:"pending",detail:"Start sending from warmed mailboxes",sub:"Smartlead sequences active | Replies forwarded to lead_email: "+(custData.lead_email||custData.email)},
+          const prov=t.provisioning||{};
+          const mbCount=custData._limits?custData._limits.mailboxes:12;
+          
+          const stages=[
+            {id:"payment",label:"Stripe payment",status:"done",
+              detail:[(custData.plan||"").charAt(0).toUpperCase()+(custData.plan||"").slice(1)+" plan","Status: "+(custData.plan_status||"active")],
+              tech:"Stripe webhook -> Supabase customers table",
+              api:"Stripe",color:"teal"},
+            {id:"record",label:"Customer record",status:"done",
+              detail:["user_id: "+currentUser.id.slice(0,12)+"...","email: "+custData.email],
+              tech:"Supabase auth.users + public.customers",
+              api:"Supabase",color:"teal"},
+            {id:"onboarding",label:"Onboarding form",status:"done",
+              detail:["Business: "+(custData.business_name||"-"),"Service: "+(custData.service_description||"-").slice(0,40)],
+              tech:"Saves business_name, service_description, target_market JSON",
+              api:"Supabase",color:"teal"},
+            {id:"campaigns",label:"Campaign configuration",status:allDone?"done":"active",
+              detail:[conf.length+"/"+total+" campaigns confirmed","campaigns_confirmed: ["+conf.join(",")+"]"],
+              tech:"Each campaign saves offer, pain_point, social_proof + targeting to target_market",
+              api:"Supabase",color:"amber"},
+            {id:"domains",label:"Purchase domains",status:allDone?(prov.status==="domains_purchased"?"done":"next"):"pending",
+              detail:[mbCount+" domains needed (~$"+(mbCount*11.08).toFixed(2)+")","TLD: .com via Porkbun API"],
+              tech:"Porkbun register -> store in target_market.provisioning.domains",
+              api:"Porkbun",color:"purple"},
+            {id:"dns",label:"DNS configuration",status:prov.dns_status==="done"?"done":"pending",
+              detail:["MX: aspmx.l.google.com","SPF + DKIM + DMARC per domain"],
+              tech:"Porkbun DNS API -> create records -> verify propagation (24-48hrs)",
+              api:"Porkbun",color:"purple"},
+            {id:"workspace",label:"Google Workspace",status:prov.workspace_status==="done"?"done":"pending",
+              detail:["Create mailbox user per domain","outreach@[domain].com format"],
+              tech:"Google Admin SDK -> admin.googleapis.com -> store creds encrypted",
+              api:"Google Admin",color:"purple"},
+            {id:"smartlead",label:"Smartlead connect",status:prov.smartlead_status==="done"?"done":"pending",
+              detail:["Add "+mbCount+" mailbox accounts","Configure warmup: 2/day ramp to 40/day"],
+              tech:"Smartlead API -> add accounts -> set warmup config -> assign to campaigns",
+              api:"Smartlead",color:"purple"},
+            {id:"warmup",label:"Warmup phase",status:"pending",
+              detail:["14-21 days reputation building","Target: 95%+ inbox placement"],
+              tech:"Smartlead auto-warmup -> monitor inbox rate daily via API",
+              api:"Smartlead",color:"blue"},
+            {id:"leads",label:"Lead sourcing",status:"pending",
+              detail:["Match targeting per campaign","Filter: titles, industries, locations, size"],
+              tech:"SmartProspect/Apollo API -> filter -> verify emails -> push to Smartlead",
+              api:"SmartProspect",color:"green"},
+            {id:"copy",label:"AI email copy",status:"pending",
+              detail:["3-email sequence per campaign","Subject lines + bodies + follow-ups"],
+              tech:"Claude API -> use offer, pain_point, social_proof -> generate sequences",
+              api:"Claude API",color:"green"},
+            {id:"launch",label:"Campaign launch",status:"pending",
+              detail:["Sequences go live","Replies -> "+(custData.lead_email||custData.email)],
+              tech:"Smartlead sequences activate -> reply forwarding to lead_email",
+              api:"Smartlead",color:"coral"},
           ];
-          return <div style={{marginBottom:28}}>
-            <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>Pipeline Status</div>
-            <div style={{fontSize:11,color:"var(--text3)",marginBottom:16,fontFamily:"var(--mono)"}}>{custData.business_name} | {custData.email} | {custData.plan} plan</div>
-            <div style={{display:"flex",flexDirection:"column",gap:0}}>
-              {steps.map((s,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"36px 1fr",gap:12,padding:"14px 20px",border:"1px solid var(--border)",borderTop:i===0?"1px solid var(--border)":"none",background:s.status==="active"?"var(--orange-bg)":s.status==="next"?"var(--green-bg)":"var(--bg)"}}>
-                <div style={{width:28,height:28,borderRadius:0,display:"flex",alignItems:"center",justifyContent:"center",
-                  background:s.status==="done"?"var(--green)":s.status==="active"?"var(--orange)":s.status==="next"?"var(--green)":"var(--bg3)",
-                  color:s.status==="pending"?"var(--text3)":"#fff",fontSize:11,fontWeight:700}}>
-                  {s.status==="done"?"OK":s.status==="active"?"...":s.status==="next"?">":i+1}
+          
+          const statusBg=s=>s==="done"?"var(--green)":s==="active"?"var(--orange)":s==="next"?"#006949":"var(--bg3)";
+          const statusTxt=s=>s==="done"?"DONE":s==="active"?"ACTIVE":s==="next"?"READY":"PENDING";
+          const statusFg=s=>s==="pending"?"var(--text3)":"#fff";
+          
+          return <div>
+            {/* Visual flowchart */}
+            <div style={{marginBottom:28,border:"1px solid var(--border)",background:"var(--bg)",padding:24}}>
+              <div style={{fontSize:12,fontWeight:700,marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span>Pipeline flowchart</span>
+                <div style={{display:"flex",gap:12,fontSize:10,color:"var(--text3)"}}>
+                  <span><span style={{display:"inline-block",width:8,height:8,background:"var(--green)",marginRight:4,verticalAlign:"middle"}}></span>Done</span>
+                  <span><span style={{display:"inline-block",width:8,height:8,background:"var(--orange)",marginRight:4,verticalAlign:"middle"}}></span>Active</span>
+                  <span><span style={{display:"inline-block",width:8,height:8,background:"#006949",marginRight:4,verticalAlign:"middle"}}></span>Ready</span>
+                  <span><span style={{display:"inline-block",width:8,height:8,background:"var(--bg3)",marginRight:4,verticalAlign:"middle"}}></span>Pending</span>
                 </div>
-                <div>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
-                    <span style={{fontSize:13,fontWeight:700,color:s.status==="pending"?"var(--text3)":"var(--text)"}}>{s.label}</span>
-                    <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:0,
-                      background:s.status==="done"?"var(--green)":s.status==="active"?"var(--orange)":s.status==="next"?"var(--green)":"var(--bg3)",
-                      color:s.status==="pending"?"var(--text3)":"#fff"}}>{s.status==="done"?"DONE":s.status==="active"?"ACTIVE":s.status==="next"?"READY":"PENDING"}</span>
+              </div>
+              
+              {/* Flow — vertical steps with connectors */}
+              <div style={{display:"flex",flexDirection:"column",gap:0,position:"relative"}}>
+                {/* Row 1: Payment -> Record -> Onboarding */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:4}}>
+                  {stages.slice(0,3).map((s,i)=><div key={i} style={{padding:"10px 12px",border:"1px solid var(--border)",background:s.status==="done"?"var(--green-bg)":"var(--bg2)",position:"relative"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                      <div style={{width:18,height:18,borderRadius:0,background:statusBg(s.status),display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:statusFg(s.status),fontWeight:700,flexShrink:0}}>{s.status==="done"?"OK":(i+1)}</div>
+                      <span style={{fontSize:11,fontWeight:700}}>{s.label}</span>
+                    </div>
+                    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{s.api}</div>
+                  </div>)}
+                </div>
+                
+                {/* Connector */}
+                <div style={{textAlign:"center",padding:"2px 0",fontSize:10,color:"var(--text3)"}}>↓</div>
+                
+                {/* Row 2: Campaign config (wide) */}
+                <div style={{marginBottom:4}}>
+                  <div style={{padding:"12px 16px",border:allDone?"1px solid var(--green-bd)":"2px solid var(--orange)",background:allDone?"var(--green-bg)":"var(--orange-bg)"}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <div style={{width:22,height:22,borderRadius:0,background:statusBg(allDone?"done":"active"),display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:"#fff",fontWeight:700}}>{allDone?"OK":"..."}</div>
+                        <div>
+                          <div style={{fontSize:12,fontWeight:700}}>Campaign configuration</div>
+                          <div style={{fontSize:10,color:"var(--text3)"}}>{conf.length}/{total} confirmed — campaigns_confirmed: [{conf.join(",")}]</div>
+                        </div>
+                      </div>
+                      <span style={{fontSize:9,fontWeight:700,padding:"3px 8px",background:statusBg(allDone?"done":"active"),color:"#fff"}}>{allDone?"DONE":"ACTIVE"}</span>
+                    </div>
                   </div>
-                  <div style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--text2)",marginBottom:2}}>{s.detail}</div>
-                  <div style={{fontSize:10,color:"var(--text3)"}}>{s.sub}</div>
                 </div>
-              </div>)}
+                
+                {/* Gate */}
+                <div style={{textAlign:"center",padding:"4px 0"}}>
+                  <span style={{fontSize:10,fontWeight:700,padding:"3px 12px",background:allDone?"var(--green)":"var(--bg3)",color:allDone?"#fff":"var(--text3)"}}>
+                    {allDone?"ALL CONFIRMED — TRIGGER AUTOMATION":"WAITING FOR ALL CAMPAIGNS"}
+                  </span>
+                </div>
+                
+                {/* Dashed line */}
+                <div style={{borderTop:"1px dashed var(--border)",margin:"8px 0",position:"relative"}}>
+                  <span style={{position:"absolute",top:-8,left:0,fontSize:9,color:"var(--text3)",background:"var(--bg)",padding:"0 6px"}}>Automated from here</span>
+                </div>
+                
+                {/* Row 3: Domains + DNS (parallel) */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:4}}>
+                  {stages.slice(4,6).map((s,i)=><div key={i} style={{padding:"10px 12px",border:"1px solid var(--border)",background:s.status==="done"?"var(--green-bg)":s.status==="next"?"var(--green-bg)":"var(--bg2)"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                      <div style={{width:18,height:18,borderRadius:0,background:statusBg(s.status),display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:statusFg(s.status),fontWeight:700,flexShrink:0}}>{s.status==="done"?"OK":s.status==="next"?">":(i+5)}</div>
+                      <span style={{fontSize:11,fontWeight:700,color:s.status==="pending"?"var(--text3)":"var(--text)"}}>{s.label}</span>
+                      <span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:statusBg(s.status),color:statusFg(s.status),marginLeft:"auto"}}>{statusTxt(s.status)}</span>
+                    </div>
+                    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{s.detail[0]}</div>
+                    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{s.detail[1]}</div>
+                  </div>)}
+                </div>
+                
+                <div style={{textAlign:"center",padding:"2px 0",fontSize:10,color:"var(--text3)"}}>↓</div>
+                
+                {/* Row 4: Workspace + Smartlead (parallel) */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:4}}>
+                  {stages.slice(6,8).map((s,i)=><div key={i} style={{padding:"10px 12px",border:"1px solid var(--border)",background:s.status==="done"?"var(--green-bg)":"var(--bg2)"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                      <div style={{width:18,height:18,borderRadius:0,background:statusBg(s.status),display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:statusFg(s.status),fontWeight:700,flexShrink:0}}>{s.status==="done"?"OK":(i+7)}</div>
+                      <span style={{fontSize:11,fontWeight:700,color:s.status==="pending"?"var(--text3)":"var(--text)"}}>{s.label}</span>
+                      <span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:statusBg(s.status),color:statusFg(s.status),marginLeft:"auto"}}>{statusTxt(s.status)}</span>
+                    </div>
+                    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{s.detail[0]}</div>
+                  </div>)}
+                </div>
+                
+                <div style={{textAlign:"center",padding:"2px 0",fontSize:10,color:"var(--text3)"}}>↓</div>
+                
+                {/* Row 5: Warmup (full width) */}
+                <div style={{padding:"10px 16px",border:"1px solid var(--border)",background:"var(--bg2)",marginBottom:4}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{width:18,height:18,borderRadius:0,background:statusBg("pending"),display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:"var(--text3)",fontWeight:700}}>9</div>
+                    <span style={{fontSize:11,fontWeight:700,color:"var(--text3)"}}>Warmup phase</span>
+                    <span style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>14-21 days, 2→40 emails/day per mailbox</span>
+                    <span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:"var(--bg3)",color:"var(--text3)",marginLeft:"auto"}}>PENDING</span>
+                  </div>
+                </div>
+                
+                <div style={{textAlign:"center",padding:"2px 0",fontSize:10,color:"var(--text3)"}}>↓</div>
+                
+                {/* Row 6: Leads + Copy (parallel) */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:4}}>
+                  {stages.slice(9,11).map((s,i)=><div key={i} style={{padding:"10px 12px",border:"1px solid var(--border)",background:"var(--bg2)"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                      <div style={{width:18,height:18,borderRadius:0,background:statusBg(s.status),display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:statusFg(s.status),fontWeight:700,flexShrink:0}}>{i+10}</div>
+                      <span style={{fontSize:11,fontWeight:700,color:"var(--text3)"}}>{s.label}</span>
+                      <span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:"var(--bg3)",color:"var(--text3)",marginLeft:"auto"}}>PENDING</span>
+                    </div>
+                    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{s.detail[0]}</div>
+                  </div>)}
+                </div>
+                
+                <div style={{textAlign:"center",padding:"2px 0",fontSize:10,color:"var(--text3)"}}>↓</div>
+                
+                {/* Row 7: Launch (full width, highlighted) */}
+                <div style={{padding:"12px 16px",border:"1px solid var(--border)",background:"var(--bg2)"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{width:22,height:22,borderRadius:0,background:"var(--bg3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:"var(--text3)",fontWeight:700}}>12</div>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:700,color:"var(--text3)"}}>Campaign launch</div>
+                      <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Sequences live → replies to {custData.lead_email||custData.email}</div>
+                    </div>
+                    <span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:"var(--bg3)",color:"var(--text3)",marginLeft:"auto"}}>PENDING</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Detailed stage list */}
+            <div style={{marginBottom:28}}>
+              <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>Stage details</div>
+              <div style={{display:"flex",flexDirection:"column",gap:0}}>
+                {stages.map((s,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"32px 1fr 90px",gap:12,padding:"12px 16px",border:"1px solid var(--border)",borderTop:i===0?"1px solid var(--border)":"none",background:s.status==="active"?"var(--orange-bg)":s.status==="next"?"var(--green-bg)":"var(--bg)"}}>
+                  <div style={{width:24,height:24,borderRadius:0,background:statusBg(s.status),display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:statusFg(s.status),fontWeight:700}}>{s.status==="done"?"OK":s.status==="active"?"...":s.status==="next"?">":(i+1)}</div>
+                  <div>
+                    <div style={{fontSize:12,fontWeight:700,color:s.status==="pending"?"var(--text3)":"var(--text)",marginBottom:2}}>{s.label}</div>
+                    {s.detail.map((d,j)=><div key={j} style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>{d}</div>)}
+                    <div style={{fontSize:9,color:"var(--text3)",marginTop:3}}>{s.tech}</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <span style={{fontSize:8,fontWeight:700,padding:"2px 8px",background:statusBg(s.status),color:statusFg(s.status)}}>{statusTxt(s.status)}</span>
+                    <div style={{fontSize:9,color:"var(--text3)",marginTop:4,fontFamily:"var(--mono)"}}>{s.api}</div>
+                  </div>
+                </div>)}
+              </div>
+            </div>
+            
+            {/* Data reference */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:28}}>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:16}}>
+                <div style={{fontSize:11,fontWeight:700,marginBottom:10}}>Supabase</div>
+                <div style={{display:"flex",flexDirection:"column",gap:4,fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>
+                  <div>project: bmjjyujuyjpkyggormoa</div>
+                  <div>table: customers</div>
+                  <div>user_id: {currentUser.id.slice(0,12)}...</div>
+                  <div>plan: {custData.plan}</div>
+                  <div>mailbox_count: {custData.mailbox_count}</div>
+                  <div>confirmed: [{(t.campaigns_confirmed||[]).join(",")}]</div>
+                </div>
+              </div>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:16}}>
+                <div style={{fontSize:11,fontWeight:700,marginBottom:10}}>APIs required</div>
+                <div style={{display:"flex",flexDirection:"column",gap:4,fontSize:10,color:"var(--text2)"}}>
+                  <div><strong>Porkbun</strong> — domains + DNS</div>
+                  <div><strong>Google Admin</strong> — workspace mailboxes</div>
+                  <div><strong>Smartlead</strong> — warmup + sequences</div>
+                  <div><strong>SmartProspect</strong> — lead sourcing</div>
+                  <div><strong>Claude API</strong> — email copy</div>
+                  <div><strong>Stripe</strong> — payments + webhooks</div>
+                </div>
+              </div>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:16}}>
+                <div style={{fontSize:11,fontWeight:700,marginBottom:10}}>Plan costs</div>
+                <div style={{display:"flex",flexDirection:"column",gap:4,fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>
+                  <div>Domains: {mbCount} x $11.08 = ${(mbCount*11.08).toFixed(2)}/yr</div>
+                  <div>Smartlead: $39/mo base</div>
+                  <div>Google Workspace: ~$6/user/mo</div>
+                  <div>Lead data: ~$0.03-0.05/lead</div>
+                  <div style={{borderTop:"1px solid var(--border)",paddingTop:4,marginTop:4,fontWeight:700}}>Monthly overhead: ~${(mbCount*11.08/12+39+mbCount*6).toFixed(0)}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Raw JSON */}
+            <div style={{marginBottom:28}}>
+              <div style={{fontSize:11,fontWeight:700,marginBottom:8}}>Raw target_market JSON</div>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12,maxHeight:250,overflow:"auto"}}>
+                <pre style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text2)",whiteSpace:"pre-wrap",margin:0}}>{JSON.stringify(t,null,2)}</pre>
+              </div>
             </div>
           </div>;
         })()}
-
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:28}}>
-          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:20}}>
-            <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>Supabase</div>
-            <div style={{display:"flex",flexDirection:"column",gap:6,fontSize:11,fontFamily:"var(--mono)",color:"var(--text2)"}}>
-              <div>project: bmjjyujuyjpkyggormoa</div>
-              <div>table: customers</div>
-              <div>user_id: {currentUser.id}</div>
-              <div>plan: {custData.plan}</div>
-              <div>mailbox_count: {custData.mailbox_count}</div>
-              <div>confirmed: [{(custData._targeting&&custData._targeting.campaigns_confirmed||[]).join(",")}]</div>
-            </div>
-          </div>
-          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:20}}>
-            <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>API Keys Required</div>
-            <div style={{display:"flex",flexDirection:"column",gap:6,fontSize:11,color:"var(--text2)"}}>
-              <div><span style={{fontWeight:600}}>Porkbun</span> — domains + DNS</div>
-              <div><span style={{fontWeight:600}}>Google Admin SDK</span> — workspace mailboxes</div>
-              <div><span style={{fontWeight:600}}>Smartlead</span> — warmup + sequences</div>
-              <div><span style={{fontWeight:600}}>SmartProspect</span> — lead sourcing</div>
-              <div><span style={{fontWeight:600}}>Claude API</span> — email copy</div>
-              <div><span style={{fontWeight:600}}>Stripe</span> — payments + webhooks</div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{marginBottom:28}}>
-          <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>Raw target_market JSON</div>
-          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:16,maxHeight:300,overflow:"auto"}}>
-            <pre style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)",whiteSpace:"pre-wrap",margin:0}}>{JSON.stringify(custData._targeting,null,2)}</pre>
-          </div>
-        </div>
       </div>}
+
 
       </div>}
     </main>
