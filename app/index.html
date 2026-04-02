@@ -893,7 +893,7 @@ function CampaignModal({configCampaign, custData, setCustData, setConfigCampaign
       const campDataRef=React.useRef(campNum===1?Object.assign({},t):Object.assign({},t['campaign_'+campNum]||{}));
       const campData=campDataRef.current;
       
-      const [inheritMode,setInheritMode]=React.useState(true);
+      const [inheritMode,setInheritMode]=React.useState(false);
       
       const allTitles=["CEO","Managing Director","Founder","VP Sales","VP Marketing","Head of Growth","CMO","CTO","Director","Operations Manager","HR Director","CFO","COO","Business Owner","General Manager","Sales Manager"];
       const allSeniority=["C-Suite","VP","Director","Manager","Senior"];
@@ -1025,10 +1025,34 @@ function CampaignModal({configCampaign, custData, setCustData, setConfigCampaign
             <div><div style={{fontSize:13,fontWeight:600,color:"var(--green)"}}>Campaign confirmed</div><div style={{fontSize:12,color:"var(--text3)"}}>Changes available after account setup is complete.</div></div>
           </div>}
           {campNum>1&&!isConfirmed&&<div style={{marginBottom:24}}>
-            <label style={LB}>Start from</label>
+            <label style={LB}>How do you want to set up this campaign?</label>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-              <div onClick={()=>setInheritMode(true)} style={{padding:14,borderRadius:10,border:inheritMode?"2px solid var(--green)":"1px solid var(--border)",background:inheritMode?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center"}}><div style={{fontSize:13,fontWeight:700}}>Copy from Campaign 1</div><div style={{fontSize:11,color:"var(--text3)"}}>Same targeting, new copy</div></div>
-              <div onClick={()=>setInheritMode(false)} style={{padding:14,borderRadius:10,border:!inheritMode?"2px solid var(--green)":"1px solid var(--border)",background:!inheritMode?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center"}}><div style={{fontSize:13,fontWeight:700}}>Different targeting</div><div style={{fontSize:11,color:"var(--text3)"}}>New audience</div></div>
+              <div onClick={()=>{setInheritMode(true);
+                // Fill text fields with Campaign 1 data
+                var o=document.getElementById('edit-offer');if(o&&!o.value)o.value=t.offer||'';
+                var p=document.getElementById('edit-pain');if(p&&!p.value)p.value=t.pain_point||'';
+                var pr=document.getElementById('edit-proof');if(pr&&!pr.value)pr.value=t.social_proof||'';
+                var ld=document.getElementById('edit-locdetail');if(ld&&!ld.value)ld.value=t.location_detail||'';
+              }} style={{padding:16,borderRadius:0,border:inheritMode===true?"2px solid var(--green)":"1px solid var(--border)",background:inheritMode===true?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+                <div style={{fontSize:20,marginBottom:6}}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={inheritMode===true?"var(--green)":"var(--text3)"} strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                </div>
+                <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>Copy from Campaign 1</div>
+                <div style={{fontSize:11,color:"var(--text3)"}}>Pre-fills with same targeting</div>
+              </div>
+              <div onClick={()=>{setInheritMode(false);
+                // Clear fields if switching from copy
+                var o=document.getElementById('edit-offer');if(o)o.value='';
+                var p=document.getElementById('edit-pain');if(p)p.value='';
+                var pr=document.getElementById('edit-proof');if(pr)pr.value='';
+                var ld=document.getElementById('edit-locdetail');if(ld)ld.value='';
+              }} style={{padding:16,borderRadius:0,border:inheritMode===false?"2px solid var(--green)":"1px solid var(--border)",background:inheritMode===false?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+                <div style={{fontSize:20,marginBottom:6}}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={inheritMode===false?"var(--green)":"var(--text3)"} strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                </div>
+                <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>Start fresh</div>
+                <div style={{fontSize:11,color:"var(--text3)"}}>Different targeting for this campaign</div>
+              </div>
             </div>
           </div>}
           {campNum===1&&<><div style={{marginBottom:28}}>
