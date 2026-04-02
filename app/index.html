@@ -1311,10 +1311,25 @@ function App(){
             const allDone=confirmed.length>=totalCamps;
             const mbPerCamp=Math.floor((custData._limits?custData._limits.mailboxes:12)/totalCamps);
             return <div style={{marginBottom:24}}>
+
+            {/* SUCCESS STATE — all campaigns done */}
+            {allDone&&<div style={{border:"1px solid var(--green-bd)",background:"var(--green-bg)",padding:28,marginBottom:20}}>
+              <div style={{display:"flex",alignItems:"flex-start",gap:16}}>
+                <div style={{width:44,height:44,borderRadius:0,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                  <div style={{fontSize:18,fontWeight:700,color:"var(--green)",marginBottom:6}}>All campaigns configured</div>
+                  <div style={{fontSize:14,color:"var(--text2)",lineHeight:1.7,marginBottom:10}}>Everything from here is automated. We're now purchasing your domains, creating mailboxes, and configuring DNS records. Your mailboxes will enter a warmup phase to build sender reputation before any outreach begins.</div>
+                  <div style={{fontSize:13,color:"var(--text3)",lineHeight:1.7}}>We'll notify you at <strong style={{color:"var(--text2)"}}>{custData.lead_email||custData.email}</strong> when your account is live — usually within 24 hours. You don't need to do anything else.</div>
+                </div>
+              </div>
+            </div>}
+
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <div>
-                <div style={{fontSize:15,fontWeight:700}}>Setup your campaigns</div>
-                <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>{allDone?"All campaigns configured — provisioning will begin shortly":"Configure Campaign "+nextToSetup+" to continue"}</div>
+                <div style={{fontSize:15,fontWeight:700}}>{allDone?"Your campaigns":"Setup your campaigns"}</div>
+                <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>{allDone?"Click any campaign to review your targeting":"Configure Campaign "+nextToSetup+" to continue"}</div>
               </div>
               <div style={{fontSize:12,fontWeight:600,fontFamily:"var(--mono)",background:allDone?"var(--green-bg)":"var(--bg2)",color:allDone?"var(--green)":"var(--text3)",padding:"4px 12px",borderRadius:6,border:"1px solid "+(allDone?"var(--green-bd)":"var(--border)")}}>{confirmed.length}/{totalCamps} complete</div>
             </div>
