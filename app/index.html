@@ -1953,16 +1953,35 @@ function App(){
               var proofVal=proofEl?proofEl.value.trim():(t.social_proof||'').trim();
               
               var missing=[];
-              if(!svcVal||svcVal.length<5)missing.push('product or service');
-              if(!offerVal||offerVal.length<5)missing.push('your offer');
-              if(!painVal||painVal.length<5)missing.push('what problem you solve');
-              if(!proofVal||proofVal.length<5)missing.push('results or proof');
+              if(!svcVal||svcVal.length<5)missing.push('edit-svc');
+              if(!offerVal||offerVal.length<5)missing.push('edit-offer');
+              if(!painVal||painVal.length<5)missing.push('edit-pain');
+              if(!proofVal||proofVal.length<5)missing.push('edit-proof');
+              
+              // Reset all field borders first
+              ['edit-svc','edit-offer','edit-pain','edit-proof'].forEach(function(id){
+                var el=document.getElementById(id);
+                if(el)el.style.border='1px solid var(--border)';
+              });
               
               if(missing.length>0){
-                setValidationErr('Please fill in: '+missing.join(', ')+'. We need this information to write effective outreach copy.');
-                // Scroll to top of modal
-                var modal=document.querySelector('[data-modal-scroll]');
-                if(modal)modal.scrollTo({top:0,behavior:'smooth'});
+                // Highlight invalid fields with red border
+                var names=[];
+                missing.forEach(function(id){
+                  var el=document.getElementById(id);
+                  if(el){
+                    el.style.border='2px solid var(--red)';
+                    el.style.background='var(--red-bg)';
+                  }
+                  if(id==='edit-svc')names.push('product or service');
+                  if(id==='edit-offer')names.push('your offer');
+                  if(id==='edit-pain')names.push('what problem you solve');
+                  if(id==='edit-proof')names.push('results or proof');
+                });
+                setValidationErr('Please fill in: '+names.join(', ')+'. We need this information to write effective outreach copy.');
+                // Scroll to first invalid field
+                var firstInvalid=document.getElementById(missing[0]);
+                if(firstInvalid)firstInvalid.scrollIntoView({behavior:'smooth',block:'center'});
                 return;
               }
               setValidationErr(null);
