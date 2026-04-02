@@ -1797,20 +1797,46 @@ function App(){
               Your business
             </div>
             <div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:10,padding:16}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-                <div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Business name</div>
-                  {editMode?<input defaultValue={custData.business_name||""} id="edit-biz" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontWeight:600}}>{custData.business_name||"—"}</div>}
+              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                  <div>
+                    <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Business name</div>
+                    {editMode?<input defaultValue={custData.business_name||""} id="edit-biz" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontWeight:600}}>{custData.business_name||"—"}</div>}
+                  </div>
+                  <div>
+                    <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Website <span style={{color:"var(--text3)",fontWeight:400}}>(optional)</span></div>
+                    {editMode?<input defaultValue={t.website||""} id="edit-web" placeholder="e.g. yourcompany.com" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--mono)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontFamily:"var(--mono)"}}>{t.website||"—"}</div>}
+                  </div>
                 </div>
                 <div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Website</div>
-                  {editMode?<input defaultValue={t.website||""} id="edit-web" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--mono)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontFamily:"var(--mono)"}}>{t.website||"—"}</div>}
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What's your product or service?</div>
+                  {editMode?<div>
+                    <textarea defaultValue={custData.service_description||""} id="edit-svc" rows="2" placeholder="e.g. We build custom Shopify stores for e-commerce brands looking to scale past $50K/mo in revenue" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>
+                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Be specific — this helps our AI write more relevant copy</div>
+                  </div>:<div style={{fontSize:13}}>{custData.service_description||"—"}</div>}
                 </div>
-                <div style={{gridColumn:"1/-1"}}>
-                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What you offer</div>
-                  {editMode?<textarea defaultValue={t.offer||custData.service_description||""} id="edit-offer" rows="2" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>:<div style={{fontSize:13}}>{t.offer||custData.service_description||"—"}</div>}
+                <div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What's your offer? <span style={{color:"var(--green)",fontWeight:500}}>*important for AI copy</span></div>
+                  {editMode?<div>
+                    <textarea defaultValue={t.offer||""} id="edit-offer" rows="2" placeholder="e.g. Free audit + $4,999 flat rate, 3-week delivery, money-back guarantee" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>
+                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Include pricing, guarantees, timelines — anything that makes your offer compelling</div>
+                  </div>:<div style={{fontSize:13}}>{t.offer||"—"}</div>}
                 </div>
-                <div style={{gridColumn:"1/-1"}}>
+                <div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>What problem do you solve for your clients?</div>
+                  {editMode?<div>
+                    <textarea defaultValue={t.pain_point||""} id="edit-pain" rows="2" placeholder="e.g. Most e-commerce brands are losing 30-40% of potential revenue due to poor site speed, broken checkout flows, and outdated design" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>
+                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>This is what our AI uses to create urgency in your outreach</div>
+                  </div>:<div style={{fontSize:13}}>{t.pain_point||<span style={{color:"var(--text3)"}}>Not provided</span>}</div>}
+                </div>
+                <div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Any results or proof you can reference? <span style={{color:"var(--text3)",fontWeight:400}}>(optional)</span></div>
+                  {editMode?<div>
+                    <textarea defaultValue={t.social_proof||""} id="edit-proof" rows="2" placeholder="e.g. We've built 200+ Shopify stores, average 3.2x ROI for our clients, worked with brands like XYZ" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:12,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",resize:"vertical"}}/>
+                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Numbers, client names, case studies — makes your outreach much more credible</div>
+                  </div>:<div style={{fontSize:13}}>{t.social_proof||<span style={{color:"var(--text3)"}}>Not provided</span>}</div>}
+                </div>
+                <div>
                   <div style={{fontSize:10,color:"var(--text3)",marginBottom:3}}>Replies sent to</div>
                   {editMode?<input defaultValue={custData.lead_email||custData.email||""} id="edit-email" style={{width:"100%",padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--mono)",background:"var(--bg2)",color:"var(--text)"}}/>:<div style={{fontSize:13,fontFamily:"var(--mono)",color:"var(--green)"}}>{custData.lead_email||custData.email}</div>}
                 </div>
@@ -1873,13 +1899,16 @@ function App(){
               var campEl=document.getElementById('edit-camp');if(campEl)newTarget.campaign_name=campEl.value;
               var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
               var offerEl=document.getElementById('edit-offer');if(offerEl)newTarget.offer=offerEl.value;
+              var painEl=document.getElementById('edit-pain');if(painEl)newTarget.pain_point=painEl.value;
+              var proofEl=document.getElementById('edit-proof');if(proofEl)newTarget.social_proof=proofEl.value;
               var locDetailEl=document.getElementById('edit-locdetail');if(locDetailEl)newTarget.location_detail=locDetailEl.value;
               var bizEl=document.getElementById('edit-biz');
               var emailEl=document.getElementById('edit-email');
+              var svcEl=document.getElementById('edit-svc');
               await sb.from('customers').update({
                 business_name:bizEl?bizEl.value:custData.business_name,
                 lead_email:emailEl?emailEl.value:custData.lead_email,
-                service_description:offerEl?offerEl.value:custData.service_description,
+                service_description:svcEl?svcEl.value:custData.service_description,
                 target_market:JSON.stringify(newTarget)
               }).eq('user_id',currentUser.id);
               // Reload data
