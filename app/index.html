@@ -894,6 +894,7 @@ function CampaignModal({configCampaign, custData, setCustData, setConfigCampaign
       const campData=campDataRef.current;
       
       const [inheritMode,setInheritMode]=React.useState(false);
+      const [copyFrom,setCopyFrom]=React.useState(0);
       
       const allTitles=["CEO","Managing Director","Founder","VP Sales","VP Marketing","Head of Growth","CMO","CTO","Director","Operations Manager","HR Director","CFO","COO","Business Owner","General Manager","Sales Manager"];
       const allSeniority=["C-Suite","VP","Director","Manager","Senior"];
@@ -908,9 +909,17 @@ function CampaignModal({configCampaign, custData, setCustData, setConfigCampaign
       const DIS={...IS,opacity:0.6,background:"var(--bg3)",cursor:"not-allowed",color:"var(--text3)"};
 
       function ChipGroup({label,allOptions,selectedKey,disabled}){
-        const initVal=campData[selectedKey]||(inheritMode&&campNum>1?t[selectedKey]:[])||[];
+        var srcData=copyFrom>0?(copyFrom===1?t:(t['campaign_'+copyFrom]||{})):{};
+        const initVal=campData[selectedKey]||(inheritMode&&copyFrom>0?srcData[selectedKey]:[])||[];
         const [sel,setSel]=React.useState(initVal);
-        React.useEffect(()=>{setSel(campData[selectedKey]||(inheritMode&&campNum>1?t[selectedKey]:[])||[])},[inheritMode]);
+        React.useEffect(()=>{
+          if(inheritMode&&copyFrom>0){
+            var src=copyFrom===1?t:(t['campaign_'+copyFrom]||{});
+            setSel(src[selectedKey]||[]);
+          } else if(!inheritMode){
+            setSel(campData[selectedKey]||[]);
+          }
+        },[inheritMode,copyFrom]);
         campData[selectedKey]=sel;
         return <div style={{marginBottom:14}}>
           <label style={LB}>{label}</label>
@@ -1038,36 +1047,32 @@ function CampaignModal({configCampaign, custData, setCustData, setConfigCampaign
             <div style={{width:24,height:24,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",fontWeight:700,flexShrink:0}}>OK</div>
             <div><div style={{fontSize:13,fontWeight:600,color:"var(--green)"}}>Campaign confirmed</div><div style={{fontSize:12,color:"var(--text3)"}}>Changes available after account setup is complete.</div></div>
           </div>}
-          {campNum>1&&!isConfirmed&&<div style={{marginBottom:24}}>
-            <label style={LB}>How do you want to set up this campaign?</label>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-              <div onClick={()=>{setInheritMode(true);
-                // Fill text fields with Campaign 1 data
-                var o=document.getElementById('edit-offer');if(o&&!o.value)o.value=t.offer||'';
-                var p=document.getElementById('edit-pain');if(p&&!p.value)p.value=t.pain_point||'';
-                var pr=document.getElementById('edit-proof');if(pr&&!pr.value)pr.value=t.social_proof||'';
-                var ld=document.getElementById('edit-locdetail');if(ld&&!ld.value)ld.value=t.location_detail||'';
-              }} style={{padding:16,borderRadius:0,border:inheritMode===true?"2px solid var(--green)":"1px solid var(--border)",background:inheritMode===true?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
-                <div style={{fontSize:20,marginBottom:6}}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={inheritMode===true?"var(--green)":"var(--text3)"} strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                </div>
-                <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>Copy from Campaign 1</div>
-                <div style={{fontSize:11,color:"var(--text3)"}}>Pre-fills with same targeting</div>
-              </div>
-              <div onClick={()=>{setInheritMode(false);
-                // Clear fields if switching from copy
-                var o=document.getElementById('edit-offer');if(o)o.value='';
-                var p=document.getElementById('edit-pain');if(p)p.value='';
-                var pr=document.getElementById('edit-proof');if(pr)pr.value='';
-                var ld=document.getElementById('edit-locdetail');if(ld)ld.value='';
-              }} style={{padding:16,borderRadius:0,border:inheritMode===false?"2px solid var(--green)":"1px solid var(--border)",background:inheritMode===false?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
-                <div style={{fontSize:20,marginBottom:6}}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={inheritMode===false?"var(--green)":"var(--text3)"} strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                </div>
-                <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>Start fresh</div>
-                <div style={{fontSize:11,color:"var(--text3)"}}>Different targeting for this campaign</div>
-              </div>
+          {campNum>1&&!isConfirmed&&<div style={{marginBottom:24,padding:16,border:"1px solid var(--border)",background:"var(--bg)"}}>
+            <label style={LB}>Copy from another campaign?</label>
+            <div style={{display:"flex",gap:10,alignItems:"center"}}>
+              <select id="copy-from-select" value={copyFrom} onChange={e=>{
+                var src=parseInt(e.target.value,10);
+                setCopyFrom(src);
+                if(src>0){
+                  // Get source campaign data
+                  var srcData=src===1?t:(t['campaign_'+src]||{});
+                  // Fill text fields
+                  var o=document.getElementById('edit-offer');if(o)o.value=srcData.offer||t.offer||'';
+                  var p=document.getElementById('edit-pain');if(p)p.value=srcData.pain_point||t.pain_point||'';
+                  var pr=document.getElementById('edit-proof');if(pr)pr.value=srcData.social_proof||t.social_proof||'';
+                  var ld=document.getElementById('edit-locdetail');if(ld)ld.value=srcData.location_detail||t.location_detail||'';
+                  // Set inherit mode so chips copy too
+                  setInheritMode(true);
+                }
+              }} style={{flex:1,padding:"10px 14px",borderRadius:0,border:"1px solid var(--border)",fontSize:14,fontFamily:"var(--sans)",background:"var(--bg2)",color:"var(--text)",cursor:"pointer"}}>
+                <option value="0">No — start fresh</option>
+                {confirmed.filter(c=>c!==campNum).map(c=>
+                  <option key={c} value={c}>Copy from Campaign {c}{c===1&&t.campaign_name?" ("+t.campaign_name+")":t["campaign_"+c]&&t["campaign_"+c].campaign_name?" ("+t["campaign_"+c].campaign_name+")":""}</option>
+                )}
+              </select>
+              {copyFrom>0&&<div style={{fontSize:11,color:"var(--green)",fontWeight:600,flexShrink:0}}>Fields pre-filled</div>}
             </div>
+            <div style={{fontSize:11,color:"var(--text3)",marginTop:6}}>Select a confirmed campaign to copy its targeting and offer details. You can still edit everything before confirming.</div>
           </div>}
           {campNum===1&&<><div style={{marginBottom:28}}>
             <div style={{fontSize:14,fontWeight:700,marginBottom:16}}>Your business</div>
