@@ -1133,10 +1133,8 @@ function App(){
   React.useEffect(()=>{
     function loadData(){
       if(!currentUser)return;
-      setAuthLoaded(true);
       sb.from('customers').select('*').eq('user_id',currentUser.id).single().then(({data,error})=>{
         if(data){
-          setCustData(data);
           // Parse target_market if it's a string
           if(data.target_market && typeof data.target_market === 'string'){
             try { data._targeting = JSON.parse(data.target_market); } catch(e){ data._targeting = null; }
@@ -1144,11 +1142,12 @@ function App(){
           // Set plan limits
           var limits = {starter:{mailboxes:4,campaigns:2},growth:{mailboxes:12,campaigns:4},scale:{mailboxes:30,campaigns:10}};
           data._limits = limits[data.plan] || limits.starter;
-          
+          setCustData(data);
           if(!data.business_name||data.plan_status==='pending'){setIsNew(true);}
         } else {
           setIsNew(true);
         }
+        setAuthLoaded(true);
       });
     }
     if(authReady){loadData();}
@@ -1420,7 +1419,7 @@ function App(){
         </div>}
 
         {/* ACTIVE STATE — existing mock dashboard for when mailboxes are live */}
-        {(!custData||custData.mailbox_count>0)&&<>
+        {custData&&custData.mailbox_count>0&&<>
 
         {wc>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--green)",borderBottom:"1px solid var(--border)"}}>
           <div style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>{wc} warm lead{wc>1?"s":""} waiting for follow-up
@@ -1653,7 +1652,7 @@ function App(){
         </div>}
 
         {/* Active state — show real mailbox data */}
-        {(!custData||custData.mailbox_count>0)&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:12}}>
+        {custData&&custData.mailbox_count>0&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:12}}>
           {D.mbs.map((m,i)=>{
             const rc=m.rep>=95?"var(--green)":m.rep>=80?"var(--orange)":"var(--red)";
             return <Card key={i} style={{padding:20}}>
