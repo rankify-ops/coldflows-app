@@ -26,12 +26,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:h
 @keyframes sN1{0%,25%{opacity:0.1;transform:scale(0.8)}30%{opacity:0.7;transform:scale(1.15)}35%{transform:scale(1)}70%{opacity:0.5}85%{opacity:0.1;transform:scale(0.8)}100%{opacity:0.1;transform:scale(0.8)}}
 @keyframes sE1{0%{stroke-dashoffset:16;opacity:0}15%{opacity:0.3}35%{stroke-dashoffset:0;opacity:0.2}75%{opacity:0.05}90%{stroke-dashoffset:16;opacity:0}100%{opacity:0}}
 a{color:inherit;text-decoration:none}
-.ctn{max-width:var(--mw);margin:0 auto;padding:0 32px;position:relative}
+.ctn{max-width:var(--mw);margin:0 auto;padding:0 32px;position:relative;border-left:1px solid var(--border);border-right:1px solid var(--border)}
 .gl{position:fixed;top:0;left:50%;transform:translateX(-50%);width:var(--mw);height:100vh;pointer-events:none;z-index:0;opacity:0.5}
 .gl::before,.gl::after{content:'';position:absolute;top:0;bottom:0;width:1px;background:var(--border)}.gl::before{left:0}.gl::after{right:0}
 .gl i{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--border)}
 nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);background:rgba(249,249,249,0.85)}
-.ni{max-width:var(--mw);margin:0 auto;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.ni{max-width:var(--mw);margin:0 auto;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;border-left:1px solid var(--border);border-right:1px solid var(--border)}
 .nl{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:-.3px}
 .nli{width:22px;height:22px;border-radius:5px;background:var(--green);display:flex;align-items:center;justify-content:center}
 .nli svg{width:11px;height:11px}
@@ -167,7 +167,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 
 <!-- Sticky CTA -->
 <div class="sticky-cta" id="stickyCta">
-  <div style="max-width:var(--mw);margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between">
+  <div style="max-width:var(--mw);margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;border-left:1px solid var(--border);border-right:1px solid var(--border)">
     <div style="font-size:13px;font-weight:500">Ready to fill your pipeline?</div>
     <button class="bp" style="padding:8px 20px;font-size:12px" onclick="window.location.href='/signup.html?signup'">Get started →</button>
   </div>
@@ -177,9 +177,9 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
   <div style="position:relative;min-height:560px">
     <!-- LEFT: Text content — this determines hero height -->
     <div style="width:50%;padding-right:48px;display:flex;flex-direction:column;justify-content:center;min-height:560px">
-      <div class="hb"><div class="hd"></div>Fully automated · Self-learning · We configure everything</div>
+      <div class="hb"><div class="hd"></div>Fully managed cold email · Zero setup</div>
       <h1>Cold email that<br>runs <span class="scramble" data-scramble="itself">itself</span><span class="cur" style="height:0.9em;margin-left:4px"></span></h1>
-      <p class="hs">Purchase a package. Tell us your service and who your ideal customer is. <strong>That's it.</strong> Open your dashboard, track your campaigns, watch them optimise — and reply to your leads.</p>
+      <p class="hs">Just tell us what you sell and who it's for. We find the leads, write the emails, and fill your inbox with warm replies. <strong>That's it.</strong></p>
       <div class="hc">
         <button class="bp" onclick="window.location.href='/signup.html?signup'">Get started →</button>
         <button class="bg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
@@ -262,7 +262,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 </div>
 
 <div style="border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
-  <div style="max-width:var(--mw);margin:0 auto;padding:0">
+  <div style="max-width:var(--mw);margin:0 auto;padding:0;border-left:1px solid var(--border);border-right:1px solid var(--border)">
     <!-- Stats row like dashboard -->
     <div style="display:flex;border-bottom:1px solid var(--border)">
       <div style="flex:1;padding:24px 28px;border-right:1px solid var(--border)">
@@ -329,7 +329,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 
 <!-- TRUST BADGES -->
 <div style="border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
-  <div style="max-width:var(--mw);margin:0 auto;padding:16px 32px;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap">
+  <div style="max-width:var(--mw);margin:0 auto;padding:16px 32px;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap;border-left:1px solid var(--border);border-right:1px solid var(--border)">
     <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> 95%+ inbox placement</div>
     <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> 150K+ emails sent</div>
     <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:var(--mono)"><span style="color:var(--green);font-weight:700">✓</span> AI-powered copy & optimisation</div>
@@ -340,7 +340,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 
 <!-- SCALE OUTREACH -->
 <div style="border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
-  <div style="max-width:var(--mw);margin:0 auto;padding:64px 32px">
+  <div style="max-width:var(--mw);margin:0 auto;padding:64px 32px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
     <div style="text-align:center;margin-bottom:40px">
       <div style="font-size:28px;font-weight:600;letter-spacing:-1px">Scale outreach without limits</div>
     </div>
@@ -419,7 +419,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 
 <!-- DELIVERABILITY ENGINE -->
 <div style="border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
-  <div style="max-width:var(--mw);margin:0 auto;padding:64px 32px">
+  <div style="max-width:var(--mw);margin:0 auto;padding:64px 32px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
     <div style="text-align:center;margin-bottom:12px">
       <div style="display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--green);background:var(--green-bg);border:1px solid var(--green-bd);padding:4px 14px;border-radius:100px;margin-bottom:12px">DELIVERABILITY ENGINE</div>
       <div style="font-size:28px;font-weight:600;letter-spacing:-1px">Deliverability engine built for cold outreach</div>
@@ -488,7 +488,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 
 <!-- BOOST DELIVERABILITY -->
 <div style="border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
-  <div style="max-width:var(--mw);margin:0 auto;padding:64px 32px">
+  <div style="max-width:var(--mw);margin:0 auto;padding:64px 32px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
       <div>
         <div style="font-size:28px;font-weight:600;letter-spacing:-1px;margin-bottom:20px;line-height:1.2">Boost deliverability before you send</div>
@@ -548,7 +548,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 
 <!-- ENTERPRISE INFRASTRUCTURE -->
 <div style="border-bottom:1px solid var(--border);background:var(--bg);position:relative;z-index:10">
-  <div style="max-width:var(--mw);margin:0 auto;padding:48px 32px">
+  <div style="max-width:var(--mw);margin:0 auto;padding:48px 32px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
     <div style="text-align:center;margin-bottom:28px">
       <div style="font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--text3);margin-bottom:8px">ENTERPRISE-GRADE INFRASTRUCTURE</div>
       <div style="font-size:20px;font-weight:500;letter-spacing:-.5px">Built on technology you can trust</div>
@@ -669,7 +669,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
 <section class="sc" id="how"><div class="ctn rv">
   <div class="sn">How it works</div>
   <div class="st">Three steps. That's it.</div><div class="sd" style="margin-bottom:0"></div>
-</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
   <div class="sg"><div class="sp"><div class="spn">01 Purchase</div><div class="spt">Pick a plan</div><div class="spd">Stripe checkout takes 30 seconds. Your system starts provisioning immediately.</div></div>
     <div class="sp"><div class="spn">02 Configure</div><div class="spt">Tell us your service</div><div class="spd">What you do, who your ideal customer is, and where they are. 2 minute form.</div></div>
     <div class="sp"><div class="spn">03 Done</div><div class="spt">We handle everything</div><div class="spd">Domains, mailboxes, warmup, copy, A/B testing, leads, optimisation. You log in and see warm leads.</div></div>
@@ -680,7 +680,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
   <div class="sn">The system</div>
   <div class="st">Volume that scales itself</div>
   <div class="sd">Every account progresses through four phases automatically.</div>
-</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
   <div class="pg">
     <div class="ph"><div class="phn">Warmup</div><div class="phw">Week 1–2</div><div class="phl"><div class="phlf" style="width:25%"></div></div><div class="phv">420</div><div class="php">emails / week</div><div class="phd">Mailboxes build sender reputation. No outreach yet.</div></div>
     <div class="ph"><div class="phn">Phase 1</div><div class="phw">Week 3</div><div class="phl"><div class="phlf" style="width:50%"></div></div><div class="phv">840</div><div class="php">emails / week</div><div class="phd">Live outreach begins. A/B testing enabled.</div></div>
@@ -693,7 +693,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
   <div class="sn">Pricing</div>
   <div class="st">Simple. No hidden fees.</div>
   <div class="sd">Everything included — domains, mailboxes, warmup, copy, leads, optimisation.</div>
-</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px">
+</div><div style="max-width:var(--mw);margin:0 auto;padding:0 32px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
   <div class="prg">
     <div class="prc"><div class="prn">Starter</div><div class="prd">Test the waters</div><div class="pra">$690</div><div class="prp">USD per month</div>
       <ul class="prf"><li><span>✓</span> 2 dedicated domains</li><li><span>✓</span> 4 mailboxes</li><li><span>✓</span> 2 campaigns</li><li><span>✓</span> ~2,000 emails/week at full capacity</li><li><span>✓</span> A/B copy testing</li><li><span>✓</span> Verified lead sourcing</li><li><span>✓</span> Dashboard access</li></ul>
@@ -732,7 +732,7 @@ footer{padding:32px 0}.fti{display:flex;justify-content:space-between;align-item
     <div style="font-family:var(--mono);font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-2px;color:var(--green);margin-bottom:4px">coldflows</div>
     <div style="font-size:14px;color:var(--text2);margin-bottom:0">The easiest way to fill your pipeline</div>
   </div>
-  <div style="max-width:var(--mw);margin:0 auto;overflow:hidden">
+  <div style="max-width:var(--mw);margin:0 auto;overflow:hidden;border-left:1px solid var(--border);border-right:1px solid var(--border)">
     <canvas id="bottomRiver" width="1088" height="200" style="display:block;width:100%;height:200px"></canvas>
   </div>
   <div class="ctn" style="position:relative;z-index:2">
