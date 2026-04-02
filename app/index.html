@@ -1209,6 +1209,14 @@ function App(){
         </a>)}
 
       <div style={{marginTop:"auto",padding:"14px",borderTop:"1px solid var(--border)"}}>
+        {/* Admin nav — only for admin emails */}
+        {custData&&(custData.email==="tomflood1995@gmail.com"||custData.lead_email==="tomflood1995@gmail.com")&&<div style={{marginBottom:12}}>
+          <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"1.5px",color:"var(--red)",padding:"0 0 8px",fontWeight:700}}>Admin</div>
+          <a onClick={()=>nav("ops")} className="hoverable" style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:6,color:pg==="ops"?"var(--red)":"var(--text3)",fontSize:12,fontWeight:pg==="ops"?600:400,cursor:"pointer",background:"transparent",border:"1px solid transparent"}}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Ops Pipeline
+          </a>
+        </div>}
         {/* Theme toggle */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
           <span style={{fontSize:11,color:"var(--text3)",fontWeight:500}}>{dark?"Dark":"Light"} mode</span>
@@ -1879,6 +1887,91 @@ function App(){
           )}
         </div>
       </div>}
+
+      {/* OPS PIPELINE — admin only */}
+      {pg==="ops"&&custData&&(custData.email==="tomflood1995@gmail.com"||custData.lead_email==="tomflood1995@gmail.com")&&<div className="fade-in" style={{padding:"24px 28px"}}>
+        <div style={{marginBottom:8}}>
+          <h1 style={{fontSize:26,fontWeight:800}}>Ops Pipeline</h1>
+          <p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Full customer lifecycle from payment to live campaigns</p>
+        </div>
+
+        {(()=>{
+          const t=custData._targeting||{};
+          const conf=t.campaigns_confirmed||[];
+          const total=custData._limits?custData._limits.campaigns:4;
+          const allDone=conf.length>=total;
+          const steps=[
+            {id:"payment",label:"Stripe Payment",status:"done",detail:"Plan: "+((custData.plan||"").charAt(0).toUpperCase()+(custData.plan||"").slice(1))+", Status: "+(custData.plan_status||"active"),sub:"Stripe webhook creates Supabase customers row with plan + email"},
+            {id:"supabase",label:"Customer Record",status:"done",detail:"user_id: "+currentUser.id.slice(0,8)+"..., email: "+custData.email,sub:"Supabase auth.users + public.customers table"},
+            {id:"onboarding",label:"Onboarding Form",status:"done",detail:"Business: "+(custData.business_name||"-")+", Service: "+(custData.service_description||"-").slice(0,50),sub:"Saves business_name, service_description, target_market JSON"},
+            {id:"campaigns",label:"Campaign Config",status:allDone?"done":"active",detail:conf.length+"/"+total+" confirmed — campaigns_confirmed: ["+conf.join(",")+"]",sub:"Each campaign saves offer, pain_point, social_proof + targeting chips to target_market"},
+            {id:"domains",label:"Purchase Domains",status:allDone?"next":"pending",detail:(custData._limits?custData._limits.mailboxes:12)+" domains via Porkbun",sub:"Porkbun API key: pk1_a6eef... | Register .com domains | Store in domains table"},
+            {id:"dns",label:"DNS Records",status:"pending",detail:"MX + SPF + DKIM + DMARC per domain",sub:"Porkbun DNS API | Set records | Verify propagation (allow 24-48hrs)"},
+            {id:"workspace",label:"Google Workspace",status:"pending",detail:"Create mailbox user on each domain",sub:"Google Admin SDK | admin.googleapis.com | Store credentials encrypted"},
+            {id:"smartlead",label:"Smartlead Connect",status:"pending",detail:"Add mailboxes + configure warmup schedule",sub:"Smartlead API | Base plan $39/mo | Set warmup: 2/day ramp to 40/day"},
+            {id:"warmup",label:"Warmup Phase",status:"pending",detail:"14-21 days gradual reputation building",sub:"Smartlead auto-warmup | Monitor inbox rate daily | Target: 95%+"},
+            {id:"leads",label:"Lead Sourcing",status:"pending",detail:"Pull leads matching each campaign targeting",sub:"SmartProspect/Apollo API | Filter by job_titles, industries, locations, company_size"},
+            {id:"copy",label:"AI Email Copy",status:"pending",detail:"Generate sequences per campaign",sub:"Claude API | Use offer, pain_point, social_proof | 3-email sequence + follow-ups"},
+            {id:"launch",label:"Go Live",status:"pending",detail:"Start sending from warmed mailboxes",sub:"Smartlead sequences active | Replies forwarded to lead_email: "+(custData.lead_email||custData.email)},
+          ];
+          return <div style={{marginBottom:28}}>
+            <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>Pipeline Status</div>
+            <div style={{fontSize:11,color:"var(--text3)",marginBottom:16,fontFamily:"var(--mono)"}}>{custData.business_name} | {custData.email} | {custData.plan} plan</div>
+            <div style={{display:"flex",flexDirection:"column",gap:0}}>
+              {steps.map((s,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"36px 1fr",gap:12,padding:"14px 20px",border:"1px solid var(--border)",borderTop:i===0?"1px solid var(--border)":"none",background:s.status==="active"?"var(--orange-bg)":s.status==="next"?"var(--green-bg)":"var(--bg)"}}>
+                <div style={{width:28,height:28,borderRadius:0,display:"flex",alignItems:"center",justifyContent:"center",
+                  background:s.status==="done"?"var(--green)":s.status==="active"?"var(--orange)":s.status==="next"?"var(--green)":"var(--bg3)",
+                  color:s.status==="pending"?"var(--text3)":"#fff",fontSize:11,fontWeight:700}}>
+                  {s.status==="done"?"OK":s.status==="active"?"...":s.status==="next"?">":i+1}
+                </div>
+                <div>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+                    <span style={{fontSize:13,fontWeight:700,color:s.status==="pending"?"var(--text3)":"var(--text)"}}>{s.label}</span>
+                    <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:0,
+                      background:s.status==="done"?"var(--green)":s.status==="active"?"var(--orange)":s.status==="next"?"var(--green)":"var(--bg3)",
+                      color:s.status==="pending"?"var(--text3)":"#fff"}}>{s.status==="done"?"DONE":s.status==="active"?"ACTIVE":s.status==="next"?"READY":"PENDING"}</span>
+                  </div>
+                  <div style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--text2)",marginBottom:2}}>{s.detail}</div>
+                  <div style={{fontSize:10,color:"var(--text3)"}}>{s.sub}</div>
+                </div>
+              </div>)}
+            </div>
+          </div>;
+        })()}
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:28}}>
+          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:20}}>
+            <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>Supabase</div>
+            <div style={{display:"flex",flexDirection:"column",gap:6,fontSize:11,fontFamily:"var(--mono)",color:"var(--text2)"}}>
+              <div>project: bmjjyujuyjpkyggormoa</div>
+              <div>table: customers</div>
+              <div>user_id: {currentUser.id}</div>
+              <div>plan: {custData.plan}</div>
+              <div>mailbox_count: {custData.mailbox_count}</div>
+              <div>confirmed: [{(custData._targeting&&custData._targeting.campaigns_confirmed||[]).join(",")}]</div>
+            </div>
+          </div>
+          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:20}}>
+            <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>API Keys Required</div>
+            <div style={{display:"flex",flexDirection:"column",gap:6,fontSize:11,color:"var(--text2)"}}>
+              <div><span style={{fontWeight:600}}>Porkbun</span> — domains + DNS</div>
+              <div><span style={{fontWeight:600}}>Google Admin SDK</span> — workspace mailboxes</div>
+              <div><span style={{fontWeight:600}}>Smartlead</span> — warmup + sequences</div>
+              <div><span style={{fontWeight:600}}>SmartProspect</span> — lead sourcing</div>
+              <div><span style={{fontWeight:600}}>Claude API</span> — email copy</div>
+              <div><span style={{fontWeight:600}}>Stripe</span> — payments + webhooks</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{marginBottom:28}}>
+          <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>Raw target_market JSON</div>
+          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:16,maxHeight:300,overflow:"auto"}}>
+            <pre style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)",whiteSpace:"pre-wrap",margin:0}}>{JSON.stringify(custData._targeting,null,2)}</pre>
+          </div>
+        </div>
+      </div>}
+
       </div>}
     </main>
 
