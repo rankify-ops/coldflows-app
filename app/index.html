@@ -1575,7 +1575,12 @@ function App(){
       </div>}
 
       {pg==="mailboxes"&&<div className="fade-in" style={{}}>
-        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Mailboxes</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>{custData&&custData.mailbox_count===0?"Mailboxes will be provisioned once your campaigns are configured":custData?custData._limits.mailboxes+" mailboxes active":""}</p></div>
+        <div style={{marginBottom:8}}><h1 style={{fontSize:26,fontWeight:800}}>Mailboxes</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>{custData&&custData.mailbox_count===0?"Mailboxes will be provisioned once your campaigns are configured":custData?custData._limits.mailboxes+" mailboxes active":""}</p></div>
+        
+        {/* Explainer */}
+        <div style={{marginBottom:24,padding:"16px 20px",borderRadius:10,background:"var(--bg2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text2)",lineHeight:1.7}}>
+          <strong style={{color:"var(--text)"}}>Why multiple mailboxes per campaign?</strong> Email providers limit how many emails a single mailbox can send per day (typically 30-50) before risking spam flags. By spreading your outreach across multiple dedicated mailboxes, we can send higher volumes while keeping each mailbox well under its daily limit. This protects your sender reputation and keeps inbox placement rates above 95%. Each mailbox gets its own domain, SPF, DKIM, and DMARC records — fully isolated so one mailbox's reputation never affects the others.
+        </div>
         
         {/* Provisioning state — show planned mailbox allocation */}
         {custData&&custData.mailbox_count===0&&<div>
