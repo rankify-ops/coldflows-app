@@ -890,6 +890,7 @@ function App(){
   const [showAdd,setShowAdd]=useState(false);
   const [showPhase,setShowPhase]=useState(null);
   const [mb,setMb]=useState(null);
+  const [configCampaign,setConfigCampaign]=useState(null);
   const [treeFilter,setTreeFilter]=useState("SEO");
   const [dark,setDark]=useState(false);
   const [custData,setCustData]=useState(null);
@@ -1134,6 +1135,35 @@ function App(){
               <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid var(--border)"}}>
                 <div style={{fontSize:11,color:"var(--text3)"}}>{custData._limits?(custData._limits.campaigns-1):3} campaign slots remaining</div>
               </div>
+            </div>
+          </div>
+
+          {/* Remaining campaign slots — configure CTA */}
+          <div style={{marginTop:16}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+              <div style={{fontSize:13,fontWeight:700}}>Your campaigns</div>
+              <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>1/{custData._limits?custData._limits.campaigns:4} configured</div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat("+(custData._limits?custData._limits.campaigns:4)+", 1fr)",gap:12}}>
+              {/* Campaign 1 — configured */}
+              <div style={{border:"1px solid var(--green-bd)",borderRadius:10,padding:16,background:"var(--green-bg)"}}>
+                <div style={{fontSize:10,color:"var(--green)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaign 1</div>
+                <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign 1"}</div>
+                <div style={{fontSize:10,color:"var(--text3)"}}>{custData._targeting&&custData._targeting.industries?custData._targeting.industries.join(", "):""}</div>
+                <div style={{marginTop:8}}><span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:4,background:"var(--green)",color:"#fff"}}>Provisioning</span></div>
+              </div>
+              {/* Empty campaign slots */}
+              {Array.from({length:(custData._limits?custData._limits.campaigns:4)-1}).map((_,i)=>
+                <div key={i} onClick={()=>setConfigCampaign(i+2)} style={{border:"2px dashed var(--border)",borderRadius:10,padding:16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",minHeight:120,transition:"all .15s",background:"transparent"}} 
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--green)";e.currentTarget.style.background="var(--green-bg)"}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.background="transparent"}}>
+                  <div style={{width:36,height:36,borderRadius:"50%",border:"2px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:8}}>
+                    <span style={{fontSize:18,color:"var(--text3)",lineHeight:1}}>+</span>
+                  </div>
+                  <div style={{fontSize:11,fontWeight:600,color:"var(--text2)"}}>Campaign {i+2}</div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Configure targeting</div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -1713,6 +1743,110 @@ function App(){
         </div>
       </div>
     </div>}
+
+    {/* Configure Campaign Modal */}
+    {configCampaign&&<div onClick={e=>{if(e.target===e.currentTarget)setConfigCampaign(null)}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
+      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:600,maxHeight:"90vh",overflow:"auto",animation:"fadeIn .3s ease"}}>
+        <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <h2 style={{fontSize:18,fontWeight:700}}>Configure Campaign {configCampaign}</h2>
+          <button onClick={()=>setConfigCampaign(null)} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text2)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        </div>
+        <div style={{padding:"24px 28px"}}>
+          
+          {/* Inherit or custom */}
+          <div style={{marginBottom:20}}>
+            <div style={{fontSize:12,fontWeight:600,marginBottom:10}}>Start from</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <div id={"inherit-btn-"+configCampaign} onClick={e=>{
+                var cust=document.getElementById('custom-btn-'+configCampaign);
+                e.currentTarget.style.border="2px solid var(--green)";e.currentTarget.style.background="var(--green-bg)";
+                if(cust){cust.style.border="1px solid var(--border)";cust.style.background="transparent";}
+                var form=document.getElementById('custom-form-'+configCampaign);if(form)form.style.display="none";
+              }} style={{padding:14,borderRadius:10,border:"2px solid var(--green)",background:"var(--green-bg)",cursor:"pointer",textAlign:"center"}}>
+                <div style={{fontSize:12,fontWeight:700,marginBottom:2}}>Copy from Campaign 1</div>
+                <div style={{fontSize:10,color:"var(--text3)"}}>Same targeting, we write new copy</div>
+              </div>
+              <div id={"custom-btn-"+configCampaign} onClick={e=>{
+                var inh=document.getElementById('inherit-btn-'+configCampaign);
+                e.currentTarget.style.border="2px solid var(--green)";e.currentTarget.style.background="var(--green-bg)";
+                if(inh){inh.style.border="1px solid var(--border)";inh.style.background="transparent";}
+                var form=document.getElementById('custom-form-'+configCampaign);if(form)form.style.display="block";
+              }} style={{padding:14,borderRadius:10,border:"1px solid var(--border)",background:"transparent",cursor:"pointer",textAlign:"center"}}>
+                <div style={{fontSize:12,fontWeight:700,marginBottom:2}}>Different targeting</div>
+                <div style={{fontSize:10,color:"var(--text3)"}}>New audience for this campaign</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Campaign name */}
+          <div style={{marginBottom:16}}>
+            <label style={{fontSize:11,fontWeight:600,display:"block",marginBottom:4}}>Campaign name</label>
+            <input id={"cname-"+configCampaign} placeholder={"Campaign "+configCampaign} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:"1px solid var(--border)",fontSize:13,fontFamily:"var(--sans)",background:"var(--bg)",color:"var(--text)",outline:"none"}}/>
+          </div>
+
+          {/* Custom targeting form — hidden by default */}
+          <div id={"custom-form-"+configCampaign} style={{display:"none"}}>
+            <div style={{marginBottom:14}}>
+              <label style={{fontSize:11,fontWeight:600,display:"block",marginBottom:4}}>Job titles</label>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                {["CEO","Managing Director","Founder","VP Sales","VP Marketing","Head of Growth","CMO","CTO","Director","Operations Manager","HR Director","CFO","COO","Business Owner","General Manager","Sales Manager"].map((t,i)=>
+                  <label key={i} style={{fontSize:11,padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+                    <input type="checkbox" style={{width:12,height:12}}/>{t}
+                  </label>
+                )}
+              </div>
+            </div>
+            <div style={{marginBottom:14}}>
+              <label style={{fontSize:11,fontWeight:600,display:"block",marginBottom:4}}>Seniority</label>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                {["C-Suite","VP","Director","Manager","Senior"].map((t,i)=>
+                  <label key={i} style={{fontSize:11,padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+                    <input type="checkbox" style={{width:12,height:12}}/>{t}
+                  </label>
+                )}
+              </div>
+            </div>
+            <div style={{marginBottom:14}}>
+              <label style={{fontSize:11,fontWeight:600,display:"block",marginBottom:4}}>Industries</label>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                {["Software / SaaS","E-commerce","Marketing / Advertising","Finance","Healthcare","Real Estate","Construction","Education","Legal","Manufacturing","Hospitality","Professional Services","Retail","Logistics","Technology","Media","Consulting","Non-profit"].map((t,i)=>
+                  <label key={i} style={{fontSize:11,padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+                    <input type="checkbox" style={{width:12,height:12}}/>{t}
+                  </label>
+                )}
+              </div>
+            </div>
+            <div style={{marginBottom:14}}>
+              <label style={{fontSize:11,fontWeight:600,display:"block",marginBottom:4}}>Company size</label>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                {["1-10","11-50","51-200","201-500","501-1000","1001-5000","5000-10000","10000+"].map((t,i)=>
+                  <label key={i} style={{fontSize:11,padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+                    <input type="checkbox" style={{width:12,height:12}}/>{t}
+                  </label>
+                )}
+              </div>
+            </div>
+            <div style={{marginBottom:14}}>
+              <label style={{fontSize:11,fontWeight:600,display:"block",marginBottom:4}}>Locations</label>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                {["Australia","United States","United Kingdom","Canada","New Zealand","Germany","France","Singapore","Hong Kong","UAE","India","Netherlands","Ireland","Sweden","Japan"].map((t,i)=>
+                  <label key={i} style={{fontSize:11,padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+                    <input type="checkbox" style={{width:12,height:12}}/>{t}
+                  </label>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Save button */}
+          <div style={{display:"flex",gap:10,marginTop:20}}>
+            <button onClick={()=>{setConfigCampaign(null)}} style={{flex:1,padding:"12px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:13,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)"}}>Save campaign</button>
+            <button onClick={()=>setConfigCampaign(null)} style={{padding:"12px 20px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>}
+
   </div>;
 }
 
