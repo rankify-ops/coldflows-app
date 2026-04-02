@@ -905,6 +905,14 @@ function App(){
       sb.from('customers').select('*').eq('user_id',currentUser.id).single().then(({data,error})=>{
         if(data){
           setCustData(data);
+          // Parse target_market if it's a string
+          if(data.target_market && typeof data.target_market === 'string'){
+            try { data._targeting = JSON.parse(data.target_market); } catch(e){ data._targeting = null; }
+          } else { data._targeting = data.target_market || null; }
+          // Set plan limits
+          var limits = {starter:{mailboxes:4,campaigns:2},growth:{mailboxes:12,campaigns:4},scale:{mailboxes:30,campaigns:10}};
+          data._limits = limits[data.plan] || limits.starter;
+          
           if(!data.business_name||data.plan_status==='pending'){setIsNew(true);}
         } else {
           setIsNew(true);
@@ -1023,7 +1031,142 @@ function App(){
       {authLoaded&&!isNew&&<div>
 
       {pg==="overview"&&<div className="fade-in" style={{}}>
-        <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)"}}><h1 style={{fontSize:22,fontWeight:600,letterSpacing:"-0.3px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>Last updated 3 minutes ago</p></div>
+        <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)"}}><h1 style={{fontSize:22,fontWeight:600,letterSpacing:"-0.3px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>{custData&&custData.mailbox_count===0?"Account provisioning in progress":"Last updated 3 minutes ago"}</p></div>
+
+        {/* PROVISIONING STATE — real customer, 0 mailboxes */}
+        {custData&&custData.mailbox_count===0&&<div style={{padding:"28px"}}>
+          
+          {/* Welcome banner */}
+          <div style={{border:"2px solid var(--green-bd)",borderRadius:12,padding:24,background:"var(--green-bg)",marginBottom:24}}>
+            <div style={{display:"flex",alignItems:"flex-start",gap:16}}>
+              <div style={{width:40,height:40,borderRadius:10,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <span style={{fontSize:18,color:"#fff"}}>⚡</span>
+              </div>
+              <div>
+                <div style={{fontSize:16,fontWeight:700,marginBottom:4}}>Welcome to Coldflows, {custData.business_name}</div>
+                <div style={{fontSize:13,color:"var(--text2)",lineHeight:1.6}}>Your <strong style={{color:"var(--green)"}}>{custData.plan?custData.plan.charAt(0).toUpperCase()+custData.plan.slice(1):""}</strong> plan is active. We're provisioning your infrastructure now — domains, mailboxes, DNS, and warmup. This usually takes 24-48 hours.</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Plan summary cards */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12,marginBottom:24}}>
+            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
+              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Plan</div>
+              <div style={{fontSize:18,fontWeight:700,color:"var(--green)"}}>{custData.plan?custData.plan.charAt(0).toUpperCase()+custData.plan.slice(1):""}</div>
+            </div>
+            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
+              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Mailboxes</div>
+              <div style={{fontSize:18,fontWeight:700}}><span style={{color:"var(--text3)"}}>0</span><span style={{fontSize:12,color:"var(--text3)",fontWeight:400}}>/{custData._limits?custData._limits.mailboxes:12}</span></div>
+            </div>
+            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
+              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaigns</div>
+              <div style={{fontSize:18,fontWeight:700}}><span>1</span><span style={{fontSize:12,color:"var(--text3)",fontWeight:400}}>/{custData._limits?custData._limits.campaigns:4}</span></div>
+            </div>
+            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
+              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Lead email</div>
+              <div style={{fontSize:13,fontWeight:600,fontFamily:"var(--mono)",overflow:"hidden",textOverflow:"ellipsis"}}>{custData.lead_email||custData.email}</div>
+            </div>
+          </div>
+
+          {/* Setup progress + Campaign info side by side */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+            
+            {/* Setup progress */}
+            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:20,background:"var(--bg2)"}}>
+              <div style={{fontSize:13,fontWeight:700,marginBottom:16}}>Setup progress</div>
+              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                {[
+                  {label:"Account created",done:true},
+                  {label:"Payment confirmed",done:true},
+                  {label:"Campaign targeting saved",done:true},
+                  {label:"Purchasing domains",active:true},
+                  {label:"Creating "+String(custData._limits?custData._limits.mailboxes:12)+" mailboxes",pending:true},
+                  {label:"DNS configuration (SPF, DKIM, DMARC)",pending:true},
+                  {label:"Starting warmup sequence",pending:true},
+                  {label:"AI copy generation",pending:true},
+                  {label:"Lead sourcing & verification",pending:true}
+                ].map((s,i)=>
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
+                    {s.done?<div style={{width:20,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700,flexShrink:0}}>✓</div>
+                    :s.active?<div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--green)",animation:"spin 1s linear infinite",flexShrink:0}}/>
+                    :<div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",flexShrink:0}}/>}
+                    <span style={{color:s.pending?"var(--text3)":"var(--text)"}}>{s.label}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Campaign 1 details */}
+            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:20,background:"var(--bg2)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+                <div style={{fontSize:13,fontWeight:700}}>Campaign 1</div>
+                <span style={{fontSize:10,fontWeight:600,padding:"3px 8px",borderRadius:10,background:"var(--orange-bg)",color:"var(--orange)"}}>Provisioning</span>
+              </div>
+              {custData._targeting?<div style={{display:"flex",flexDirection:"column",gap:12}}>
+                {custData._targeting.campaign_name&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Campaign name</div>
+                  <div style={{fontSize:13,fontWeight:600}}>{custData._targeting.campaign_name}</div>
+                </div>}
+                {custData._targeting.job_titles&&custData._targeting.job_titles.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Job titles</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.job_titles.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+                {custData._targeting.seniority&&custData._targeting.seniority.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Seniority</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.seniority.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+                {custData._targeting.industries&&custData._targeting.industries.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Industries</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.industries.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+                {custData._targeting.company_size&&custData._targeting.company_size.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Company size</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.company_size.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+                {custData._targeting.locations&&custData._targeting.locations.length>0&&<div>
+                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Locations</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.locations.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
+                </div>}
+              </div>:<div style={{fontSize:13,color:"var(--text3)"}}>Targeting data loading...</div>}
+              
+              {/* Remaining campaign slots */}
+              <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid var(--border)"}}>
+                <div style={{fontSize:11,color:"var(--text3)"}}>{custData._limits?(custData._limits.campaigns-1):3} campaign slots remaining</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div style={{border:"1px solid var(--border)",borderRadius:10,padding:20,background:"var(--bg2)",marginTop:16}}>
+            <div style={{fontSize:13,fontWeight:700,marginBottom:12}}>Estimated timeline</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12}}>
+              <div style={{textAlign:"center",padding:12,borderRadius:8,background:"var(--green-bg)",border:"1px solid var(--green-bd)"}}>
+                <div style={{fontSize:10,color:"var(--green)",fontWeight:600,marginBottom:4}}>Day 1-2</div>
+                <div style={{fontSize:11,fontWeight:600}}>Setup</div>
+                <div style={{fontSize:10,color:"var(--text3)"}}>Domains, mailboxes, DNS</div>
+              </div>
+              <div style={{textAlign:"center",padding:12,borderRadius:8,border:"1px solid var(--border)"}}>
+                <div style={{fontSize:10,color:"var(--text3)",fontWeight:600,marginBottom:4}}>Day 3-14</div>
+                <div style={{fontSize:11,fontWeight:600}}>Warmup</div>
+                <div style={{fontSize:10,color:"var(--text3)"}}>Building sender reputation</div>
+              </div>
+              <div style={{textAlign:"center",padding:12,borderRadius:8,border:"1px solid var(--border)"}}>
+                <div style={{fontSize:10,color:"var(--text3)",fontWeight:600,marginBottom:4}}>Day 14</div>
+                <div style={{fontSize:11,fontWeight:600}}>First sends</div>
+                <div style={{fontSize:10,color:"var(--text3)"}}>Outreach begins</div>
+              </div>
+              <div style={{textAlign:"center",padding:12,borderRadius:8,border:"1px solid var(--border)"}}>
+                <div style={{fontSize:10,color:"var(--text3)",fontWeight:600,marginBottom:4}}>Day 21+</div>
+                <div style={{fontSize:11,fontWeight:600}}>Replies</div>
+                <div style={{fontSize:10,color:"var(--text3)"}}>Warm leads in your inbox</div>
+              </div>
+            </div>
+          </div>
+        </div>}
+
+        {/* ACTIVE STATE — existing mock dashboard for when mailboxes are live */}
+        {(!custData||custData.mailbox_count>0)&&<>
 
         {wc>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--green)",borderBottom:"1px solid var(--border)"}}>
           <div style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>{wc} warm lead{wc>1?"s":""} waiting for follow-up
@@ -1125,6 +1268,7 @@ function App(){
         <div style={{padding:"0 24px"}}>
           {D.reps.slice(0,4).map((r,i)=><Reply key={i} r={r}/>)}
         </div>
+      </>}
       </div>}
 
       {pg==="campaigns"&&<div className="fade-in" style={{}}>
