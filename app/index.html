@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>coldflows</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -879,6 +882,208 @@ function LeadDetail({lead,onClose}){
     </div>
   </div>;
 }
+
+function CampaignModal({configCampaign, custData, setCustData, setConfigCampaign, editMode, setEditMode, validationErr, setValidationErr}){
+      const t=custData?custData._targeting||{}:{};
+      const confirmed=t.campaigns_confirmed||[];
+      const campNum=typeof configCampaign==='string'?parseInt(configCampaign.replace('view-',''),10):configCampaign;
+      const isConfirmed=confirmed.indexOf(campNum)!==-1;
+      const totalCamps=custData&&custData._limits?custData._limits.campaigns:4;
+      const mbPerCamp=Math.floor((custData&&custData._limits?custData._limits.mailboxes:12)/totalCamps);
+      const campDataRef=React.useRef(campNum===1?Object.assign({},t):Object.assign({},t['campaign_'+campNum]||{}));
+      const campData=campDataRef.current;
+      
+      const [inheritMode,setInheritMode]=React.useState(true);
+      
+      const allTitles=["CEO","Managing Director","Founder","VP Sales","VP Marketing","Head of Growth","CMO","CTO","Director","Operations Manager","HR Director","CFO","COO","Business Owner","General Manager","Sales Manager"];
+      const allSeniority=["C-Suite","VP","Director","Manager","Senior"];
+      const allIndustries=["Software / SaaS","E-commerce","Marketing / Advertising","Finance","Healthcare","Real Estate","Construction","Education","Legal","Manufacturing","Hospitality","Professional Services","Retail","Logistics","Technology","Media","Consulting","Non-profit"];
+      const allSizes=["1-10","11-50","51-200","201-500","501-1000","1001-5000","5000-10000","10000+"];
+      const allLocations=["Australia","United States","United Kingdom","Canada","New Zealand","Germany","France","Singapore","Hong Kong","UAE","India","Netherlands","Ireland","Sweden","Japan"];
+      
+      const IS={width:"100%",padding:"10px 14px",borderRadius:8,border:"1px solid var(--border)",fontSize:14,fontFamily:"'DM Sans',sans-serif",background:"var(--bg)",color:"var(--text)",outline:"none",lineHeight:"1.5"};
+      const IM={...IS,fontFamily:"'JetBrains Mono',monospace"};
+      const LB={fontSize:12,fontWeight:600,color:"var(--text2)",display:"block",marginBottom:6};
+      const HT={fontSize:11,color:"var(--text3)",marginTop:4};
+      const DIS={...IS,opacity:0.6,background:"var(--bg3)",cursor:"not-allowed",color:"var(--text3)"};
+
+      function ChipGroup({label,allOptions,selectedKey,disabled}){
+        const initVal=campData[selectedKey]||(inheritMode&&campNum>1?t[selectedKey]:[])||[];
+        const [sel,setSel]=React.useState(initVal);
+        React.useEffect(()=>{setSel(campData[selectedKey]||(inheritMode&&campNum>1?t[selectedKey]:[])||[])},[inheritMode]);
+        campData[selectedKey]=sel;
+        return <div style={{marginBottom:14}}>
+          <label style={LB}>{label}</label>
+          {disabled?<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {sel.length?sel.map((v,i)=><span key={i} style={{fontSize:13,padding:"6px 14px",borderRadius:8,background:"var(--bg3)",border:"1px solid var(--border)",fontWeight:500,opacity:0.6}}>{v}</span>):<span style={{fontSize:13,color:"var(--text3)",padding:"6px 0"}}>-</span>}
+          </div>:editMode||!disabled?<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {allOptions.map((o,i)=>{
+              const active=sel.indexOf(o)!==-1;
+              return <span key={i} onClick={()=>{if(!disabled)setSel(active?sel.filter(x=>x!==o):[...sel,o])}} style={{fontSize:12,padding:"6px 14px",borderRadius:8,border:active?"1.5px solid var(--green)":"1px solid var(--border)",background:active?"var(--green-bg)":"var(--bg)",color:active?"var(--green)":"var(--text3)",cursor:disabled?"not-allowed":"pointer",fontWeight:active?600:400,transition:"all .1s"}}>{o}</span>;
+            })}
+          </div>:<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {sel.length?sel.map((v,i)=><span key={i} style={{fontSize:13,padding:"6px 14px",borderRadius:8,background:"var(--bg)",border:"1px solid var(--border)",fontWeight:500}}>{v}</span>):<span style={{fontSize:13,color:"var(--text3)",padding:"6px 0"}}>-</span>}
+          </div>}
+        </div>;
+      }
+      
+      async function saveCampaign(){
+        var svcEl=document.getElementById('edit-svc');
+        var offerEl=document.getElementById('edit-offer');
+        var painEl=document.getElementById('edit-pain');
+        var proofEl=document.getElementById('edit-proof');
+        var svcVal=svcEl?svcEl.value.trim():(custData.service_description||'').trim();
+        var offerVal=offerEl?offerEl.value.trim():(campData.offer||t.offer||'').trim();
+        var painVal=painEl?painEl.value.trim():(campData.pain_point||t.pain_point||'').trim();
+        var proofVal=proofEl?proofEl.value.trim():(campData.social_proof||t.social_proof||'').trim();
+        var missingIds=[];
+        if(campNum===1&&(!svcVal||svcVal.length<5))missingIds.push('edit-svc');
+        if(!offerVal||offerVal.length<5)missingIds.push('edit-offer');
+        if(!painVal||painVal.length<5)missingIds.push('edit-pain');
+        if(!proofVal||proofVal.length<5)missingIds.push('edit-proof');
+        ['edit-svc','edit-offer','edit-pain','edit-proof'].forEach(function(id){
+          var el=document.getElementById(id);if(el){el.style.border='1px solid var(--border)';el.style.background='var(--bg)';}
+        });
+        if(missingIds.length>0){
+          var names=[];
+          missingIds.forEach(function(id){
+            var el=document.getElementById(id);if(el){el.style.border='2px solid var(--red)';el.style.background='var(--red-bg)';}
+            if(id==='edit-svc')names.push('product or service');
+            if(id==='edit-offer')names.push('your offer');
+            if(id==='edit-pain')names.push('what problem you solve');
+            if(id==='edit-proof')names.push('results or proof');
+          });
+          setValidationErr('Please fill in: '+names.join(', ')+'.');
+          var firstInvalid=document.getElementById(missingIds[0]);
+          if(firstInvalid)firstInvalid.scrollIntoView({behavior:'smooth',block:'center'});
+          return;
+        }
+        setValidationErr(null);
+        var newTarget=JSON.parse(JSON.stringify(t));
+        if(campNum===1){
+          var campEl=document.getElementById('edit-camp');if(campEl)newTarget.campaign_name=campEl.value;
+          var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
+          if(offerEl)newTarget.offer=offerEl.value;
+          if(painEl)newTarget.pain_point=painEl.value;
+          if(proofEl)newTarget.social_proof=proofEl.value;
+          var locDetailEl=document.getElementById('edit-locdetail');if(locDetailEl)newTarget.location_detail=locDetailEl.value;
+          // Copy chip selections from campData
+          newTarget.job_titles=campData.job_titles||t.job_titles||[];
+          newTarget.seniority=campData.seniority||t.seniority||[];
+          newTarget.industries=campData.industries||t.industries||[];
+          newTarget.company_size=campData.company_size||t.company_size||[];
+          newTarget.locations=campData.locations||t.locations||[];
+        } else {
+          var cd={};
+          var campEl=document.getElementById('edit-camp');cd.campaign_name=campEl?campEl.value:'Campaign '+campNum;
+          if(offerEl)cd.offer=offerEl.value;
+          if(painEl)cd.pain_point=painEl.value;
+          if(proofEl)cd.social_proof=proofEl.value;
+          var locDetailEl=document.getElementById('edit-locdetail');cd.location_detail=locDetailEl?locDetailEl.value:'';
+          cd.job_titles=campData.job_titles||[];
+          cd.seniority=campData.seniority||[];
+          cd.industries=campData.industries||[];
+          cd.company_size=campData.company_size||[];
+          cd.locations=campData.locations||[];
+          newTarget['campaign_'+campNum]=cd;
+        }
+        if(!newTarget.campaigns_confirmed)newTarget.campaigns_confirmed=[];
+        if(newTarget.campaigns_confirmed.indexOf(campNum)===-1)newTarget.campaigns_confirmed.push(campNum);
+        var updateObj={target_market:JSON.stringify(newTarget)};
+        if(campNum===1){
+          var bizEl=document.getElementById('edit-biz');if(bizEl)updateObj.business_name=bizEl.value;
+          var emailEl=document.getElementById('edit-email');if(emailEl)updateObj.lead_email=emailEl.value;
+          var svcEl2=document.getElementById('edit-svc');if(svcEl2)updateObj.service_description=svcEl2.value;
+        }
+        await sb.from('customers').update(updateObj).eq('user_id',currentUser.id);
+        var{data}=await sb.from('customers').select('*').eq('user_id',currentUser.id).single();
+        if(data){
+          if(data.target_market&&typeof data.target_market==='string')try{data._targeting=JSON.parse(data.target_market)}catch(e){data._targeting=null}
+          var limits={starter:{mailboxes:4,campaigns:2},growth:{mailboxes:12,campaigns:4},scale:{mailboxes:30,campaigns:10}};
+          data._limits=limits[data.plan]||limits.starter;
+          setCustData(data);
+        }
+        setConfigCampaign(null);setEditMode(false);setValidationErr(null);
+      }
+      
+      return <div onClick={e=>{if(e.target===e.currentTarget){setConfigCampaign(null);setEditMode(false);setValidationErr(null);}}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
+      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:680,maxHeight:"90vh",overflow:"auto",animation:"fadeIn .3s ease"}} data-modal-scroll="1">
+        <div style={{padding:"28px 32px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+          <div>
+            <h2 style={{fontSize:20,fontWeight:700,letterSpacing:"-0.3px"}}>{isConfirmed?"Campaign "+campNum:"Setup Campaign "+campNum}</h2>
+            <div style={{fontSize:13,color:"var(--text3)",marginTop:4}}>{isConfirmed?"This campaign is confirmed and locked.":editMode?"Editing all fields":"Complete the fields below, then confirm"}</div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+            {!isConfirmed&&!editMode&&<button onClick={()=>setEditMode(true)} style={{padding:"8px 16px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"var(--sans)",display:"flex",alignItems:"center",gap:6}}>Edit all</button>}
+            {editMode&&<button onClick={()=>setEditMode(false)} style={{padding:"8px 16px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:500,fontFamily:"var(--sans)"}}>Cancel edit</button>}
+            <button onClick={()=>{setConfigCampaign(null);setEditMode(false);setValidationErr(null);}} style={{width:36,height:36,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>X</button>
+          </div>
+        </div>
+        <div style={{padding:"28px 32px"}}>
+          {isConfirmed&&<div style={{marginBottom:24,padding:"14px 18px",borderRadius:10,background:"var(--green-bg)",border:"1px solid var(--green-bd)",display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:24,height:24,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",fontWeight:700,flexShrink:0}}>OK</div>
+            <div><div style={{fontSize:13,fontWeight:600,color:"var(--green)"}}>Campaign confirmed</div><div style={{fontSize:12,color:"var(--text3)"}}>Changes available after account setup is complete.</div></div>
+          </div>}
+          {campNum>1&&!isConfirmed&&<div style={{marginBottom:24}}>
+            <label style={LB}>Start from</label>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <div onClick={()=>setInheritMode(true)} style={{padding:14,borderRadius:10,border:inheritMode?"2px solid var(--green)":"1px solid var(--border)",background:inheritMode?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center"}}><div style={{fontSize:13,fontWeight:700}}>Copy from Campaign 1</div><div style={{fontSize:11,color:"var(--text3)"}}>Same targeting, new copy</div></div>
+              <div onClick={()=>setInheritMode(false)} style={{padding:14,borderRadius:10,border:!inheritMode?"2px solid var(--green)":"1px solid var(--border)",background:!inheritMode?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center"}}><div style={{fontSize:13,fontWeight:700}}>Different targeting</div><div style={{fontSize:11,color:"var(--text3)"}}>New audience</div></div>
+            </div>
+          </div>}
+          {campNum===1&&<><div style={{marginBottom:28}}>
+            <div style={{fontSize:14,fontWeight:700,marginBottom:16}}>Your business</div>
+            <div style={{display:"flex",flexDirection:"column",gap:18}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                <div><label style={LB}>Business name</label>{isConfirmed||(!editMode&&custData.business_name&&custData.business_name.length>=5)?<div style={{fontSize:14,fontWeight:600,padding:"10px 0",opacity:isConfirmed?0.6:1}}>{custData.business_name}</div>:<input defaultValue={custData.business_name||""} id="edit-biz" style={IS}/>}</div>
+                <div><label style={LB}>Website (optional)</label>{isConfirmed?<div style={{fontSize:14,fontFamily:"var(--mono)",padding:"10px 0",opacity:0.6}}>{t.website||"-"}</div>:<input defaultValue={t.website||""} id="edit-web" placeholder="yourcompany.com" style={IS}/>}</div>
+              </div>
+              <div><label style={LB}>Product or service</label>{isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6}}>{custData.service_description}</div>:(editMode||!custData.service_description||custData.service_description.length<5)?<div><textarea defaultValue={custData.service_description||""} id="edit-svc" rows="2" placeholder="e.g. We build custom Shopify stores for e-commerce brands" style={{...IS,resize:"vertical"}}/><div style={HT}>Be specific - helps our AI write relevant copy</div></div>:<div style={{fontSize:14,padding:"10px 0"}}>{custData.service_description}</div>}</div>
+              <div><label style={LB}>Warm replies sent to</label>{isConfirmed||!editMode?<div style={{fontSize:14,fontFamily:"var(--mono)",color:isConfirmed?"var(--text3)":"var(--green)",padding:"10px 0",opacity:isConfirmed?0.6:1}}>{custData.lead_email||custData.email}</div>:<input defaultValue={custData.lead_email||custData.email||""} id="edit-email" style={IM}/>}</div>
+            </div>
+          </div><div style={{height:1,background:"var(--border)",marginBottom:28}}/></>}
+          <div style={{marginBottom:28}}>
+            <div style={{fontSize:14,fontWeight:700,marginBottom:16}}>{campNum===1?"Your offer":"Campaign "+campNum+" offer"}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:18}}>
+              <div><label style={LB}>What is your offer? <span style={{color:"var(--green)",fontSize:11}}>important for AI</span></label>{isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6}}>{campData.offer||t.offer||"-"}</div>:<div><textarea defaultValue={campData.offer||(campNum>1&&inheritMode?t.offer:"")||""} id="edit-offer" rows="2" placeholder="e.g. Free audit + $4,999 flat rate, 3-week delivery" style={{...IS,resize:"vertical"}}/><div style={HT}>Pricing, guarantees, timelines</div></div>}</div>
+              <div><label style={LB}>What problem do you solve?</label>{isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6}}>{campData.pain_point||t.pain_point||"-"}</div>:<div><textarea defaultValue={campData.pain_point||(campNum>1&&inheritMode?t.pain_point:"")||""} id="edit-pain" rows="2" placeholder="e.g. Most brands lose 30-40% of revenue due to poor site speed" style={{...IS,resize:"vertical"}}/><div style={HT}>Our AI uses this to create urgency</div></div>}</div>
+              <div><label style={LB}>Results or proof (optional)</label>{isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6}}>{campData.social_proof||t.social_proof||"-"}</div>:<div><textarea defaultValue={campData.social_proof||(campNum>1&&inheritMode?t.social_proof:"")||""} id="edit-proof" rows="2" placeholder="e.g. Built 200+ stores, 3.2x ROI average" style={{...IS,resize:"vertical"}}/><div style={HT}>Numbers and names boost credibility</div></div>}</div>
+            </div>
+          </div>
+          <div style={{height:1,background:"var(--border)",marginBottom:28}}/>
+          <div style={{marginBottom:28}}>
+            <div style={{fontSize:14,fontWeight:700,marginBottom:16}}>Who we are targeting</div>
+            <ChipGroup label="Job titles" allOptions={allTitles} selectedKey="job_titles" disabled={isConfirmed}/>
+            <ChipGroup label="Seniority" allOptions={allSeniority} selectedKey="seniority" disabled={isConfirmed}/>
+            <ChipGroup label="Industries" allOptions={allIndustries} selectedKey="industries" disabled={isConfirmed}/>
+            <ChipGroup label="Company size" allOptions={allSizes} selectedKey="company_size" disabled={isConfirmed}/>
+            <ChipGroup label="Locations" allOptions={allLocations} selectedKey="locations" disabled={isConfirmed}/>
+            <div><label style={LB}>Specific areas (states, cities)</label>{isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6}}>{campData.location_detail||t.location_detail||"-"}</div>:<div><input defaultValue={campData.location_detail||(campNum>1&&inheritMode?t.location_detail:"")||""} id="edit-locdetail" placeholder="e.g. California, Sydney, London" style={IS}/><div style={HT}>Narrow to specific regions</div></div>}</div>
+          </div>
+          <div style={{height:1,background:"var(--border)",marginBottom:28}}/>
+          <div style={{marginBottom:24}}>
+            <div style={{fontSize:14,fontWeight:700,marginBottom:16}}>Campaign details</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16}}>
+              <div><label style={LB}>Name</label>{isConfirmed?<div style={{fontSize:14,fontWeight:600,padding:"10px 0",opacity:0.6}}>{campData.campaign_name||"Campaign "+campNum}</div>:<input defaultValue={campData.campaign_name||"Campaign "+campNum} id="edit-camp" style={IS}/>}</div>
+              <div><label style={LB}>Mailboxes</label><div style={{fontSize:14,fontWeight:600,padding:"10px 0"}}>{mbPerCamp}</div></div>
+              <div><label style={LB}>Status</label><div style={{padding:"10px 0"}}><span style={{fontSize:11,fontWeight:600,padding:"4px 10px",borderRadius:10,background:isConfirmed?"var(--green-bg)":"var(--orange-bg)",color:isConfirmed?"var(--green)":"var(--orange)"}}>{isConfirmed?"Confirmed":"Awaiting"}</span></div></div>
+            </div>
+          </div>
+          {isConfirmed?<div style={{textAlign:"center",padding:"12px 0"}}><div style={{fontSize:12,color:"var(--text3)"}}>Changes available after account setup is complete.</div></div>:<div>
+            {validationErr&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:8,background:"var(--red-bg)",border:"1px solid var(--red)",fontSize:13,color:"var(--red)",fontWeight:500}}>{validationErr}</div>}
+            {editMode?<div style={{display:"flex",gap:10}}>
+              <button onClick={saveCampaign} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)"}}>Save changes</button>
+              <button onClick={()=>setEditMode(false)} style={{padding:"14px 24px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Cancel</button>
+            </div>:<div>
+              <button onClick={saveCampaign} style={{width:"100%",padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:15,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>Confirm campaign</button>
+              <div style={{marginTop:10,fontSize:12,color:"var(--text3)",textAlign:"center"}}>Provisioning begins once all campaigns are confirmed.</div>
+            </div>}
+          </div>}
+        </div>
+      </div>
+    </div>;
+}
+
 
 function App(){
   const [pg,setPg]=useState("overview");
@@ -1788,301 +1993,7 @@ function App(){
     </div>}
 
     {/* Unified Campaign Modal */}
-    {configCampaign&&(()=>{
-      const t=custData?custData._targeting||{}:{};
-      const confirmed=t.campaigns_confirmed||[];
-      const campNum=typeof configCampaign==='string'?parseInt(configCampaign.replace('view-',''),10):configCampaign;
-      const isConfirmed=confirmed.indexOf(campNum)!==-1;
-      const totalCamps=custData&&custData._limits?custData._limits.campaigns:4;
-      const mbPerCamp=Math.floor((custData&&custData._limits?custData._limits.mailboxes:12)/totalCamps);
-      
-      // Get this campaign's data — campaign 1 uses root targeting, others use campaign_X key
-      const campData=campNum===1?t:(t['campaign_'+campNum]||{});
-      
-      const allTitles=["CEO","Managing Director","Founder","VP Sales","VP Marketing","Head of Growth","CMO","CTO","Director","Operations Manager","HR Director","CFO","COO","Business Owner","General Manager","Sales Manager"];
-      const allSeniority=["C-Suite","VP","Director","Manager","Senior"];
-      const allIndustries=["Software / SaaS","E-commerce","Marketing / Advertising","Finance","Healthcare","Real Estate","Construction","Education","Legal","Manufacturing","Hospitality","Professional Services","Retail","Logistics","Technology","Media","Consulting","Non-profit"];
-      const allSizes=["1-10","11-50","51-200","201-500","501-1000","1001-5000","5000-10000","10000+"];
-      const allLocations=["Australia","United States","United Kingdom","Canada","New Zealand","Germany","France","Singapore","Hong Kong","UAE","India","Netherlands","Ireland","Sweden","Japan"];
-      
-      const IS={width:"100%",padding:"10px 14px",borderRadius:8,border:"1px solid var(--border)",fontSize:14,fontFamily:"'DM Sans',sans-serif",background:"var(--bg)",color:"var(--text)",outline:"none",lineHeight:"1.5"};
-      const IM={...IS,fontFamily:"'JetBrains Mono',monospace"};
-      const LB={fontSize:12,fontWeight:600,color:"var(--text2)",display:"block",marginBottom:6};
-      const HT={fontSize:11,color:"var(--text3)",marginTop:4};
-      const DIS={...IS,opacity:0.6,background:"var(--bg3)",cursor:"not-allowed",color:"var(--text3)"};
-      
-      // For campaigns 2+ that inherit from campaign 1
-      const [inheritMode,setInheritMode]=React.useState(true);
-      
-      function ChipGroup({label,allOptions,selectedKey,disabled}){
-        const initVal=campData[selectedKey]||(inheritMode&&campNum>1?t[selectedKey]:[])||[];
-        const [sel,setSel]=React.useState(initVal);
-        React.useEffect(()=>{setSel(campData[selectedKey]||(inheritMode&&campNum>1?t[selectedKey]:[])||[])},[inheritMode]);
-        if(!disabled)campData[selectedKey]=sel;
-        return <div style={{marginBottom:14}}>
-          <label style={LB}>{label}</label>
-          {disabled?<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-            {sel.length?sel.map((v,i)=><span key={i} style={{fontSize:13,padding:"6px 14px",borderRadius:8,background:"var(--bg3)",border:"1px solid var(--border)",fontWeight:500,opacity:0.6}}>{v}</span>):<span style={{fontSize:13,color:"var(--text3)",padding:"6px 0"}}>—</span>}
-          </div>:editMode?<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-            {allOptions.map((o,i)=>{
-              const active=sel.indexOf(o)!==-1;
-              return <span key={i} onClick={()=>{setSel(active?sel.filter(x=>x!==o):[...sel,o])}} style={{fontSize:12,padding:"6px 14px",borderRadius:8,border:active?"1.5px solid var(--green)":"1px solid var(--border)",background:active?"var(--green-bg)":"var(--bg)",color:active?"var(--green)":"var(--text3)",cursor:"pointer",fontWeight:active?600:400,transition:"all .1s"}}>{o}</span>;
-            })}
-          </div>:<div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-            {sel.length?sel.map((v,i)=><span key={i} style={{fontSize:13,padding:"6px 14px",borderRadius:8,background:"var(--bg)",border:"1px solid var(--border)",fontWeight:500}}>{v}</span>):<span style={{fontSize:13,color:"var(--text3)",padding:"6px 0"}}>—</span>}
-          </div>}
-        </div>;
-      }
-      
-      async function saveCampaign(){
-        // Validate required fields
-        var svcEl=document.getElementById('edit-svc');
-        var offerEl=document.getElementById('edit-offer');
-        var painEl=document.getElementById('edit-pain');
-        var proofEl=document.getElementById('edit-proof');
-        
-        var svcVal=svcEl?svcEl.value.trim():(custData.service_description||'').trim();
-        var offerVal=offerEl?offerEl.value.trim():(campData.offer||t.offer||'').trim();
-        var painVal=painEl?painEl.value.trim():(campData.pain_point||t.pain_point||'').trim();
-        var proofVal=proofEl?proofEl.value.trim():(campData.social_proof||t.social_proof||'').trim();
-        
-        var missingIds=[];
-        if(campNum===1&&(!svcVal||svcVal.length<5))missingIds.push('edit-svc');
-        if(!offerVal||offerVal.length<5)missingIds.push('edit-offer');
-        if(!painVal||painVal.length<5)missingIds.push('edit-pain');
-        if(!proofVal||proofVal.length<5)missingIds.push('edit-proof');
-        
-        ['edit-svc','edit-offer','edit-pain','edit-proof'].forEach(function(id){
-          var el=document.getElementById(id);if(el){el.style.border='1px solid var(--border)';el.style.background='var(--bg)';}
-        });
-        
-        if(missingIds.length>0){
-          var names=[];
-          missingIds.forEach(function(id){
-            var el=document.getElementById(id);if(el){el.style.border='2px solid var(--red)';el.style.background='var(--red-bg)';}
-            if(id==='edit-svc')names.push('product or service');
-            if(id==='edit-offer')names.push('your offer');
-            if(id==='edit-pain')names.push('what problem you solve');
-            if(id==='edit-proof')names.push('results or proof');
-          });
-          setValidationErr('Please fill in: '+names.join(', ')+'.');
-          var firstInvalid=document.getElementById(missingIds[0]);
-          if(firstInvalid)firstInvalid.scrollIntoView({behavior:'smooth',block:'center'});
-          return;
-        }
-        setValidationErr(null);
-        
-        var newTarget=JSON.parse(JSON.stringify(t));
-        
-        if(campNum===1){
-          // Campaign 1 saves to root level
-          var campEl=document.getElementById('edit-camp');if(campEl)newTarget.campaign_name=campEl.value;
-          var webEl=document.getElementById('edit-web');if(webEl)newTarget.website=webEl.value;
-          if(offerEl)newTarget.offer=offerEl.value;
-          if(painEl)newTarget.pain_point=painEl.value;
-          if(proofEl)newTarget.social_proof=proofEl.value;
-          var locDetailEl=document.getElementById('edit-locdetail');if(locDetailEl)newTarget.location_detail=locDetailEl.value;
-        } else {
-          // Campaigns 2+ save to campaign_X key
-          var cd={};
-          var campEl=document.getElementById('edit-camp');cd.campaign_name=campEl?campEl.value:'Campaign '+campNum;
-          if(offerEl)cd.offer=offerEl.value; else cd.offer=campData.offer||t.offer||'';
-          if(painEl)cd.pain_point=painEl.value; else cd.pain_point=campData.pain_point||t.pain_point||'';
-          if(proofEl)cd.social_proof=proofEl.value; else cd.social_proof=campData.social_proof||t.social_proof||'';
-          var locDetailEl=document.getElementById('edit-locdetail');cd.location_detail=locDetailEl?locDetailEl.value:'';
-          // Save chip selections from campData (mutated by ChipGroup)
-          cd.job_titles=campData.job_titles||[];
-          cd.seniority=campData.seniority||[];
-          cd.industries=campData.industries||[];
-          cd.company_size=campData.company_size||[];
-          cd.locations=campData.locations||[];
-          newTarget['campaign_'+campNum]=cd;
-        }
-        
-        // Mark as confirmed
-        if(!newTarget.campaigns_confirmed)newTarget.campaigns_confirmed=[];
-        if(newTarget.campaigns_confirmed.indexOf(campNum)===-1)newTarget.campaigns_confirmed.push(campNum);
-        
-        var updateObj={target_market:JSON.stringify(newTarget)};
-        if(campNum===1){
-          var bizEl=document.getElementById('edit-biz');if(bizEl)updateObj.business_name=bizEl.value;
-          var emailEl=document.getElementById('edit-email');if(emailEl)updateObj.lead_email=emailEl.value;
-          var svcEl2=document.getElementById('edit-svc');if(svcEl2)updateObj.service_description=svcEl2.value;
-        }
-        
-        await sb.from('customers').update(updateObj).eq('user_id',currentUser.id);
-        var{data}=await sb.from('customers').select('*').eq('user_id',currentUser.id).single();
-        if(data){
-          if(data.target_market&&typeof data.target_market==='string')try{data._targeting=JSON.parse(data.target_market)}catch(e){data._targeting=null}
-          var limits={starter:{mailboxes:4,campaigns:2},growth:{mailboxes:12,campaigns:4},scale:{mailboxes:30,campaigns:10}};
-          data._limits=limits[data.plan]||limits.starter;
-          setCustData(data);
-        }
-        setConfigCampaign(null);setEditMode(false);setValidationErr(null);
-      }
-      
-      return <div onClick={e=>{if(e.target===e.currentTarget){setConfigCampaign(null);setEditMode(false);setValidationErr(null);}}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
-      <div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,width:"100%",maxWidth:680,maxHeight:"90vh",overflow:"auto",animation:"fadeIn .3s ease"}} data-modal-scroll="1">
-        
-        {/* Header */}
-        <div style={{padding:"28px 32px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-          <div>
-            <h2 style={{fontSize:20,fontWeight:700,letterSpacing:"-0.3px"}}>
-              {isConfirmed?"Campaign "+campNum:"Setup Campaign "+campNum}
-            </h2>
-            <div style={{fontSize:13,color:"var(--text3)",marginTop:4}}>
-              {isConfirmed?"This campaign is confirmed and locked. Changes available after setup is complete."
-              :editMode?"Editing all fields"
-              :"Complete the fields below, then confirm"}
-            </div>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-            {!isConfirmed&&!editMode&&<button onClick={()=>setEditMode(true)} style={{padding:"8px 16px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"var(--sans)",display:"flex",alignItems:"center",gap:6,transition:"all .15s"}}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--green)";e.currentTarget.style.color="var(--green)"}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)"}}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit all
-            </button>}
-            {editMode&&<button onClick={()=>setEditMode(false)} style={{padding:"8px 16px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:500,fontFamily:"var(--sans)"}}>Cancel edit</button>}
-            <button onClick={()=>{setConfigCampaign(null);setEditMode(false);setValidationErr(null);}} style={{width:36,height:36,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-          </div>
-        </div>
-        
-        <div style={{padding:"28px 32px"}}>
-          
-          {/* Confirmed banner */}
-          {isConfirmed&&<div style={{marginBottom:24,padding:"14px 18px",borderRadius:10,background:"var(--green-bg)",border:"1px solid var(--green-bd)",display:"flex",alignItems:"center",gap:10}}>
-            <div style={{width:24,height:24,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",fontWeight:700,flexShrink:0}}>✓</div>
-            <div>
-              <div style={{fontSize:13,fontWeight:600,color:"var(--green)"}}>Campaign confirmed</div>
-              <div style={{fontSize:12,color:"var(--text3)"}}>You can make changes once your account setup is complete.</div>
-            </div>
-          </div>}
-
-          {/* For campaigns 2+, inherit option */}
-          {campNum>1&&!isConfirmed&&<div style={{marginBottom:24}}>
-            <label style={LB}>Start from</label>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-              <div onClick={()=>setInheritMode(true)} style={{padding:14,borderRadius:10,border:inheritMode?"2px solid var(--green)":"1px solid var(--border)",background:inheritMode?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center"}}>
-                <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>Copy from Campaign 1</div>
-                <div style={{fontSize:11,color:"var(--text3)"}}>Same targeting, new copy</div>
-              </div>
-              <div onClick={()=>setInheritMode(false)} style={{padding:14,borderRadius:10,border:!inheritMode?"2px solid var(--green)":"1px solid var(--border)",background:!inheritMode?"var(--green-bg)":"transparent",cursor:"pointer",textAlign:"center"}}>
-                <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>Different targeting</div>
-                <div style={{fontSize:11,color:"var(--text3)"}}>New audience</div>
-              </div>
-            </div>
-          </div>}
-
-          {/* YOUR BUSINESS — only for campaign 1 */}
-          {campNum===1&&<><div style={{marginBottom:28}}>
-            <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:16,display:"flex",alignItems:"center",gap:8}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              Your business
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:18}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-                <div><label style={LB}>Business name</label>
-                  {isConfirmed||(!editMode&&custData.business_name&&custData.business_name.length>=5)?<div style={{fontSize:14,fontWeight:600,padding:"10px 0",opacity:isConfirmed?0.6:1}}>{custData.business_name}</div>
-                  :<input defaultValue={custData.business_name||""} id="edit-biz" style={isConfirmed?DIS:IS}/>}
-                </div>
-                <div><label style={LB}>Website <span style={{fontWeight:400,color:"var(--text3)"}}>(optional)</span></label>
-                  {isConfirmed?<div style={{fontSize:14,fontFamily:"var(--mono)",padding:"10px 0",opacity:0.6}}>{t.website||"—"}</div>
-                  :<input defaultValue={t.website||""} id="edit-web" placeholder="yourcompany.com" style={IS}/>}
-                </div>
-              </div>
-              <div><label style={LB}>Product or service</label>
-                {isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6,lineHeight:1.5}}>{custData.service_description}</div>
-                :(editMode||!custData.service_description||custData.service_description.length<5)?<div><textarea defaultValue={custData.service_description||""} id="edit-svc" rows="2" placeholder="e.g. We build custom Shopify stores for e-commerce brands looking to scale past $50K/mo" style={{...IS,resize:"vertical"}}/><div style={HT}>Be specific — this helps our AI write relevant copy</div></div>
-                :<div style={{fontSize:14,padding:"10px 0",lineHeight:1.5}}>{custData.service_description}</div>}
-              </div>
-              <div><label style={LB}>Warm replies sent to</label>
-                {isConfirmed||!editMode?<div style={{fontSize:14,fontFamily:"var(--mono)",color:isConfirmed?"var(--text3)":"var(--green)",padding:"10px 0",opacity:isConfirmed?0.6:1}}>{custData.lead_email||custData.email}</div>
-                :<input defaultValue={custData.lead_email||custData.email||""} id="edit-email" style={IM}/>}
-              </div>
-            </div>
-          </div><div style={{height:1,background:"var(--border)",marginBottom:28}}/></>}
-
-          {/* OFFER & PROBLEM — for all campaigns */}
-          <div style={{marginBottom:28}}>
-            <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:16,display:"flex",alignItems:"center",gap:8}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
-              {campNum===1?"Your offer":"Campaign "+campNum+" offer"}
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:18}}>
-              <div><label style={LB}>What's your offer? <span style={{color:"var(--green)",fontSize:11,fontWeight:500}}>important for AI copy</span></label>
-                {isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6,lineHeight:1.5}}>{campData.offer||t.offer||"—"}</div>
-                :<div><textarea defaultValue={campData.offer||(campNum>1&&inheritMode?t.offer:"")||""} id="edit-offer" rows="2" placeholder="e.g. Free audit + $4,999 flat rate, 3-week delivery, money-back guarantee" style={{...IS,resize:"vertical"}}/><div style={HT}>Include pricing, guarantees, timelines</div></div>}
-              </div>
-              <div><label style={LB}>What problem do you solve?</label>
-                {isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6,lineHeight:1.5}}>{campData.pain_point||t.pain_point||"—"}</div>
-                :<div><textarea defaultValue={campData.pain_point||(campNum>1&&inheritMode?t.pain_point:"")||""} id="edit-pain" rows="2" placeholder="e.g. Most e-commerce brands lose 30-40% of revenue due to poor site speed" style={{...IS,resize:"vertical"}}/><div style={HT}>Our AI uses this to create urgency</div></div>}
-              </div>
-              <div><label style={LB}>Results or proof <span style={{fontWeight:400,color:"var(--text3)"}}>(optional but recommended)</span></label>
-                {isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6,lineHeight:1.5}}>{campData.social_proof||t.social_proof||"—"}</div>
-                :<div><textarea defaultValue={campData.social_proof||(campNum>1&&inheritMode?t.social_proof:"")||""} id="edit-proof" rows="2" placeholder="e.g. Built 200+ stores, average 3.2x ROI" style={{...IS,resize:"vertical"}}/><div style={HT}>Numbers and names boost credibility</div></div>}
-              </div>
-            </div>
-          </div>
-
-          <div style={{height:1,background:"var(--border)",marginBottom:28}}/>
-
-          {/* TARGETING */}
-          <div style={{marginBottom:28}}>
-            <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:16,display:"flex",alignItems:"center",gap:8}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-              Who we're targeting
-            </div>
-            <ChipGroup label="Job titles" allOptions={allTitles} selectedKey="job_titles" disabled={isConfirmed}/>
-            <ChipGroup label="Seniority" allOptions={allSeniority} selectedKey="seniority" disabled={isConfirmed}/>
-            <ChipGroup label="Industries" allOptions={allIndustries} selectedKey="industries" disabled={isConfirmed}/>
-            <ChipGroup label="Company size" allOptions={allSizes} selectedKey="company_size" disabled={isConfirmed}/>
-            <ChipGroup label="Locations" allOptions={allLocations} selectedKey="locations" disabled={isConfirmed}/>
-            <div>
-              <label style={LB}>Specific areas <span style={{fontWeight:400,color:"var(--text3)"}}>(states, cities)</span></label>
-              {isConfirmed?<div style={{fontSize:14,padding:"10px 0",opacity:0.6}}>{campData.location_detail||t.location_detail||"—"}</div>
-              :<div><input defaultValue={campData.location_detail||(campNum>1&&inheritMode?t.location_detail:"")||""} id="edit-locdetail" placeholder="e.g. California, Sydney, London" style={IS}/><div style={HT}>Narrow to specific states, cities, regions</div></div>}
-            </div>
-          </div>
-
-          <div style={{height:1,background:"var(--border)",marginBottom:28}}/>
-
-          {/* CAMPAIGN DETAILS */}
-          <div style={{marginBottom:24}}>
-            <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:16}}>Campaign details</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16}}>
-              <div><label style={LB}>Name</label>
-                {isConfirmed?<div style={{fontSize:14,fontWeight:600,padding:"10px 0",opacity:0.6}}>{campData.campaign_name||"Campaign "+campNum}</div>
-                :<input defaultValue={campData.campaign_name||"Campaign "+campNum} id="edit-camp" style={IS}/>}
-              </div>
-              <div><label style={LB}>Mailboxes</label><div style={{fontSize:14,fontWeight:600,padding:"10px 0"}}>{mbPerCamp}</div></div>
-              <div><label style={LB}>Status</label><div style={{padding:"10px 0"}}><span style={{fontSize:11,fontWeight:600,padding:"4px 10px",borderRadius:10,background:isConfirmed?"var(--green-bg)":"var(--orange-bg)",color:isConfirmed?"var(--green)":"var(--orange)"}}>{isConfirmed?"Confirmed":"Awaiting confirmation"}</span></div></div>
-            </div>
-          </div>
-
-          {/* ACTIONS */}
-          {isConfirmed?<div style={{textAlign:"center",padding:"12px 0"}}>
-            <div style={{fontSize:12,color:"var(--text3)"}}>Changes will be available once your account setup is complete.</div>
-          </div>:<div>
-            {validationErr&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:8,background:"var(--red-bg)",border:"1px solid var(--red)",fontSize:13,color:"var(--red)",fontWeight:500,display:"flex",alignItems:"center",gap:8}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              {validationErr}
-            </div>}
-            {editMode?<div style={{display:"flex",gap:10}}>
-              <button onClick={saveCampaign} style={{flex:1,padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)"}}>Save changes</button>
-              <button onClick={()=>setEditMode(false)} style={{padding:"14px 24px",borderRadius:10,background:"transparent",border:"1px solid var(--border)",color:"var(--text2)",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"var(--sans)"}}>Cancel</button>
-            </div>:<div>
-              <button onClick={saveCampaign} style={{width:"100%",padding:"14px",borderRadius:10,background:"var(--green)",color:"#fff",fontSize:15,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"var(--sans)",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                Confirm campaign
-              </button>
-              <div style={{marginTop:10,fontSize:12,color:"var(--text3)",textAlign:"center"}}>{confirmed.length<totalCamps-1?"Provisioning begins once all campaigns are confirmed.":"This is your last campaign — provisioning begins after confirmation."}</div>
-            </div>}
-          </div>}
-        </div>
-      </div>
-    </div>;
-    })()}
+    {configCampaign&&<CampaignModal configCampaign={configCampaign} custData={custData} setCustData={setCustData} setConfigCampaign={setConfigCampaign} editMode={editMode} setEditMode={setEditMode} validationErr={validationErr} setValidationErr={setValidationErr}/>}
 
   </div>;
 }
