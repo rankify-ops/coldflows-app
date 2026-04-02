@@ -1037,7 +1037,7 @@ function App(){
         {/* PROVISIONING STATE — real customer, 0 mailboxes */}
         {custData&&custData.mailbox_count===0&&<div style={{padding:"28px"}}>
           
-          {/* Welcome banner */}
+          {/* Welcome banner with notification */}
           <div style={{border:"2px solid var(--green-bd)",borderRadius:12,padding:24,background:"var(--green-bg)",marginBottom:24}}>
             <div style={{display:"flex",alignItems:"flex-start",gap:16}}>
               <div style={{width:40,height:40,borderRadius:10,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
@@ -1045,33 +1045,57 @@ function App(){
               </div>
               <div>
                 <div style={{fontSize:16,fontWeight:700,marginBottom:4}}>Welcome to Coldflows, {custData.business_name}</div>
-                <div style={{fontSize:13,color:"var(--text2)",lineHeight:1.6}}>Your <strong style={{color:"var(--green)"}}>{custData.plan?custData.plan.charAt(0).toUpperCase()+custData.plan.slice(1):""}</strong> plan is active. We're provisioning your infrastructure now — domains, mailboxes, DNS, and warmup. This usually takes 24-48 hours.</div>
+                <div style={{fontSize:13,color:"var(--text2)",lineHeight:1.6}}>Your <strong style={{color:"var(--green)"}}>{custData.plan?custData.plan.charAt(0).toUpperCase()+custData.plan.slice(1):""}</strong> plan is active. Configure your campaigns below so we can start building your outreach engine.</div>
+                <div style={{fontSize:12,color:"var(--text3)",marginTop:8,display:"flex",alignItems:"center",gap:6}}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+                  We'll notify you at <strong style={{color:"var(--text2)"}}>{custData.lead_email||custData.email}</strong> when your infrastructure is ready and campaigns go live.
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Plan summary cards */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12,marginBottom:24}}>
-            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Plan</div>
-              <div style={{fontSize:18,fontWeight:700,color:"var(--green)"}}>{custData.plan?custData.plan.charAt(0).toUpperCase()+custData.plan.slice(1):""}</div>
+          {/* CAMPAIGNS — TOP PRIORITY */}
+          <div style={{marginBottom:24}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+              <div>
+                <div style={{fontSize:15,fontWeight:700}}>Configure your campaigns</div>
+                <div style={{fontSize:12,color:"var(--text3)",marginTop:2}}>Set up your remaining campaigns so we can begin outreach as soon as infrastructure is ready</div>
+              </div>
+              <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)",background:"var(--bg2)",padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)"}}>1/{custData._limits?custData._limits.campaigns:4} configured</div>
             </div>
-            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Mailboxes</div>
-              <div style={{fontSize:18,fontWeight:700}}><span style={{color:"var(--text3)"}}>0</span><span style={{fontSize:12,color:"var(--text3)",fontWeight:400}}>/{custData._limits?custData._limits.mailboxes:12}</span></div>
-            </div>
-            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaigns</div>
-              <div style={{fontSize:18,fontWeight:700}}><span>1</span><span style={{fontSize:12,color:"var(--text3)",fontWeight:400}}>/{custData._limits?custData._limits.campaigns:4}</span></div>
-            </div>
-            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
-              <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Lead email</div>
-              <div style={{fontSize:13,fontWeight:600,fontFamily:"var(--mono)",overflow:"hidden",textOverflow:"ellipsis"}}>{custData.lead_email||custData.email}</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat("+(custData._limits?custData._limits.campaigns:4)+", 1fr)",gap:12}}>
+              {/* Campaign 1 — configured */}
+              <div style={{border:"1px solid var(--green-bd)",borderRadius:10,padding:16,background:"var(--green-bg)"}}>
+                <div style={{fontSize:10,color:"var(--green)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaign 1</div>
+                <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign 1"}</div>
+                <div style={{fontSize:10,color:"var(--text3)"}}>
+                  {custData._targeting&&custData._targeting.job_titles?custData._targeting.job_titles.join(", "):""}
+                </div>
+                <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>
+                  {custData._targeting&&custData._targeting.locations?custData._targeting.locations.join(", "):""}
+                </div>
+                <div style={{marginTop:8,display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:4,background:"var(--orange-bg)",color:"var(--orange)"}}>Provisioning</span>
+                  <span style={{fontSize:9,color:"var(--text3)"}}>{Math.floor((custData._limits?custData._limits.mailboxes:12)/(custData._limits?custData._limits.campaigns:4))} mailboxes</span>
+                </div>
+              </div>
+              {/* Empty campaign slots */}
+              {Array.from({length:(custData._limits?custData._limits.campaigns:4)-1}).map((_,i)=>
+                <div key={i} onClick={()=>setConfigCampaign(i+2)} style={{border:"2px dashed var(--border)",borderRadius:10,padding:16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",minHeight:130,transition:"all .15s",background:"transparent"}} 
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--green)";e.currentTarget.style.background="var(--green-bg)"}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.background="transparent"}}>
+                  <div style={{width:40,height:40,borderRadius:"50%",border:"2px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:8}}>
+                    <span style={{fontSize:20,color:"var(--text3)",lineHeight:1}}>+</span>
+                  </div>
+                  <div style={{fontSize:12,fontWeight:600,color:"var(--text2)"}}>Campaign {i+2}</div>
+                  <div style={{fontSize:10,color:"var(--green)",marginTop:2,fontWeight:500}}>Configure now →</div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Setup progress + Campaign info side by side */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+          {/* Setup progress + Plan summary side by side */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
             
             {/* Setup progress */}
             <div style={{border:"1px solid var(--border)",borderRadius:10,padding:20,background:"var(--bg2)"}}>
@@ -1098,98 +1122,33 @@ function App(){
               </div>
             </div>
 
-            {/* Campaign 1 details */}
-            <div style={{border:"1px solid var(--border)",borderRadius:10,padding:20,background:"var(--bg2)"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-                <div style={{fontSize:13,fontWeight:700}}>Campaign 1</div>
-                <span style={{fontSize:10,fontWeight:600,padding:"3px 8px",borderRadius:10,background:"var(--orange-bg)",color:"var(--orange)"}}>Provisioning</span>
+            {/* Plan summary */}
+            <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)",flex:1}}>
+                <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Plan</div>
+                <div style={{fontSize:22,fontWeight:700,color:"var(--green)"}}>{custData.plan?custData.plan.charAt(0).toUpperCase()+custData.plan.slice(1):""}</div>
+                <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{custData.plan==="starter"?"$690":custData.plan==="growth"?"$1,750":custData.plan==="scale"?"$3,500":"—"} USD/mo</div>
               </div>
-              {custData._targeting?<div style={{display:"flex",flexDirection:"column",gap:12}}>
-                {custData._targeting.campaign_name&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Campaign name</div>
-                  <div style={{fontSize:13,fontWeight:600}}>{custData._targeting.campaign_name}</div>
-                </div>}
-                {custData._targeting.job_titles&&custData._targeting.job_titles.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Job titles</div>
-                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.job_titles.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-                {custData._targeting.seniority&&custData._targeting.seniority.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Seniority</div>
-                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.seniority.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-                {custData._targeting.industries&&custData._targeting.industries.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Industries</div>
-                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.industries.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-                {custData._targeting.company_size&&custData._targeting.company_size.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Company size</div>
-                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.company_size.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-                {custData._targeting.locations&&custData._targeting.locations.length>0&&<div>
-                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:3}}>Locations</div>
-                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{custData._targeting.locations.map((t,i)=><span key={i} style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:"var(--bg3)",fontWeight:500}}>{t}</span>)}</div>
-                </div>}
-              </div>:<div style={{fontSize:13,color:"var(--text3)"}}>Targeting data loading...</div>}
-              
-              {/* Remaining campaign slots */}
-              <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid var(--border)"}}>
-                <div style={{fontSize:11,color:"var(--text3)"}}>{custData._limits?(custData._limits.campaigns-1):3} campaign slots remaining</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Remaining campaign slots — configure CTA */}
-          <div style={{marginTop:16}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-              <div style={{fontSize:13,fontWeight:700}}>Your campaigns</div>
-              <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>1/{custData._limits?custData._limits.campaigns:4} configured</div>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat("+(custData._limits?custData._limits.campaigns:4)+", 1fr)",gap:12}}>
-              {/* Campaign 1 — configured */}
-              <div style={{border:"1px solid var(--green-bd)",borderRadius:10,padding:16,background:"var(--green-bg)"}}>
-                <div style={{fontSize:10,color:"var(--green)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaign 1</div>
-                <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign 1"}</div>
-                <div style={{fontSize:10,color:"var(--text3)"}}>{custData._targeting&&custData._targeting.industries?custData._targeting.industries.join(", "):""}</div>
-                <div style={{marginTop:8}}><span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:4,background:"var(--green)",color:"#fff"}}>Provisioning</span></div>
-              </div>
-              {/* Empty campaign slots */}
-              {Array.from({length:(custData._limits?custData._limits.campaigns:4)-1}).map((_,i)=>
-                <div key={i} onClick={()=>setConfigCampaign(i+2)} style={{border:"2px dashed var(--border)",borderRadius:10,padding:16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",minHeight:120,transition:"all .15s",background:"transparent"}} 
-                  onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--green)";e.currentTarget.style.background="var(--green-bg)"}}
-                  onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.background="transparent"}}>
-                  <div style={{width:36,height:36,borderRadius:"50%",border:"2px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:8}}>
-                    <span style={{fontSize:18,color:"var(--text3)",lineHeight:1}}>+</span>
-                  </div>
-                  <div style={{fontSize:11,fontWeight:600,color:"var(--text2)"}}>Campaign {i+2}</div>
-                  <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Configure targeting</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
+                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Mailboxes</div>
+                  <div style={{fontSize:20,fontWeight:700}}><span style={{color:"var(--text3)"}}>0</span><span style={{fontSize:12,color:"var(--text3)",fontWeight:400}}>/{custData._limits?custData._limits.mailboxes:12}</span></div>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Timeline */}
-          <div style={{border:"1px solid var(--border)",borderRadius:10,padding:20,background:"var(--bg2)",marginTop:16}}>
-            <div style={{fontSize:13,fontWeight:700,marginBottom:12}}>Estimated timeline</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12}}>
-              <div style={{textAlign:"center",padding:12,borderRadius:8,background:"var(--green-bg)",border:"1px solid var(--green-bd)"}}>
-                <div style={{fontSize:10,color:"var(--green)",fontWeight:600,marginBottom:4}}>Day 1-2</div>
-                <div style={{fontSize:11,fontWeight:600}}>Setup</div>
-                <div style={{fontSize:10,color:"var(--text3)"}}>Domains, mailboxes, DNS</div>
+                <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
+                  <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaigns</div>
+                  <div style={{fontSize:20,fontWeight:700}}>1<span style={{fontSize:12,color:"var(--text3)",fontWeight:400}}>/{custData._limits?custData._limits.campaigns:4}</span></div>
+                </div>
               </div>
-              <div style={{textAlign:"center",padding:12,borderRadius:8,border:"1px solid var(--border)"}}>
-                <div style={{fontSize:10,color:"var(--text3)",fontWeight:600,marginBottom:4}}>Day 3-14</div>
-                <div style={{fontSize:11,fontWeight:600}}>Warmup</div>
-                <div style={{fontSize:10,color:"var(--text3)"}}>Building sender reputation</div>
-              </div>
-              <div style={{textAlign:"center",padding:12,borderRadius:8,border:"1px solid var(--border)"}}>
-                <div style={{fontSize:10,color:"var(--text3)",fontWeight:600,marginBottom:4}}>Day 14</div>
-                <div style={{fontSize:11,fontWeight:600}}>First sends</div>
-                <div style={{fontSize:10,color:"var(--text3)"}}>Outreach begins</div>
-              </div>
-              <div style={{textAlign:"center",padding:12,borderRadius:8,border:"1px solid var(--border)"}}>
-                <div style={{fontSize:10,color:"var(--text3)",fontWeight:600,marginBottom:4}}>Day 21+</div>
-                <div style={{fontSize:11,fontWeight:600}}>Replies</div>
-                <div style={{fontSize:10,color:"var(--text3)"}}>Warm leads in your inbox</div>
+              <div style={{border:"1px solid var(--border)",borderRadius:10,padding:16,background:"var(--bg2)"}}>
+                <div style={{fontSize:10,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Estimated timeline</div>
+                <div style={{display:"flex",gap:8}}>
+                  {[{d:"Day 1-2",l:"Setup",active:true},{d:"Day 3-14",l:"Warmup"},{d:"Day 14",l:"First sends"},{d:"Day 21+",l:"Replies"}].map((t,i)=>
+                    <div key={i} style={{flex:1,textAlign:"center",padding:"8px 4px",borderRadius:6,background:t.active?"var(--green-bg)":"transparent",border:t.active?"1px solid var(--green-bd)":"1px solid var(--border)"}}>
+                      <div style={{fontSize:9,color:t.active?"var(--green)":"var(--text3)",fontWeight:600}}>{t.d}</div>
+                      <div style={{fontSize:10,fontWeight:600,marginTop:2}}>{t.l}</div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1375,8 +1334,56 @@ function App(){
       </div>}
 
       {pg==="mailboxes"&&<div className="fade-in" style={{}}>
-        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Mailboxes</h1></div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:12}}>
+        <div style={{marginBottom:28}}><h1 style={{fontSize:26,fontWeight:800}}>Mailboxes</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>{custData&&custData.mailbox_count===0?"Mailboxes will be provisioned once your campaigns are configured":custData?custData._limits.mailboxes+" mailboxes active":""}</p></div>
+        
+        {/* Provisioning state — show planned mailbox allocation */}
+        {custData&&custData.mailbox_count===0&&<div>
+          <div style={{border:"1px solid var(--orange-bg)",borderRadius:10,padding:16,background:"var(--orange-bg)",marginBottom:20,display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--orange)",animation:"spin 1s linear infinite",flexShrink:0}}/>
+            <div style={{fontSize:12,color:"var(--text2)"}}>Your mailboxes are being set up. We'll notify you at <strong>{custData.lead_email||custData.email}</strong> when they're ready.</div>
+          </div>
+          {(()=>{
+            var mbPerCampaign=Math.floor((custData._limits?custData._limits.mailboxes:12)/(custData._limits?custData._limits.campaigns:4));
+            var totalCampaigns=custData._limits?custData._limits.campaigns:4;
+            var campaigns=[];
+            for(var c=0;c<totalCampaigns;c++){
+              campaigns.push({
+                name:c===0&&custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:"Campaign "+(c+1),
+                configured:c===0,
+                mailboxes:Array.from({length:mbPerCampaign}).map((_,m)=>({
+                  email:"mailbox-"+(c*mbPerCampaign+m+1)+"@pending.coldflows.ai",
+                  status:"pending"
+                }))
+              });
+            }
+            return campaigns.map((camp,ci)=>
+              <div key={ci} style={{border:"1px solid var(--border)",borderRadius:10,marginBottom:12,overflow:"hidden",background:"var(--bg2)"}}>
+                <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{width:8,height:8,borderRadius:"50%",background:camp.configured?"var(--orange)":"var(--border)"}}/>
+                    <span style={{fontSize:13,fontWeight:600}}>{camp.name}</span>
+                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{mbPerCampaign} mailboxes</span>
+                  </div>
+                  <span style={{fontSize:10,fontWeight:600,padding:"3px 8px",borderRadius:10,background:camp.configured?"var(--orange-bg)":"var(--bg3)",color:camp.configured?"var(--orange)":"var(--text3)"}}>{camp.configured?"Provisioning":"Not configured"}</span>
+                </div>
+                <div style={{padding:"0"}}>
+                  {camp.mailboxes.map((mb,mi)=>
+                    <div key={mi} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 20px",borderBottom:mi<camp.mailboxes.length-1?"1px solid var(--border)":"none",fontSize:12,color:"var(--text3)"}}>
+                      <div style={{width:16,height:16,borderRadius:"50%",border:"1.5px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                        <div style={{width:6,height:6,borderRadius:"50%",background:"var(--border)"}}/>
+                      </div>
+                      <span style={{fontFamily:"var(--mono)",fontSize:11}}>Mailbox {ci*mbPerCampaign+mi+1}</span>
+                      <span style={{marginLeft:"auto",fontSize:10,padding:"2px 6px",borderRadius:4,background:"var(--bg3)"}}>Pending</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+        </div>}
+
+        {/* Active state — show real mailbox data */}
+        {(!custData||custData.mailbox_count>0)&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:12}}>
           {D.mbs.map((m,i)=>{
             const rc=m.rep>=95?"var(--green)":m.rep>=80?"var(--orange)":"var(--red)";
             return <Card key={i} style={{padding:20}}>
@@ -1394,7 +1401,7 @@ function App(){
                 </div>
               </div>
             </Card>;})}
-        </div>
+        </div>}
       </div>}
 
       {pg==="experiments"&&<div className="fade-in" style={{}}>
