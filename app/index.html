@@ -1908,19 +1908,19 @@ function App(){
           const detail=opsDetail;const setDetail=setOpsDetail;
 
           const stages=[
-            {id:"stripe",label:"Stripe",sub:"Payment",status:"done"},
-            {id:"supabase",label:"Record",sub:"Supabase",status:"done"},
-            {id:"onboard",label:"Onboard",sub:"Form",status:"done"},
-            {id:"campaigns",label:"Campaigns",sub:conf.length+"/"+total,status:allDone?"done":"active"},
-            {id:"gate",label:"Gate",sub:allDone?"Open":"Wait",status:allDone?"done":"pending"},
-            {id:"domains",label:"Domains",sub:domains.length+"/"+mb,status:allDone?(domains.length>=mb?"done":domains.length>0?"active":"next"):"pending"},
-            {id:"dns",label:"DNS",sub:"Records",status:prov.dns_status==="done"?"done":"pending"},
-            {id:"workspace",label:"Workspace",sub:"Mailboxes",status:prov.workspace_status==="done"?"done":"pending"},
-            {id:"smartlead",label:"Smartlead",sub:"Connect",status:prov.smartlead_status==="done"?"done":"pending"},
-            {id:"warmup",label:"Warmup",sub:"14-21d",status:"pending"},
-            {id:"leads",label:"Leads",sub:"Source",status:"pending"},
-            {id:"copy",label:"AI Copy",sub:"Claude",status:"pending"},
-            {id:"launch",label:"Launch",sub:"Go live",status:"pending"},
+            {id:"stripe",label:"Stripe",sub:"Payment",status:"done",info:"Customer pays via Stripe payment link. Webhook creates Supabase customers row with plan, email, user_id. Plan: "+(custData.plan||"-")+", Status: "+(custData.plan_status||"active")},
+            {id:"supabase",label:"Record",sub:"Supabase",status:"done",info:"Auth user + customers row created. user_id: "+currentUser.id.slice(0,14)+"..., email: "+custData.email},
+            {id:"onboard",label:"Onboard",sub:"Form",status:"done",info:"Customer fills business name, service description, initial targeting. Saved to target_market JSON. Business: "+(custData.business_name||"-")},
+            {id:"campaigns",label:"Campaigns",sub:conf.length+"/"+total,status:allDone?"done":"active",info:"Customer configures each campaign: offer, pain point, social proof, targeting chips. Confirmed: ["+conf.join(",")+"], Need: "+total},
+            {id:"gate",label:"Gate",sub:allDone?"Open":"Wait",status:allDone?"done":"pending",info:"Automation triggers when campaigns_confirmed.length >= "+total+". Currently: "+conf.length+"/"+total+". Gate: "+(allDone?"OPEN":"CLOSED")},
+            {id:"domains",label:"Domains",sub:domains.length+"/"+mb,status:allDone?(domains.length>=mb?"done":domains.length>0?"active":"next"):"pending",info:"Register "+mb+" .com domains via Porkbun (~$11.08 each). RDAP availability check first, then register, then verify in account. Total: ~$"+(mb*11.08).toFixed(0)+"/yr"},
+            {id:"dns",label:"DNS",sub:"Records",status:prov.dns_status==="done"?"done":"pending",info:"Set MX (aspmx.l.google.com), SPF (include:_spf.google.com), DMARC (p=none), DKIM per domain via Porkbun DNS API. Allow 24-48hrs propagation."},
+            {id:"workspace",label:"Workspace",sub:"Mailboxes",status:prov.workspace_status==="done"?"done":"pending",info:"Create Google Workspace mailbox per domain (outreach@domain.com). Generate DKIM key, add to DNS. ~$6/user/mo. Count: "+mb},
+            {id:"smartlead",label:"Smartlead",sub:"Connect",status:prov.smartlead_status==="done"?"done":"pending",info:"Add "+mb+" mailboxes to Smartlead. Configure warmup: 2/day ramp to 40/day. Assign "+Math.floor(mb/total)+" mailboxes per campaign. $39/mo base."},
+            {id:"warmup",label:"Warmup",sub:"14-21d",status:"pending",info:"Smartlead auto-warms mailboxes. 2/day -> 40/day over 14-21 days. Target 95%+ inbox rate. Monitor daily."},
+            {id:"leads",label:"Leads",sub:"Source",status:"pending",info:"Pull leads matching each campaign targeting via SmartProspect/Apollo. Filter by job titles, industries, locations, company size. Verify emails. ~$0.03-0.05/lead."},
+            {id:"copy",label:"AI Copy",sub:"Claude",status:"pending",info:"Claude API generates 3-email sequences per campaign using offer, pain point, social proof. Unique copy per campaign."},
+            {id:"launch",label:"Launch",sub:"Go live",status:"pending",info:"Smartlead sequences activate. ~"+(mb*35)+" emails/day across "+mb+" mailboxes. Replies forwarded to "+(custData.lead_email||custData.email)},
           ];
 
           const sBg=s=>s==="done"?"var(--green)":s==="active"?"var(--orange)":s==="next"?"#006949":"var(--bg3)";
@@ -1928,6 +1928,16 @@ function App(){
           const sTx=s=>s==="pending"?"var(--text3)":"#fff";
 
           return <div>
+            {/* Detail panel — shows when a stage is clicked */}
+            {detail&&<div style={{border:"1px solid var(--border)",background:"var(--bg2)",padding:16,marginBottom:12,position:"relative",animation:"fadeIn .15s ease"}}>
+              <button onClick={()=>setDetail(null)} style={{position:"absolute",top:10,right:10,width:24,height:24,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>X</button>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <span style={{fontSize:9,fontWeight:700,padding:"2px 8px",background:sBg(detail.status),color:sTx(detail.status)}}>{detail.status==="done"?"DONE":detail.status==="active"?"ACTIVE":detail.status==="next"?"READY":"PENDING"}</span>
+                <span style={{fontSize:14,fontWeight:700}}>{detail.label}</span>
+              </div>
+              <div style={{fontSize:12,color:"var(--text2)",lineHeight:1.7}}>{detail.info}</div>
+            </div>}
+
             {/* Customer card */}
             <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:16,marginBottom:16,display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:12}}>
               <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Customer</div><div style={{fontSize:13,fontWeight:700}}>{custData.business_name}</div><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{custData.email}</div></div>
@@ -1942,7 +1952,7 @@ function App(){
               <div style={{display:"flex",alignItems:"center",gap:0,minWidth:1400}}>
                 {stages.map((s,i)=><React.Fragment key={i}>
                   {i>0&&<div style={{width:24,height:2,background:stages[i-1].status==="done"?"var(--green)":"var(--border)",flexShrink:0}}/>}
-                  <div style={{padding:"10px 12px",border:"1px solid "+sBd(s.status),background:s.status==="done"?"var(--green-bg)":s.status==="active"?"var(--orange-bg)":s.status==="next"?"var(--green-bg)":"var(--bg2)",
+                  <div onClick={()=>setDetail(s)} style={{padding:"10px 12px",border:"1px solid "+sBd(s.status),background:s.status==="done"?"var(--green-bg)":s.status==="active"?"var(--orange-bg)":s.status==="next"?"var(--green-bg)":"var(--bg2)",
                     cursor:"pointer",textAlign:"center",minWidth:90,flexShrink:0,position:"relative",borderRadius:s.id==="gate"?20:0,transition:"transform .1s"}}
                     onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
                     onMouseLeave={e=>e.currentTarget.style.transform="none"}>
