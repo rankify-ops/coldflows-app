@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>coldflows</title>
+<title>Coldflows</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -85,6 +85,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .campaign-cell:hover .camp-icon{transform:rotate(15deg)}
 @keyframes sendPulse{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
 </style>
+<link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/coldflows-logo.png">
 </head>
 <body>
 <div id="root"></div>
@@ -1182,10 +1183,8 @@ function App(){
     {/* Sidebar */}
     <nav style={{width:220,padding:"24px 14px",display:"flex",flexDirection:"column",position:"fixed",height:"100vh",background:"var(--sidebar-bg)",zIndex:10}}>
       <div style={{fontSize:17,fontWeight:700,letterSpacing:"-0.3px",padding:"0 14px",marginBottom:32,display:"flex",alignItems:"center",gap:8}}>
-        <div style={{width:22,height:22,borderRadius:6,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <span style={{fontSize:11,color:"#000",fontWeight:800}}>⚡</span>
-        </div>
-        <span>coldflows</span>
+        <img src="/coldflows-logo.png" alt="" style={{height:28}}/>
+        <span style={{fontFamily:"'DM Sans',var(--sans)",fontWeight:600,letterSpacing:"-0.5px"}}>Coldflows</span>
       </div>
 
       {[{id:"overview",l:"Overview"},{id:"campaigns",l:"Campaigns"},{id:"replies",l:"Replies"},{id:"leads",l:"Leads"}].map(n=>
