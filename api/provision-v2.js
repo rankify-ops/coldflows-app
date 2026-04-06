@@ -269,6 +269,160 @@ async function handleStripeWebhook(body) {
 }
 
 // =============================================
+// SMARTLEAD SYNC: Pull live data and cache in Supabase
+// =============================================
+async function fetchSmartlead(endpoint, apiKey) {
+  const resp = await fetchJSON(`https://server.smartlead.ai/api/v1/${endpoint}?api_key=${apiKey}`);
+  return resp.body;
+}
+
+async function syncSmartlead(userId, apiKey) {
+  log('INFO', 'Syncing Smartlead data for user: ' + userId);
+
+  // 1. Fetch all email accounts
+  const accounts = await fetchSmartlead('email-accounts/', apiKey);
+  const mailboxes = (accounts || []).filter(a => a).map(a => ({
+    id: a.id, email: a.from_email, name: a.from_name, daily_limit: a.message_per_day,
+    warmup_status: (a.warmup_details || {}).status || 'unknown',
+    warmup_reputation: (a.warmup_details || {}).warmup_reputation || 0,
+    sent_today: a.daily_sent_count || 0,
+  }));
+
+  // 2. Fetch all campaigns
+  const allCampaigns = await fetchSmartlead('campaigns/', apiKey);
+  
+  // Group by service type and get latest pair per service
+  const serviceMap = {};
+  for (const c of (allCampaigns || [])) {
+    if (!c) continue;
+    const name = c.name || '';
+    let svc = 'other';
+    if (name.toLowerCase().includes('seo')) svc = 'SEO services';
+    else if (name.toLowerCase().includes('shopify')) svc = 'Shopify dev';
+    else if (name.toLowerCase().includes('website')) svc = 'Website builds';
+    else if (name.toLowerCase().includes('logo')) svc = 'Logo & branding';
+    
+    if (!serviceMap[svc]) serviceMap[svc] = [];
+    serviceMap[svc].push({ id: c.id, name: c.name, status: c.status });
+  }
+
+  // 3. Fetch analytics for latest campaigns per service
+  const campaigns = [];
+  for (const [svc, camps] of Object.entries(serviceMap)) {
+    if (svc === 'other') continue;
+    // Get latest B/C pair
+    const latest = camps.slice(0, 2);
+    if (latest.length < 2) continue;
+
+    let totalSent = 0, totalReplies = 0, totalBounces = 0;
+    const variants = [];
+
+    for (const camp of latest) {
+      try {
+        const analytics = await fetchSmartlead(`campaigns/${camp.id}/analytics`, apiKey);
+        const sent = parseInt(analytics.sent_count || 0);
+        const replies = parseInt(analytics.reply_count || 0);
+        const bounces = parseInt(analytics.bounce_count || 0);
+        const rate = sent > 0 ? ((replies / sent) * 100).toFixed(1) : '0.0';
+        const variant = camp.name.includes('[B]') ? 'b' : 'c';
+        
+        variants.push({
+          variant, id: camp.id, name: camp.name, sent, replies, bounces, rate: parseFloat(rate),
+          sub: analytics.subject_line || camp.name,
+        });
+        totalSent += sent;
+        totalReplies += replies;
+        totalBounces += bounces;
+      } catch (e) { log('WARN', 'Analytics failed for ' + camp.id); }
+      await sleep(200); // Rate limit
+    }
+
+    // Also get aggregate stats across ALL campaigns for this service
+    let aggSent = 0, aggReplies = 0, aggBounces = 0;
+    // Sample a few more campaigns for aggregate stats
+    for (const camp of camps.slice(0, 10)) {
+      try {
+        const a = await fetchSmartlead(`campaigns/${camp.id}/analytics`, apiKey);
+        aggSent += parseInt(a.sent_count || 0);
+        aggReplies += parseInt(a.reply_count || 0);
+        aggBounces += parseInt(a.bounce_count || 0);
+      } catch (e) {}
+      await sleep(150);
+    }
+
+    campaigns.push({
+      id: campaigns.length + 1,
+      name: svc,
+      sent: aggSent,
+      rep: aggReplies,
+      bnc: aggBounces,
+      rate: aggSent > 0 ? ((aggReplies / aggSent) * 100).toFixed(1) : '0.0',
+      campaign_count: camps.length,
+      latest_ids: latest.map(c => c.id),
+      a: variants.find(v => v.variant === 'b') || variants[0] || {},
+      b: variants.find(v => v.variant === 'c') || variants[1] || {},
+    });
+  }
+
+  // 4. Fetch leads with replies from recent campaigns
+  const leads = [];
+  const replies = [];
+  const recentCampIds = Object.values(serviceMap).flat().slice(0, 8).map(c => c.id);
+  
+  for (const campId of recentCampIds) {
+    try {
+      const leadData = await fetchSmartlead(`campaigns/${campId}/leads`, apiKey);
+      const leadsArr = leadData.data || leadData || [];
+      for (const lead of leadsArr) {
+        if (!lead || !lead.lead) continue;
+        const l = lead.lead;
+        const status = lead.status || '';
+        const campName = (allCampaigns.find(c => c && c.id === campId) || {}).name || '';
+        let svc = 'Other';
+        if (campName.toLowerCase().includes('seo')) svc = 'SEO services';
+        else if (campName.toLowerCase().includes('shopify')) svc = 'Shopify dev';
+        else if (campName.toLowerCase().includes('website')) svc = 'Website builds';
+        else if (campName.toLowerCase().includes('logo')) svc = 'Logo & branding';
+
+        leads.push({
+          id: l.id,
+          name: (l.first_name || '') + ' ' + (l.last_name || ''),
+          email: l.email,
+          company: l.company_name || '',
+          campaign: svc,
+          status: status,
+          location: l.location || '',
+          linkedin: l.linkedin_profile || '',
+          created: lead.created_at,
+        });
+      }
+    } catch (e) {}
+    await sleep(200);
+  }
+
+  // 5. Build the sync payload
+  const syncData = {
+    synced_at: new Date().toISOString(),
+    mailboxes: mailboxes,
+    campaigns: campaigns,
+    leads: leads,
+    total_campaigns: (allCampaigns || []).length,
+    total_mailboxes: mailboxes.length,
+    total_sent: campaigns.reduce((s, c) => s + c.sent, 0),
+    total_replies: campaigns.reduce((s, c) => s + c.rep, 0),
+    total_bounces: campaigns.reduce((s, c) => s + c.bnc, 0),
+  };
+
+  // 6. Save to Supabase
+  await updateCustomer(userId, { smartlead_cache: JSON.stringify(syncData) });
+
+  log('INFO', `Smartlead sync complete: ${campaigns.length} services, ${mailboxes.length} mailboxes, ${leads.length} leads`);
+  await notify(`📊 Smartlead sync complete\n${campaigns.length} services, ${mailboxes.length} mailboxes\n${syncData.total_sent} sent, ${syncData.total_replies} replies`);
+  
+  return syncData;
+}
+
+// =============================================
 // HTTP SERVER
 // =============================================
 const server = http.createServer(async (req, res) => {
@@ -337,6 +491,16 @@ const server = http.createServer(async (req, res) => {
       return json(200, { status: 'recorded' });
     }
 
+    // Sync Smartlead data to Supabase (called periodically or on demand)
+    if (path === '/sync-smartlead' && req.method === 'POST') {
+      if (req.headers['x-webhook-secret'] !== CONFIG.webhook_secret) return json(403, { error: 'Forbidden' });
+      let body = '';
+      for await (const chunk of req) body += chunk;
+      const { userId, apiKey } = JSON.parse(body);
+      const result = await syncSmartlead(userId, apiKey);
+      return json(200, result);
+    }
+
     // 404
     json(404, { error: 'Not found' });
   } catch (e) {
@@ -388,6 +552,16 @@ async function pollTelegram() {
           const hrs = Math.floor(uptime / 3600);
           const mins = Math.floor((uptime % 3600) / 60);
           await notify(`🟢 Coldflows VPS v2\nUptime: ${hrs}h ${mins}m\nMemory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`);
+        }
+        
+        // /sync — manually trigger Smartlead sync for Rankify
+        if (text === '/sync') {
+          await notify('⏳ Syncing Smartlead data...');
+          try {
+            await syncSmartlead('ef5e6377-61af-4217-ab5d-e4eb39bb28e5', 'e64f0945-d63c-4591-a89a-d8925bc23c05_4dd3gzb');
+          } catch (e) {
+            await notify('🚨 Sync error: ' + e.message);
+          }
         }
       }
     }
