@@ -1419,27 +1419,34 @@ function App(){
                 return <>
                 <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>Setup progress</div>
                 <div style={{fontSize:11,color:allCampsDone?"var(--green)":"var(--orange)",fontWeight:600,marginBottom:16}}>
-                  {allCampsDone?"All campaigns configured — provisioning starting":"Setup your campaigns ("+confirmed.length+"/"+totalCamps+" complete)"}
+                  {allCampsDone?"All campaigns configured — domain setup starting":"Setup your campaigns ("+confirmed.length+"/"+totalCamps+" complete)"}
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:12}}>
-                {[
-                  {label:"Account created",done:true},
-                  {label:"Payment confirmed",done:true},
-                  {label:"Campaign setup ("+confirmed.length+"/"+totalCamps+") — the only part we need you for",done:allCampsDone,active:!allCampsDone},
-                  {label:"Purchasing domains",done:false,active:allCampsDone,pending:!allCampsDone},
-                  {label:"Creating "+String(custData._limits?custData._limits.mailboxes:12)+" mailboxes",pending:true},
-                  {label:"DNS configuration (SPF, DKIM, DMARC)",pending:true},
-                  {label:"Starting warmup sequence",pending:true},
-                  {label:"AI copy generation",pending:true},
-                  {label:"Lead sourcing & verification",pending:true}
-                ].map((s,i)=>
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
-                    {s.done?<div style={{width:28,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700,flexShrink:0}}>✓</div>
-                    :s.active?<div style={{width:28,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--green)",animation:"spin 1s linear infinite",flexShrink:0}}/>
-                    :<div style={{width:28,height:20,borderRadius:"50%",border:"2px solid var(--border)",flexShrink:0}}/>}
-                    <span style={{color:s.pending?"var(--text3)":"var(--text)"}}>{s.label}</span>
-                  </div>
-                )}
+                {(()=>{
+                  const prov=custData._targeting&&custData._targeting.provisioning?custData._targeting.provisioning:(custData.provisioning?(() => {try{return JSON.parse(custData.provisioning)}catch(e){return null}})():null);
+                  const provStatus=prov?prov.status:null;
+                  const steps=[
+                    {label:"Account created",done:true},
+                    {label:"Payment confirmed",done:true},
+                    {label:"Campaign setup ("+confirmed.length+"/"+totalCamps+")",done:allCampsDone,active:!allCampsDone},
+                    {label:provStatus==="active"?"Domains purchased ✓":"Purchasing domains (vendor processing order)",done:provStatus==="active",active:allCampsDone&&provStatus==="domains_suggested",pending:!allCampsDone,sub:provStatus==="domains_suggested"?"Estimated 24–48 hours":null},
+                    {label:provStatus==="active"?"Mailboxes created ✓":"Setting up mailboxes + email authentication",done:provStatus==="active",pending:provStatus!=="active",sub:provStatus!=="active"?"SPF, DKIM, DMARC — handled automatically":null},
+                    {label:"Warmup sequence",done:false,pending:provStatus!=="active",sub:"14-day warmup period before sending"},
+                    {label:"AI copy generation",pending:provStatus!=="active"},
+                    {label:"Lead sourcing & verification",pending:provStatus!=="active"}
+                  ];
+                  return steps.map((s,i)=>
+                    <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,fontSize:12}}>
+                      {s.done?<div style={{width:28,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700,flexShrink:0}}>✓</div>
+                      :s.active?<div style={{width:28,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--green)",animation:"spin 1s linear infinite",flexShrink:0}}/>
+                      :<div style={{width:28,height:20,borderRadius:"50%",border:"2px solid var(--border)",flexShrink:0}}/>}
+                      <div>
+                        <span style={{color:s.pending?"var(--text3)":"var(--text)"}}>{s.label}</span>
+                        {s.sub&&<div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{s.sub}</div>}
+                      </div>
+                    </div>
+                  );
+                })()}
                 </div>
                 </>;
               })()}
