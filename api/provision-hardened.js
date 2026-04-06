@@ -186,7 +186,7 @@ async function generatePlan(userId) {
     `\nAlready owned: ${existing.length}\n` +
     `━━━━━━━━━━━━━━━━━━━━\n\n` +
     `✅ Approve in Coldflows dashboard:\nhttps://coldflows.ai/app\n\n` +
-    `❌ To reject, ignore. Expires 24hrs.`
+    `❌ To reject, open dashboard and click Reject.`
   );
 
   log('INFO', `Plan sent for approval. ${remaining} domains, $${total.toFixed(2)}`);
