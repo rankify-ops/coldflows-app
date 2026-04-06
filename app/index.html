@@ -1144,6 +1144,10 @@ function App(){
   const [editMode,setEditMode]=useState(false);
   const [validationErr,setValidationErr]=useState(null);
   const [opsDetail,setOpsDetail]=useState(null);
+  const [currency,setCurrency]=useState("USD");
+  const audRate=1.55;
+  const fx=(usd)=>currency==="AUD"?(usd*audRate).toFixed(2):usd.toFixed(2);
+  const cs=currency==="AUD"?"A$":"$";
   const [treeFilter,setTreeFilter]=useState("SEO");
   const [dark,setDark]=useState(false);
   const [custData,setCustData]=useState(null);
@@ -1899,7 +1903,10 @@ function App(){
       {pg==="ops"&&custData&&(custData.email==="tomflood1995@gmail.com"||custData.lead_email==="tomflood1995@gmail.com")&&<div className="fade-in" style={{padding:"24px 28px"}}>
         <div style={{marginBottom:16}}>
           <h1 style={{fontSize:22,fontWeight:700}}>Ops pipeline</h1>
-          <p style={{fontSize:11,color:"var(--text3)",marginTop:2}}>Admin panel — customer management + provisioning</p>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <p style={{fontSize:11,color:"var(--text3)",marginTop:2}}>Admin panel — customer management + provisioning</p>
+            <button onClick={()=>setCurrency(currency==="USD"?"AUD":"USD")} style={{marginLeft:"auto",padding:"4px 10px",fontSize:10,fontWeight:700,border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",cursor:"pointer",fontFamily:"var(--mono)"}}>{currency==="USD"?"USD → AUD":"AUD → USD"}</button>
+          </div>
         </div>
 
         {(()=>{
@@ -1949,7 +1956,7 @@ function App(){
               <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Plan</div><div style={{fontSize:13,fontWeight:700,color:"var(--green)"}}>{(custData.plan||"").charAt(0).toUpperCase()+(custData.plan||"").slice(1)}</div><div style={{fontSize:10,color:"var(--text3)"}}>{mb} mailboxes, {total} campaigns</div></div>
               <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Campaigns</div><div style={{fontSize:13,fontWeight:700}}>{conf.length}/{total}</div><div style={{fontSize:10,color:allDone?"var(--green)":"var(--orange)"}}>{allDone?"All confirmed":"In progress"}</div></div>
               <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Domains</div><div style={{fontSize:13,fontWeight:700}}>{domains.length}/{mb}</div><div style={{fontSize:10,color:domains.length>=mb?"var(--green)":"var(--text3)"}}>{domains.length>=mb?"All purchased":domains.length>0?"Purchasing":"Not started"}</div></div>
-              <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Provisioning</div><div style={{fontSize:13,fontWeight:700}}>{prov.status||"Not started"}</div><div style={{fontSize:10,color:"var(--text3)"}}>{prov.budget_spent?"$"+prov.budget_spent.toFixed(2)+" spent":"$0 spent"}</div></div>
+              <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Provisioning</div><div style={{fontSize:13,fontWeight:700}}>{prov.status||"Not started"}</div><div style={{fontSize:10,color:"var(--text3)"}}>{prov.budget_spent?cs+fx(prov.budget_spent)+" spent":cs+"0 spent"}</div></div>
             </div>
 
             {/* Horizontal pipeline */}
@@ -2005,8 +2012,8 @@ function App(){
                   </div>
                   <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
                     <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Total cost</div>
-                    <div style={{fontSize:18,fontWeight:700,color:"var(--red)"}}>${(plan.total||plan.totalCost||0).toFixed(2)}</div>
-                    <div style={{fontSize:10,color:"var(--text3)"}}>${planDomains[0]?planDomains[0].price:"0"}/domain</div>
+                    <div style={{fontSize:18,fontWeight:700,color:"var(--red)"}}>{cs}{fx(plan.total||plan.totalCost||0)} {currency}</div>
+                    <div style={{fontSize:10,color:"var(--text3)"}}>{cs}{fx(planDomains[0]?planDomains[0].price:0)}/domain</div>
                   </div>
                 </div>
 
@@ -2017,23 +2024,23 @@ function App(){
                   {planDomains.map((d,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"40px 2fr 1fr",gap:0,padding:"6px 12px",borderBottom:i<planDomains.length-1?"1px solid var(--border)":"none",fontSize:11}}>
                     <div style={{fontWeight:600,color:"var(--text3)"}}>{i+1}</div>
                     <div style={{fontFamily:"var(--mono)",fontWeight:600}}>{d.domain}</div>
-                    <div style={{fontFamily:"var(--mono)"}}>${(d.price||0).toFixed(2)}</div>
+                    <div style={{fontFamily:"var(--mono)"}}>{cs}{fx(d.price||0)}</div>
                   </div>)}
                   <div style={{display:"grid",gridTemplateColumns:"40px 2fr 1fr",gap:0,padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:12,fontWeight:700,background:"var(--bg2)"}}>
-                    <div></div><div>{planDomains.length} domains</div><div>${(plan.total||plan.totalCost||0).toFixed(2)}</div>
+                    <div></div><div>{planDomains.length} domains</div><div>{cs}{fx(plan.total||plan.totalCost||0)} {currency}</div>
                   </div>
                 </div>
 
                 <div style={{display:"flex",gap:12}}>
                   <button onClick={async()=>{
-                    if(!confirm("Approve purchase of "+planDomains.length+" domains for $"+(plan.total||plan.totalCost||0).toFixed(2)+"? This will charge your Namecheap balance."))return;
+                    if(!confirm("Approve purchase of "+planDomains.length+" domains for "+cs+fx(plan.total||plan.totalCost||0)+" "+currency+"? This will charge your Namecheap balance."))return;
                     try{
                       const resp=await fetch("http://170.64.130.130:3000/approve/"+(plan.jobId||""),{method:"POST"});
                       if(resp.ok){alert("Purchase approved! Domains are being purchased now. Check Telegram for updates.");location.reload();}
                       else{alert("Approval failed: "+await resp.text());}
                     }catch(e){alert("Could not reach automation server: "+e.message);}
                   }} style={{flex:1,padding:"14px 24px",background:"var(--green)",color:"#fff",border:"none",fontSize:14,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                    APPROVE PURCHASE — ${(plan.total||plan.totalCost||0).toFixed(2)}
+                    APPROVE PURCHASE — {cs}{fx(plan.total||plan.totalCost||0)} {currency}
                   </button>
                   <button onClick={async()=>{
                     if(!confirm("Reject this purchase plan? The domains will NOT be purchased."))return;
@@ -2052,7 +2059,7 @@ function App(){
             <div style={{marginBottom:16}}>
               <div style={{fontSize:14,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <span>Domains ({domains.length}/{mb})</span>
-                {domains.length>0&&<span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>Total: ${domains.reduce((s,d)=>s+(d.cost||0),0).toFixed(2)}/yr | ${(domains.reduce((s,d)=>s+(d.cost||0),0)/12).toFixed(2)}/mo</span>}
+                {domains.length>0&&<span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>Total: {cs}{fx(domains.reduce((s,d)=>s+(d.cost||0),0))}/yr ({currency}) | {cs}{fx(domains.reduce((s,d)=>s+(d.cost||0),0)/12)}/mo</span>}
               </div>
               {domains.length>0?<div style={{border:"1px solid var(--border)",background:"var(--bg)"}}>
                 {/* Header */}
@@ -2073,13 +2080,13 @@ function App(){
                     <div style={{fontSize:10,fontFamily:"var(--mono)"}}>#{d.mailbox_index||"-"}</div>
                     <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>{purchDate?purchDate.toLocaleDateString("en-AU",{day:"2-digit",month:"short",year:"2-digit"}):"-"}</div>
                     <div style={{fontSize:10,fontFamily:"var(--mono)",color:isExpiring?"var(--orange)":"var(--text2)"}}>{renewDate?renewDate.toLocaleDateString("en-AU",{day:"2-digit",month:"short",year:"2-digit"}):"-"}{isExpiring&&" !"}</div>
-                    <div style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600}}>${(d.cost||0).toFixed(2)}</div>
+                    <div style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600}}>{cs}{fx(d.cost||0)}</div>
                     <div><span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:d.status==="purchased"||d.status==="dns_done"?"var(--green)":d.status==="error"?"var(--red)":"var(--bg3)",color:d.status==="purchased"||d.status==="dns_done"?"#fff":d.status==="error"?"#fff":"var(--text3)"}}>{(d.status||"pending").toUpperCase()}</span></div>
                   </div>;
                 })}
                 {/* Totals row */}
                 <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:11,fontWeight:700,background:"var(--bg2)"}}>
-                  <div>{domains.length} domains</div><div></div><div></div><div></div><div></div><div style={{fontFamily:"var(--mono)"}}>${domains.reduce((s,d)=>s+(d.cost||0),0).toFixed(2)}</div><div></div>
+                  <div>{domains.length} domains</div><div></div><div></div><div></div><div></div><div style={{fontFamily:"var(--mono)"}}>{cs}{fx(domains.reduce((s,d)=>s+(d.cost||0),0))}</div><div></div>
                 </div>
               </div>:<div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:20,textAlign:"center"}}>
                 <div style={{fontSize:12,color:"var(--text3)",marginBottom:6}}>No domains purchased yet</div>
@@ -2137,9 +2144,9 @@ function App(){
                 </div>
               </div>
               <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12}}>
-                <div style={{fontSize:10,fontWeight:700,marginBottom:6}}>Costs ({custData.plan})</div>
+                <div style={{fontSize:10,fontWeight:700,marginBottom:6}}>Costs ({custData.plan}) — {currency}</div>
                 <div style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text2)",lineHeight:1.8}}>
-                  Domains: ${(mb*11.08/12).toFixed(0)}/mo<br/>Smartlead: $39/mo<br/>Workspace: ${mb*6}/mo<br/><strong>Total: ~${Math.round(mb*11.08/12+39+mb*6)}/mo</strong>
+                  Domains: {cs}{fx(mb*11.08/12)}/mo<br/>Smartlead: {cs}{fx(39)}/mo<br/>Workspace: {cs}{fx(mb*6)}/mo<br/><strong>Total: ~{cs}{fx(mb*11.08/12+39+mb*6)}/mo</strong>
                 </div>
               </div>
             </div>
