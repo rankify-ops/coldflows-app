@@ -333,11 +333,11 @@ function getPhase(day){
 
 function CampaignCard({c,onClick}){
   const rr=c.sent>0?(c.rep/c.sent*100).toFixed(1):"0.0";
-  const phase=getPhase(c.day);
+  const hasCampCount=c.campaign_count>0;
+  const isActive=c.sent>0&&c.sentToday>0;
   return <div onClick={onClick} className="campaign-cell" style={{cursor:"pointer",position:"relative"}}>
     <div style={{padding:"14px 20px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
-        {/* Animated campaign icon */}
         <div className="camp-icon" style={{width:28,height:28,borderRadius:6,background:"var(--green-bg)",border:"1px solid var(--green-bd)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/>
@@ -349,16 +349,19 @@ function CampaignCard({c,onClick}){
             <span className="camp-arrow" style={{color:"var(--green)",fontSize:12,fontWeight:600}}>→</span>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3}}>
-            <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,fontWeight:600,
-              background:phase.name==="Warmup"?"var(--orange-bg)":"var(--green-bg)",
-              color:phase.color}}>{phase.name}</span>
-            <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
+            {hasCampCount?<>
+              <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,fontWeight:600,background:c.sent>0?"var(--green-bg)":"var(--bg3)",color:c.sent>0?"var(--green)":"var(--text3)"}}>{c.campaign_count} batches</span>
+              <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,fontWeight:600,background:c.rep>0?"var(--green-bg)":"var(--bg3)",color:c.rep>0?"var(--green)":"var(--text3)"}}>{c.rep} replies</span>
+            </>:<>
+              <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,fontWeight:600,background:getPhase(c.day).name==="Warmup"?"var(--orange-bg)":"var(--green-bg)",color:getPhase(c.day).color}}>{getPhase(c.day).name}</span>
+              <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>Day {c.day}</span>
+            </>}
           </div>
         </div>
       </div>
       <div style={{textAlign:"right"}}>
-        <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:600,color:"var(--text)"}}>{c.weekly.toLocaleString()}</div>
-        <div style={{fontSize:9,color:"var(--text3)"}}>/week</div>
+        <div style={{fontFamily:"var(--mono)",fontSize:20,fontWeight:600,color:"var(--text)"}}>{c.sent.toLocaleString()}</div>
+        <div style={{fontSize:9,color:"var(--text3)"}}>total sent</div>
       </div>
     </div>
     <div style={{display:"flex",borderTop:"1px solid var(--border)"}}>
@@ -1573,6 +1576,18 @@ function App(){
         {/* ACTIVE STATE — campaigns live, show real dashboard */}
         {custData&&(custData.smartlead_cache||custData.mailbox_count>0)&&<>
 
+        {/* Sending status banner */}
+        {D.sentToday===0&&D.totalSent>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--orange)",borderBottom:"1px solid var(--border)",background:"var(--orange-bg)"}}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:"var(--orange)"}}/>
+          No emails sending — all campaigns completed. New campaigns with fresh leads needed to resume outreach.
+        </div>}
+        {D.sentToday===0&&D.totalSent===0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--orange)",borderBottom:"1px solid var(--border)",background:"var(--orange-bg)"}}>
+          <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--orange)",animation:"spin 1s linear infinite",flexShrink:0}}/>
+          Mailboxes warming up — campaigns will begin sending once warmup is complete.
+        </div>}
+        {D.sentToday>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--green)",borderBottom:"1px solid var(--border)"}}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>Campaigns actively sending — {D.sentToday} emails sent today
+        </div>}
         {wc>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--green)",borderBottom:"1px solid var(--border)"}}>
           <div style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>{wc} warm lead{wc>1?"s":""} waiting for follow-up
         </div>}
@@ -1594,9 +1609,9 @@ function App(){
 
         {/* CAMPAIGNS */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 24px",borderBottom:"1px solid var(--border)"}}>
-          <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>Active campaigns</div>
+          <div style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>Campaigns</div>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length}/12 slots</div>
+            <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>{D.campaigns.length} services · {D.totalSent.toLocaleString()} total sent</div>
             <div onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 12px",borderRadius:6,border:"1px solid var(--border)",color:"var(--green)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
               <span style={{fontSize:13,lineHeight:1}}>+</span> Add campaign
             </div>
