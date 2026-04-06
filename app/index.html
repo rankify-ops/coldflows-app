@@ -1146,6 +1146,7 @@ function App(){
   const [opsDetail,setOpsDetail]=useState(null);
   const [currency,setCurrency]=useState("AUD");
   const [approvalView,setApprovalView]=useState(null);
+  const [allCustomers,setAllCustomers]=useState([]);
   const audRate=1.55;
   const fx=(usd)=>currency==="AUD"?(usd*audRate).toFixed(2):usd.toFixed(2);
   const cs=currency==="AUD"?"A$":"$";
@@ -1167,10 +1168,23 @@ function App(){
             try { data._targeting = JSON.parse(data.target_market); } catch(e){ data._targeting = null; }
           } else { data._targeting = data.target_market || null; }
           // Set plan limits
-          var limits = {starter:{mailboxes:4,campaigns:2},growth:{mailboxes:12,campaigns:4},scale:{mailboxes:30,campaigns:10}};
+          var limits = {starter:{mailboxes:6,campaigns:1,domains:3},growth:{mailboxes:12,campaigns:3,domains:6},scale:{mailboxes:24,campaigns:6,domains:12}};
           data._limits = limits[data.plan] || limits.starter;
           setCustData(data);
           if(!data.business_name||data.plan_status==='pending'){setIsNew(true);}
+          // If admin, fetch all customers
+          if(data.email==='tomflood1995@gmail.com'||data.lead_email==='tomflood1995@gmail.com'){
+            sb.from('customers').select('*').then(({data:all})=>{
+              if(all){
+                setAllCustomers(all.map(c=>{
+                  if(c.target_market&&typeof c.target_market==='string'){try{c._targeting=JSON.parse(c.target_market);}catch(e){c._targeting=null;}}else{c._targeting=c.target_market||null;}
+                  if(c.provisioning&&typeof c.provisioning==='string'){try{c._prov=JSON.parse(c.provisioning);}catch(e){c._prov=null;}}else{c._prov=c.provisioning||null;}
+                  c._limits=limits[c.plan]||limits.starter;
+                  return c;
+                }));
+              }
+            });
+          }
         } else {
           setIsNew(true);
         }
@@ -2140,184 +2154,126 @@ function App(){
         <div style={{marginBottom:16}}>
           <h1 style={{fontSize:22,fontWeight:700}}>Ops pipeline</h1>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <p style={{fontSize:11,color:"var(--text3)",marginTop:2}}>Admin panel — customer management + provisioning</p>
+            <p style={{fontSize:11,color:"var(--text3)",marginTop:2}}>All customers — provisioning + infrastructure management</p>
             <button onClick={()=>setCurrency(currency==="USD"?"AUD":"USD")} style={{marginLeft:"auto",padding:"4px 10px",fontSize:10,fontWeight:700,border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",cursor:"pointer",fontFamily:"var(--mono)"}}>{currency==="USD"?"USD → AUD":"AUD → USD"}</button>
           </div>
         </div>
 
-        {(()=>{
-          const t=custData._targeting||{};
-          const conf=t.campaigns_confirmed||[];
-          const total=custData._limits?custData._limits.campaigns:4;
-          const allDone=conf.length>=total;
-          const prov=t.provisioning||{};
-          const mb=custData._limits?custData._limits.mailboxes:12;
-          const domains=prov.domains||[];
-          const detail=opsDetail;const setDetail=setOpsDetail;
-
-          const stages=[
-            {id:"stripe",label:"Stripe",sub:"Payment",status:"done",info:"Customer pays via Stripe payment link. Webhook creates Supabase customers row with plan, email, user_id. Plan: "+(custData.plan||"-")+", Status: "+(custData.plan_status||"active")},
-            {id:"supabase",label:"Record",sub:"Supabase",status:"done",info:"Auth user + customers row created. user_id: "+currentUser.id.slice(0,14)+"..., email: "+custData.email},
-            {id:"onboard",label:"Onboard",sub:"Form",status:"done",info:"Customer fills business name, service description, initial targeting. Saved to target_market JSON. Business: "+(custData.business_name||"-")},
-            {id:"campaigns",label:"Campaigns",sub:conf.length+"/"+total,status:allDone?"done":"active",info:"Customer configures each campaign: offer, pain point, social proof, targeting chips. Confirmed: ["+conf.join(",")+"], Need: "+total},
-            {id:"gate",label:"Gate",sub:allDone?"Open":"Wait",status:allDone?"done":"pending",info:"Automation triggers when campaigns_confirmed.length >= "+total+". Currently: "+conf.length+"/"+total+". Gate: "+(allDone?"OPEN":"CLOSED")},
-            {id:"domains",label:"Domains",sub:domains.length+"/"+mb,status:prov.status==="awaiting_approval"?"approval":allDone?(domains.length>=mb?"done":domains.length>0?"active":"next"):"pending",info:"Register "+mb+" .com domains via Namecheap (~$11/each). RDAP check, then Namecheap purchase, verify in account. Total: ~$"+(mb*11).toFixed(0)+"/yr"},
-            {id:"dns",label:"DNS",sub:"Records",status:prov.dns_status==="done"?"done":"pending",info:"Set MX (aspmx.l.google.com), SPF (include:_spf.google.com), DMARC (p=none), DKIM per domain via Porkbun DNS API. Allow 24-48hrs propagation."},
-            {id:"workspace",label:"Workspace",sub:"Mailboxes",status:prov.workspace_status==="done"?"done":"pending",info:"Create Google Workspace mailbox per domain (outreach@domain.com). Generate DKIM key, add to DNS. ~$6/user/mo. Count: "+mb},
-            {id:"smartlead",label:"Smartlead",sub:"Connect",status:prov.smartlead_status==="done"?"done":"pending",info:"Add "+mb+" mailboxes to Smartlead. Configure warmup: 2/day ramp to 40/day. Assign "+Math.floor(mb/total)+" mailboxes per campaign. $39/mo base."},
-            {id:"warmup",label:"Warmup",sub:"14-21d",status:"pending",info:"Smartlead auto-warms mailboxes. 2/day -> 40/day over 14-21 days. Target 95%+ inbox rate. Monitor daily."},
-            {id:"leads",label:"Leads",sub:"Source",status:"pending",info:"Pull leads matching each campaign targeting via SmartProspect/Apollo. Filter by job titles, industries, locations, company size. Verify emails. ~$0.03-0.05/lead."},
-            {id:"copy",label:"AI Copy",sub:"Claude",status:"pending",info:"Claude API generates 3-email sequences per campaign using offer, pain point, social proof. Unique copy per campaign."},
-            {id:"launch",label:"Launch",sub:"Go live",status:"pending",info:"Smartlead sequences activate. ~"+(mb*35)+" emails/day across "+mb+" mailboxes. Replies forwarded to "+(custData.lead_email||custData.email)},
-          ];
-
-          const sBg=s=>s==="done"?"var(--green)":s==="active"?"var(--orange)":s==="approval"?"var(--red)":s==="next"?"#006949":"var(--bg3)";
-          const sBd=s=>s==="done"?"var(--green-bd)":s==="active"?"var(--orange)":s==="approval"?"var(--red)":s==="next"?"var(--green-bd)":"var(--border)";
-          const sTx=s=>s==="pending"?"var(--text3)":"#fff";
-
-          return <div>
-            {/* Detail panel — shows when a stage is clicked */}
-            {detail&&<div style={{border:"1px solid var(--border)",background:"var(--bg2)",padding:16,marginBottom:12,position:"relative",animation:"fadeIn .15s ease"}}>
-              <button onClick={()=>setDetail(null)} style={{position:"absolute",top:10,right:10,width:24,height:24,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>X</button>
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                <span style={{fontSize:9,fontWeight:700,padding:"2px 8px",background:sBg(detail.status),color:sTx(detail.status)}}>{detail.status==="done"?"DONE":detail.status==="active"?"ACTIVE":detail.status==="next"?"READY":"PENDING"}</span>
-                <span style={{fontSize:14,fontWeight:700}}>{detail.label}</span>
+        {/* All Customers Table */}
+        <div style={{border:"1px solid var(--border)",background:"var(--bg)",marginBottom:16}}>
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 120px",gap:0,padding:"8px 12px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
+            <div>Customer</div><div>Plan</div><div>Forwarding</div><div>Senders</div><div>Campaigns</div><div>Infrastructure</div><div>Actions</div>
+          </div>
+          {allCustomers.length===0&&<div style={{padding:20,textAlign:"center",fontSize:12,color:"var(--text3)"}}>Loading customers...</div>}
+          {allCustomers.map((c,i)=>{
+            const t=c._targeting||{};
+            const prov=c._prov||{};
+            const conf=t.campaigns_confirmed||[];
+            const lim=c._limits||{campaigns:1,mailboxes:6,domains:3};
+            const allDone=conf.length>=lim.campaigns;
+            const senders=c.sender_names?(() => {try{return JSON.parse(c.sender_names)}catch(e){return []}})():[];
+            const provStatus=prov.status||"not_started";
+            const stColor=provStatus==="active"?"var(--green)":provStatus==="domains_suggested"?"var(--orange)":"var(--text3)";
+            const stLabel=provStatus==="active"?"ACTIVE":provStatus==="domains_suggested"?"DOMAINS READY":"NOT STARTED";
+            return <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 120px",gap:0,padding:"10px 12px",borderBottom:i<allCustomers.length-1?"1px solid var(--border)":"none",fontSize:11,alignItems:"center",cursor:"pointer",transition:"background .1s"}} onMouseEnter={e=>e.currentTarget.style.background="var(--bg2)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"} onClick={()=>setOpsDetail(c)}>
+              <div>
+                <div style={{fontWeight:600}}>{c.business_name||"—"}</div>
+                <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{c.email}</div>
               </div>
-              <div style={{fontSize:12,color:"var(--text2)",lineHeight:1.7}}>{detail.info}</div>
-            </div>}
-
-            {/* Customer card */}
-            <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:16,marginBottom:16,display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:12}}>
-              <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Customer</div><div style={{fontSize:13,fontWeight:700}}>{custData.business_name}</div><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{custData.email}</div></div>
-              <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Plan</div><div style={{fontSize:13,fontWeight:700,color:"var(--green)"}}>{(custData.plan||"").charAt(0).toUpperCase()+(custData.plan||"").slice(1)}</div><div style={{fontSize:10,color:"var(--text3)"}}>{mb} mailboxes, {total} campaigns</div></div>
-              <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Campaigns</div><div style={{fontSize:13,fontWeight:700}}>{conf.length}/{total}</div><div style={{fontSize:10,color:allDone?"var(--green)":"var(--orange)"}}>{allDone?"All confirmed":"In progress"}</div></div>
-              <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Domains</div><div style={{fontSize:13,fontWeight:700}}>{domains.length}/{mb}</div><div style={{fontSize:10,color:domains.length>=mb?"var(--green)":"var(--text3)"}}>{domains.length>=mb?"All purchased":domains.length>0?"Purchasing":"Not started"}</div></div>
-              <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Provisioning</div><div style={{fontSize:13,fontWeight:700}}>{prov.status||"Not started"}</div><div style={{fontSize:10,color:"var(--text3)"}}>{prov.budget_spent?cs+fx(prov.budget_spent)+" spent":cs+"0 spent"}</div></div>
-            </div>
-
-            {/* Horizontal pipeline */}
-            <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:"12px 16px",marginBottom:16,overflowX:"auto"}}>
-              <div style={{display:"flex",alignItems:"center",gap:0,minWidth:1400}}>
-                {stages.map((s,i)=><React.Fragment key={i}>
-                  {i>0&&<div style={{width:24,height:2,background:stages[i-1].status==="done"?"var(--green)":"var(--border)",flexShrink:0}}/>}
-                  <div onClick={()=>setDetail(s)} style={{padding:"10px 12px",border:(s.status==="approval"?"2px":"1px")+" solid "+sBd(s.status),background:s.status==="done"?"var(--green-bg)":s.status==="active"?"var(--orange-bg)":s.status==="approval"?"var(--red-bg)":s.status==="next"?"var(--green-bg)":"var(--bg2)",
-                    cursor:"pointer",textAlign:"center",minWidth:90,flexShrink:0,position:"relative",borderRadius:s.id==="gate"?20:0,transition:"transform .1s",
-                    animation:s.status==="approval"?"approvalPulse 1.5s ease-in-out infinite":"none",boxShadow:s.status==="approval"?"0 0 12px rgba(226,75,74,0.4)":"none"}}
-                    onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
-                    onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-                    {s.status==="done"&&<div style={{position:"absolute",top:-6,right:-6,width:16,height:16,borderRadius:8,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",fontWeight:700}}>OK</div>}
-                    {s.status==="approval"&&<div style={{position:"absolute",top:-6,right:-6,width:16,height:16,borderRadius:8,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",fontWeight:700}}>!</div>}
-                    <div style={{fontSize:11,fontWeight:700,color:s.status==="pending"?"var(--text3)":"var(--text)"}}>{s.label}</div>
-                    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{s.sub}</div>
-                  </div>
-                </React.Fragment>)}
+              <div><span style={{fontSize:9,fontWeight:700,padding:"2px 6px",background:"var(--green-bg)",color:"var(--green)",border:"1px solid var(--green-bd)"}}>{(c.plan||"—").toUpperCase()}</span></div>
+              <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>{c.forwarding_domain||"—"}</div>
+              <div style={{fontSize:10,color:"var(--text2)"}}>{senders.length>0?senders.join(", "):"—"}</div>
+              <div style={{fontSize:10}}><span style={{fontWeight:600}}>{conf.length}/{lim.campaigns}</span> <span style={{color:allDone?"var(--green)":"var(--text3)"}}>{allDone?"✓":""}</span></div>
+              <div><span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:provStatus==="active"?"var(--green)":provStatus==="domains_suggested"?"var(--orange)":"var(--bg3)",color:provStatus==="active"||provStatus==="domains_suggested"?"#fff":"var(--text3)"}}>{stLabel}</span></div>
+              <div style={{display:"flex",gap:4}}>
+                <button onClick={e=>{e.stopPropagation();setOpsDetail(c)}} style={{padding:"3px 8px",fontSize:9,border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",cursor:"pointer"}}>View</button>
+                {provStatus!=="active"&&<button onClick={e=>{e.stopPropagation();setApprovalView(c)}} style={{padding:"3px 8px",fontSize:9,border:"1px solid var(--green)",background:"var(--green-bg)",color:"var(--green)",cursor:"pointer",fontWeight:600}}>Setup</button>}
               </div>
-            </div>
+            </div>;
+          })}
+        </div>
 
-            {/* DOMAINS TABLE */}
-            <div style={{marginBottom:16}}>
-              <div style={{fontSize:14,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <span>Domains ({domains.length}/{mb})</span>
-                {domains.length>0&&<span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>Total: {cs}{fx(domains.reduce((s,d)=>s+(d.cost||0),0))}/yr ({currency}) | {cs}{fx(domains.reduce((s,d)=>s+(d.cost||0),0)/12)}/mo</span>}
-              </div>
-              {domains.length>0?<div style={{border:"1px solid var(--border)",background:"var(--bg)"}}>
-                {/* Header */}
-                <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
-                  <div>Domain</div><div>Campaign</div><div>Mailbox</div><div>Purchased</div><div>Renewal</div><div>Cost</div><div>Status</div>
+        {/* Customer Detail Panel */}
+        {opsDetail&&typeof opsDetail==="object"&&opsDetail.email&&<div style={{border:"1px solid var(--border)",background:"var(--bg2)",padding:20,marginBottom:16,position:"relative",animation:"fadeIn .15s ease"}}>
+          <button onClick={()=>setOpsDetail(null)} style={{position:"absolute",top:10,right:10,width:24,height:24,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>X</button>
+          <div style={{fontSize:16,fontWeight:700,marginBottom:12}}>{opsDetail.business_name}</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12,marginBottom:16}}>
+            <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Email</div><div style={{fontSize:11,fontFamily:"var(--mono)"}}>{opsDetail.email}</div></div>
+            <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Plan</div><div style={{fontSize:11,fontWeight:700,color:"var(--green)"}}>{(opsDetail.plan||"").toUpperCase()}</div></div>
+            <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Forwarding Domain</div><div style={{fontSize:11,fontFamily:"var(--mono)"}}>{opsDetail.forwarding_domain||"—"}</div></div>
+            <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Sender Names</div><div style={{fontSize:11}}>{opsDetail.sender_names?(() => {try{return JSON.parse(opsDetail.sender_names).join(", ")}catch(e){return "—"}})():"—"}</div></div>
+          </div>
+          {/* Provisioning Status */}
+          {(()=>{
+            const prov=opsDetail._prov||{};
+            const provStatus=prov.status||"not_started";
+            return <div style={{marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:700,marginBottom:8}}>Infrastructure</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+                <div style={{border:"1px solid var(--border)",padding:10,background:"var(--bg)"}}>
+                  <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Status</div>
+                  <div style={{fontSize:13,fontWeight:700,color:provStatus==="active"?"var(--green)":"var(--orange)"}}>{provStatus==="active"?"Active":provStatus==="domains_suggested"?"Domains Suggested":"Not Started"}</div>
                 </div>
-                {/* Rows */}
-                {domains.map((d,i)=>{
-                  var purchDate=d.purchased_at?new Date(d.purchased_at):null;
-                  var renewDate=purchDate?new Date(purchDate.getTime()+365*24*60*60*1000):null;
-                  var isExpiring=renewDate&&(renewDate.getTime()-Date.now())<30*24*60*60*1000;
-                  return <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderBottom:i<domains.length-1?"1px solid var(--border)":"none",fontSize:11,alignItems:"center"}}>
-                    <div>
-                      <div style={{fontWeight:600,fontFamily:"var(--mono)"}}>{d.domain}</div>
-                      <div style={{fontSize:9,color:"var(--text3)"}}>{d.email||"outreach@"+d.domain}</div>
-                    </div>
-                    <div style={{fontSize:10}}>Campaign {d.campaign}</div>
-                    <div style={{fontSize:10,fontFamily:"var(--mono)"}}>#{d.mailbox_index||"-"}</div>
-                    <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>{purchDate?purchDate.toLocaleDateString("en-AU",{day:"2-digit",month:"short",year:"2-digit"}):"-"}</div>
-                    <div style={{fontSize:10,fontFamily:"var(--mono)",color:isExpiring?"var(--orange)":"var(--text2)"}}>{renewDate?renewDate.toLocaleDateString("en-AU",{day:"2-digit",month:"short",year:"2-digit"}):"-"}{isExpiring&&" !"}</div>
-                    <div style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600}}>{cs}{fx(d.cost||0)}</div>
-                    <div><span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:d.status==="purchased"||d.status==="dns_done"?"var(--green)":d.status==="error"?"var(--red)":"var(--bg3)",color:d.status==="purchased"||d.status==="dns_done"?"#fff":d.status==="error"?"#fff":"var(--text3)"}}>{(d.status||"pending").toUpperCase()}</span></div>
-                  </div>;
-                })}
-                {/* Totals row */}
-                <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:11,fontWeight:700,background:"var(--bg2)"}}>
-                  <div>{domains.length} domains</div><div></div><div></div><div></div><div></div><div style={{fontFamily:"var(--mono)"}}>{cs}{fx(domains.reduce((s,d)=>s+(d.cost||0),0))}</div><div></div>
+                <div style={{border:"1px solid var(--border)",padding:10,background:"var(--bg)"}}>
+                  <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Domains</div>
+                  <div style={{fontSize:11,fontFamily:"var(--mono)"}}>{prov.domains?prov.domains.join(", "):(prov.suggestions?prov.suggestions.join(", "):"—")}</div>
                 </div>
-              </div>:<div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:20,textAlign:"center"}}>
-                <div style={{fontSize:12,color:"var(--text3)",marginBottom:6}}>No domains purchased yet</div>
-                <div style={{fontSize:10,color:"var(--text3)"}}>Domains will be purchased automatically after all campaigns are confirmed{!allDone?" ("+conf.length+"/"+total+" done)":""}</div>
-              </div>}
-            </div>
-
-            {/* CAMPAIGN DETAIL TABLE */}
-            <div style={{marginBottom:16}}>
-              <div style={{fontSize:14,fontWeight:700,marginBottom:10}}>Campaigns</div>
-              <div style={{border:"1px solid var(--border)",background:"var(--bg)"}}>
-                <div style={{display:"grid",gridTemplateColumns:"60px 1.5fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
-                  <div>#</div><div>Name</div><div>Job titles</div><div>Locations</div><div>Offer</div><div>Status</div>
-                </div>
-                {Array.from({length:total}).map((_,i)=>{
-                  var cn=i+1;
-                  var cd=cn===1?t:(t["campaign_"+cn]||{});
-                  var isConf=conf.indexOf(cn)!==-1;
-                  return <div key={i} style={{display:"grid",gridTemplateColumns:"60px 1.5fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderBottom:i<total-1?"1px solid var(--border)":"none",fontSize:11,alignItems:"center"}}>
-                    <div style={{fontWeight:700}}>C{cn}</div>
-                    <div style={{fontWeight:600}}>{cd.campaign_name||"Campaign "+cn}</div>
-                    <div style={{fontSize:9,color:"var(--text2)"}}>{(cd.job_titles||[]).slice(0,3).join(", ")}{(cd.job_titles||[]).length>3?"...":""}</div>
-                    <div style={{fontSize:9,color:"var(--text2)"}}>{(cd.locations||[]).join(", ")}</div>
-                    <div style={{fontSize:9,color:"var(--text2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{(cd.offer||"").slice(0,40)}{(cd.offer||"").length>40?"...":""}</div>
-                    <div><span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:isConf?"var(--green)":"var(--bg3)",color:isConf?"#fff":"var(--text3)"}}>{isConf?"CONFIRMED":"PENDING"}</span></div>
-                  </div>;
-                })}
-              </div>
-            </div>
-
-            {/* ERRORS LOG */}
-            {prov.errors&&prov.errors.length>0&&<div style={{marginBottom:16}}>
-              <div style={{fontSize:14,fontWeight:700,marginBottom:10,color:"var(--red)"}}>Errors ({prov.errors.length})</div>
-              <div style={{border:"1px solid var(--red)",background:"var(--red-bg)"}}>
-                {prov.errors.map((e,i)=><div key={i} style={{padding:"8px 12px",borderBottom:i<prov.errors.length-1?"1px solid var(--red)":"none",fontSize:10}}>
-                  <span style={{fontFamily:"var(--mono)",color:"var(--text3)",marginRight:8}}>{e.ts?new Date(e.ts).toLocaleTimeString():""}</span>
-                  <span style={{color:"var(--red)"}}>{e.msg||e}</span>
-                  {e.domain&&<span style={{fontFamily:"var(--mono)",color:"var(--text2)",marginLeft:8}}>{e.domain}</span>}
-                </div>)}
-              </div>
-            </div>}
-
-            {/* Reference cards */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:16}}>
-              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12}}>
-                <div style={{fontSize:10,fontWeight:700,marginBottom:6}}>Supabase</div>
-                <div style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text2)",lineHeight:1.8}}>
-                  user: {currentUser.id.slice(0,10)}...<br/>plan: {custData.plan}<br/>confirmed: [{conf.join(",")}]<br/>mailbox_count: {custData.mailbox_count}
+                <div style={{border:"1px solid var(--border)",padding:10,background:"var(--bg)"}}>
+                  <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Mailboxes</div>
+                  <div style={{fontSize:11,fontFamily:"var(--mono)"}}>{prov.mailboxes?prov.mailboxes.join(", "):"—"}</div>
                 </div>
               </div>
-              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12}}>
-                <div style={{fontSize:10,fontWeight:700,marginBottom:6}}>APIs</div>
-                <div style={{fontSize:9,color:"var(--text2)",lineHeight:1.8}}>
-                  Porkbun (domains+DNS)<br/>Google Admin (mailboxes)<br/>Smartlead (warmup+send)<br/>Claude API (copy)
-                </div>
+            </div>;
+          })()}
+          {/* Record Purchase Form */}
+          {(()=>{
+            const prov=opsDetail._prov||{};
+            if(prov.status==="active")return <div style={{padding:12,background:"var(--green-bg)",border:"1px solid var(--green-bd)",fontSize:12,color:"var(--green)",fontWeight:600}}>✓ Infrastructure active — domains and mailboxes configured</div>;
+            return <div style={{border:"1px solid var(--green)",padding:16,background:"var(--bg)"}}>
+              <div style={{fontSize:12,fontWeight:700,marginBottom:8,color:"var(--green)"}}>Record SmartSenders Purchase</div>
+              <div style={{fontSize:10,color:"var(--text3)",marginBottom:12}}>After purchasing domains + mailboxes in SmartSenders, enter them here to update this customer's dashboard.</div>
+              <div style={{marginBottom:8}}>
+                <label style={{fontSize:10,fontWeight:600,color:"var(--text2)",display:"block",marginBottom:4}}>Domains (one per line)</label>
+                <textarea id={"rec-domains-"+opsDetail.user_id} placeholder={"coldflowsmail.com\ncoldflowssends.com\ncoldflowsreach.com"} style={{width:"100%",minHeight:60,padding:8,fontSize:11,fontFamily:"var(--mono)",background:"var(--bg2)",border:"1px solid var(--border)",color:"var(--text)",resize:"vertical"}}/>
               </div>
-              <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12}}>
-                <div style={{fontSize:10,fontWeight:700,marginBottom:6}}>Costs ({custData.plan}) — {currency}</div>
-                <div style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text2)",lineHeight:1.8}}>
-                  Domains: {cs}{fx(mb*11.08/12)}/mo<br/>Smartlead: {cs}{fx(39)}/mo<br/>Workspace: {cs}{fx(mb*6)}/mo<br/><strong>Total: ~{cs}{fx(mb*11.08/12+39+mb*6)}/mo</strong>
-                </div>
+              <div style={{marginBottom:12}}>
+                <label style={{fontSize:10,fontWeight:600,color:"var(--text2)",display:"block",marginBottom:4}}>Mailbox emails (one per line)</label>
+                <textarea id={"rec-mailboxes-"+opsDetail.user_id} placeholder={"thomas@coldflowsmail.com\nthomas@coldflowssends.com"} style={{width:"100%",minHeight:60,padding:8,fontSize:11,fontFamily:"var(--mono)",background:"var(--bg2)",border:"1px solid var(--border)",color:"var(--text)",resize:"vertical"}}/>
               </div>
-            </div>
+              <button onClick={async()=>{
+                const domainsEl=document.getElementById("rec-domains-"+opsDetail.user_id);
+                const mailboxesEl=document.getElementById("rec-mailboxes-"+opsDetail.user_id);
+                const domains=domainsEl.value.trim().split("\n").filter(d=>d.trim());
+                const mailboxes=mailboxesEl.value.trim().split("\n").filter(m=>m.trim());
+                if(!domains.length){alert("Enter at least one domain");return;}
+                const provData={status:"active",purchased_at:new Date().toISOString(),domains:domains,mailboxes:mailboxes,provider:"smartsenders_zapmail"};
+                await sb.from("customers").update({provisioning:JSON.stringify(provData),status:"active"}).eq("user_id",opsDetail.user_id);
+                alert("Customer updated — infrastructure marked as active");
+                window.location.reload();
+              }} style={{padding:"8px 20px",fontSize:11,fontWeight:700,border:"none",background:"var(--green)",color:"#fff",cursor:"pointer"}}>Save & Activate Customer</button>
+            </div>;
+          })()}
+        </div>}
 
-            <details style={{border:"1px solid var(--border)",background:"var(--bg)"}}>
-              <summary style={{padding:"8px 12px",fontSize:10,fontWeight:700,cursor:"pointer",color:"var(--text2)"}}>Raw target_market JSON</summary>
-              <div style={{padding:"0 12px 12px",maxHeight:200,overflow:"auto"}}>
-                <pre style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text2)",whiteSpace:"pre-wrap",margin:0}}>{JSON.stringify(t,null,2)}</pre>
-              </div>
-            </details>
-          </div>;
-        })()}
+        {/* Summary stats */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:10}}>
+          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12,textAlign:"center"}}>
+            <div style={{fontSize:20,fontWeight:700}}>{allCustomers.length}</div>
+            <div style={{fontSize:10,color:"var(--text3)"}}>Total customers</div>
+          </div>
+          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12,textAlign:"center"}}>
+            <div style={{fontSize:20,fontWeight:700,color:"var(--green)"}}>{allCustomers.filter(c=>(c._prov||{}).status==="active").length}</div>
+            <div style={{fontSize:10,color:"var(--text3)"}}>Active</div>
+          </div>
+          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12,textAlign:"center"}}>
+            <div style={{fontSize:20,fontWeight:700,color:"var(--orange)"}}>{allCustomers.filter(c=>(c._prov||{}).status==="domains_suggested").length}</div>
+            <div style={{fontSize:10,color:"var(--text3)"}}>Awaiting setup</div>
+          </div>
+          <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:12,textAlign:"center"}}>
+            <div style={{fontSize:20,fontWeight:700}}>{allCustomers.filter(c=>!(c._prov||{}).status).length}</div>
+            <div style={{fontSize:10,color:"var(--text3)"}}>Not started</div>
+          </div>
+        </div>
       </div>}
 
       </div>}
