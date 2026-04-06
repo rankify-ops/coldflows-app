@@ -1388,8 +1388,8 @@ function App(){
       {pg==="overview"&&<div className="fade-in" style={{padding:"24px 28px"}}>
         <div style={{padding:"24px 28px",borderBottom:"1px solid var(--border)"}}><h1 style={{fontSize:22,fontWeight:600,letterSpacing:"-0.3px"}}>Overview</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>{custData&&custData.mailbox_count===0?"Account provisioning in progress":"Last updated 3 minutes ago"}</p></div>
 
-        {/* PROVISIONING STATE — real customer, 0 mailboxes */}
-        {custData&&custData.mailbox_count===0&&<div style={{}}>
+        {/* PROVISIONING STATE — real customer, no Smartlead data yet */}
+        {custData&&!custData.smartlead_cache&&custData.mailbox_count===0&&<div style={{}}>
           
           {/* Dynamic banner — changes content when all campaigns configured */}
           {(()=>{
@@ -1570,8 +1570,8 @@ function App(){
           </div>
         </div>}
 
-        {/* ACTIVE STATE — existing mock dashboard for when mailboxes are live */}
-        {custData&&custData.mailbox_count>0&&<>
+        {/* ACTIVE STATE — campaigns live, show real dashboard */}
+        {custData&&(custData.smartlead_cache||custData.mailbox_count>0)&&<>
 
         {wc>0&&<div style={{padding:"12px 20px",fontSize:13,display:"flex",alignItems:"center",gap:10,fontWeight:500,color:"var(--green)",borderBottom:"1px solid var(--border)"}}>
           <div style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 2s infinite"}}/>{wc} warm lead{wc>1?"s":""} waiting for follow-up
