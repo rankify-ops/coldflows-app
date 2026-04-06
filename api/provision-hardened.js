@@ -1,34 +1,22 @@
 /**
- * Coldflows Domain Provisioning — Namecheap Edition
- * ===================================================
- * Runs on VPS: 170.64.130.130 (coldflows-automation, DigitalOcean Sydney)
+ * Coldflows Domain Provisioning — WITH APPROVAL GATE
+ * ====================================================
+ * VPS: 170.64.130.130 (coldflows-automation, DigitalOcean Sydney)
  * 
- * SAFEGUARDS:
- * 1. Pre-purchase count check — never exceed plan limit
- * 2. RDAP availability check before every purchase attempt
- * 3. Post-purchase verification via Namecheap domains.getList
- * 4. Idempotent — safe to re-run (checks existing purchases first)
- * 5. Budget guard — hard cap per customer
- * 6. Telegram notifications for progress + errors
- * 7. Every state change written to Supabase immediately
- * 8. Detailed error logging with timestamps
+ * CRITICAL: ZERO domains purchased without manual approval.
  * 
- * TRIGGER: Supabase webhook → POST http://170.64.130.130:3000/provision
- * 
- * ENV VARS (in /opt/coldflows/.env):
- *   NAMECHEAP_API_KEY, NAMECHEAP_USER
- *   SUPABASE_URL, SUPABASE_KEY
- *   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
- *   VPS_IP
+ * FLOW:
+ * 1. Webhook → validate → generate domain list → check availability
+ * 2. Send approval request to Telegram with: domains, pricing, total, client
+ * 3. WAIT. Nothing happens until Thomas approves.
+ * 4. Thomas approves via link or /approve command in Telegram
+ * 5. ONLY THEN purchases happen, one at a time, with notifications
  */
 
 const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 
-// =============================================
-// LOAD ENV FROM .env FILE
-// =============================================
 try {
   const fs = require('fs');
   const envFile = fs.readFileSync('/opt/coldflows/.env', 'utf8');
@@ -36,544 +24,298 @@ try {
     const [key, ...vals] = line.split('=');
     if (key && vals.length) process.env[key.trim()] = vals.join('=').trim();
   });
-} catch (e) { /* .env not found, use existing env */ }
+} catch (e) {}
 
-// =============================================
-// CONFIG
-// =============================================
 const CONFIG = {
-  namecheap: {
-    api_key: process.env.NAMECHEAP_API_KEY,
-    user: process.env.NAMECHEAP_USER || 'coldflowsai',
-    base: 'https://api.namecheap.com/xml.response',
-    client_ip: process.env.VPS_IP || '170.64.130.130',
-  },
-  supabase: {
-    url: process.env.SUPABASE_URL || 'https://bmjjyujuyjpkyggormoa.supabase.co',
-    key: process.env.SUPABASE_KEY,
-  },
-  telegram: {
-    bot_token: process.env.TELEGRAM_BOT_TOKEN,
-    chat_id: process.env.TELEGRAM_CHAT_ID || '',
-  },
-  max_price_per_domain: 15.00,
-  rate_limit_ms: 1500,
-  rdap_rate_limit_ms: 200,
-  tld: '.com',
-  port: 3000,
+  namecheap: { api_key: process.env.NAMECHEAP_API_KEY, user: process.env.NAMECHEAP_USER || 'coldflowsai', base: 'https://api.namecheap.com/xml.response', client_ip: process.env.VPS_IP || '170.64.130.130' },
+  supabase: { url: process.env.SUPABASE_URL || 'https://bmjjyujuyjpkyggormoa.supabase.co', key: process.env.SUPABASE_KEY },
+  telegram: { bot_token: process.env.TELEGRAM_BOT_TOKEN, chat_id: process.env.TELEGRAM_CHAT_ID || '' },
+  max_price_per_domain: 15.00, rate_limit_ms: 1500, rdap_rate_limit_ms: 200, port: 3000,
 };
-
-const PLAN_LIMITS = {
-  starter: { mailboxes: 4, campaigns: 2 },
-  growth:  { mailboxes: 12, campaigns: 4 },
-  scale:   { mailboxes: 30, campaigns: 10 },
-};
-
-// =============================================
-// UTILITIES
-// =============================================
+const PLAN_LIMITS = { starter: { mailboxes: 4, campaigns: 2 }, growth: { mailboxes: 12, campaigns: 4 }, scale: { mailboxes: 30, campaigns: 10 } };
+const pendingApprovals = {};
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const now = () => new Date().toISOString();
-const log = (level, msg, data) => {
-  const ts = new Date().toISOString().slice(0, 19);
-  console.log(`[${ts}] [${level}] ${msg}`, data ? JSON.stringify(data) : '');
-};
+const log = (level, msg) => console.log(`[${new Date().toISOString().slice(0,19)}] [${level}] ${msg}`);
 
 function fetchJSON(url, options = {}) {
   return new Promise((resolve, reject) => {
-    const u = new URL(url);
-    const mod = u.protocol === 'https:' ? https : http;
-    const req = mod.request(url, {
-      method: options.method || 'GET',
-      headers: options.headers || {},
-      timeout: 15000,
-    }, res => {
-      let body = '';
-      res.on('data', d => body += d);
-      res.on('end', () => {
-        try { resolve({ status: res.statusCode, body: JSON.parse(body) }); }
-        catch { resolve({ status: res.statusCode, body }); }
-      });
+    const mod = url.startsWith('https') ? https : http;
+    const req = mod.request(url, { method: options.method || 'GET', headers: options.headers || {}, timeout: 15000 }, res => {
+      let body = ''; res.on('data', d => body += d);
+      res.on('end', () => { try { resolve({ status: res.statusCode, body: JSON.parse(body) }); } catch { resolve({ status: res.statusCode, body }); } });
     });
     req.on('error', reject);
-    req.on('timeout', () => { req.destroy(); reject(new Error('Request timeout')); });
     if (options.body) req.write(typeof options.body === 'string' ? options.body : JSON.stringify(options.body));
     req.end();
   });
 }
-
 function fetchXML(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, { timeout: 15000 }, res => {
-      let body = '';
-      res.on('data', d => body += d);
-      res.on('end', () => resolve(body));
-    }).on('error', reject);
+    https.get(url, { timeout: 15000 }, res => { let body = ''; res.on('data', d => body += d); res.on('end', () => resolve(body)); }).on('error', reject);
   });
 }
 
-// =============================================
-// TELEGRAM
-// =============================================
 async function notify(message) {
-  if (!CONFIG.telegram.chat_id) { log('WARN', 'No Telegram chat_id'); return; }
-  try {
-    await fetchJSON(`https://api.telegram.org/bot${CONFIG.telegram.bot_token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CONFIG.telegram.chat_id, text: `🧊 COLDFLOWS\n${message}` }),
-    });
-  } catch (e) { log('ERROR', 'Telegram failed', { error: e.message }); }
+  if (!CONFIG.telegram.chat_id) return;
+  try { await fetchJSON(`https://api.telegram.org/bot${CONFIG.telegram.bot_token}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: CONFIG.telegram.chat_id, text: message, parse_mode: 'HTML' }) }); } catch (e) { log('ERROR', 'Telegram failed: ' + e.message); }
 }
 
-// =============================================
-// SUPABASE
-// =============================================
 async function getCustomer(userId) {
-  const resp = await fetchJSON(
-    `${CONFIG.supabase.url}/rest/v1/customers?user_id=eq.${userId}&select=*`,
-    { headers: { apikey: CONFIG.supabase.key, Authorization: `Bearer ${CONFIG.supabase.key}` } }
-  );
-  if (!resp.body || !resp.body[0]) throw new Error(`Customer not found: ${userId}`);
+  const resp = await fetchJSON(`${CONFIG.supabase.url}/rest/v1/customers?user_id=eq.${userId}&select=*`, { headers: { apikey: CONFIG.supabase.key, Authorization: `Bearer ${CONFIG.supabase.key}` } });
+  if (!resp.body || !resp.body[0]) throw new Error('Customer not found: ' + userId);
   const c = resp.body[0];
   c._targeting = typeof c.target_market === 'string' ? JSON.parse(c.target_market) : c.target_market || {};
   c._limits = PLAN_LIMITS[c.plan] || PLAN_LIMITS.starter;
   return c;
 }
-
 async function updateTargetMarket(userId, targeting) {
-  await fetchJSON(
-    `${CONFIG.supabase.url}/rest/v1/customers?user_id=eq.${userId}`,
-    {
-      method: 'PATCH',
-      headers: {
-        apikey: CONFIG.supabase.key,
-        Authorization: `Bearer ${CONFIG.supabase.key}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify({ target_market: JSON.stringify(targeting) }),
-    }
-  );
+  await fetchJSON(`${CONFIG.supabase.url}/rest/v1/customers?user_id=eq.${userId}`, { method: 'PATCH', headers: { apikey: CONFIG.supabase.key, Authorization: `Bearer ${CONFIG.supabase.key}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ target_market: JSON.stringify(targeting) }) });
 }
 
-// =============================================
-// DOMAIN NAME GENERATION
-// =============================================
-function generateCandidates(businessName, count = 60) {
+function generateCandidates(businessName) {
   const clean = businessName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 14);
-  if (clean.length < 3) throw new Error(`Business name too short: "${businessName}"`);
-
-  const suffixes = [
-    'mail', 'sends', 'reach', 'hub', 'team', 'hq', 'go', 'now',
-    'pro', 'ops', 'run', 'flow', 'labs', 'direct', 'inbox', 'connect',
-    'msg', 'ping', 'works', 'zone', 'desk', 'base', 'wave', 'notify',
-    'out', 'send', 'hello', 'link', 'grid', 'core',
-  ];
-  const prefixes = ['get', 'try', 'use', 'hey', 'hi', 'meet', 'from', 'with'];
-  const candidates = [];
-  for (const s of suffixes) candidates.push(`${clean}${s}.com`);
-  for (const p of prefixes) candidates.push(`${p}${clean}.com`);
-  for (let i = 10; i < 100; i += 7) candidates.push(`${clean}${i}.com`);
-  for (let i = 100; i < 999; i += 47) candidates.push(`${clean}${i}.com`);
-  return [...new Set(candidates)].slice(0, count);
+  if (clean.length < 3) throw new Error('Business name too short');
+  const suffixes = ['mail','sends','reach','hub','team','hq','go','now','pro','ops','run','flow','labs','direct','inbox','connect','msg','ping','works','zone','desk','base','wave','notify','out','send','hello','link','grid','core'];
+  const prefixes = ['get','try','use','hey','hi','meet','from','with'];
+  const c = [];
+  for (const s of suffixes) c.push(clean+s+'.com');
+  for (const p of prefixes) c.push(p+clean+'.com');
+  for (let i = 10; i < 100; i += 7) c.push(clean+i+'.com');
+  return [...new Set(c)].slice(0, 60);
 }
 
-// =============================================
-// RDAP AVAILABILITY CHECK
-// =============================================
-function checkAvailableRDAP(domain) {
-  return new Promise((resolve) => {
-    https.get(`https://rdap.verisign.com/com/v1/domain/${domain}`, { timeout: 5000 }, (res) => {
-      if (res.statusCode === 200) resolve(false);
-      else if (res.statusCode === 404) resolve(true);
-      else resolve(null);
-      res.resume();
+function checkRDAP(domain) {
+  return new Promise(resolve => {
+    https.get('https://rdap.verisign.com/com/v1/domain/' + domain, { timeout: 5000 }, res => {
+      resolve(res.statusCode === 404); res.resume();
     }).on('error', () => resolve(null)).on('timeout', function() { this.destroy(); resolve(null); });
   });
 }
 
-// =============================================
-// NAMECHEAP: CHECK AVAILABILITY (backup check)
-// =============================================
-async function checkAvailableNamecheap(domain) {
-  const url = `${CONFIG.namecheap.base}?ApiUser=${CONFIG.namecheap.user}&ApiKey=${CONFIG.namecheap.api_key}&UserName=${CONFIG.namecheap.user}&ClientIp=${CONFIG.namecheap.client_ip}&Command=namecheap.domains.check&DomainList=${domain}`;
-  const xml = await fetchXML(url);
-  const availMatch = xml.match(/Available="(true|false)"/);
-  const premiumMatch = xml.match(/IsPremiumName="(true|false)"/);
-  return {
-    available: availMatch ? availMatch[1] === 'true' : false,
-    premium: premiumMatch ? premiumMatch[1] === 'true' : false,
-  };
+async function checkNamecheap(domain) {
+  const xml = await fetchXML(`${CONFIG.namecheap.base}?ApiUser=${CONFIG.namecheap.user}&ApiKey=${CONFIG.namecheap.api_key}&UserName=${CONFIG.namecheap.user}&ClientIp=${CONFIG.namecheap.client_ip}&Command=namecheap.domains.check&DomainList=${domain}`);
+  return { available: xml.includes('Available="true"'), premium: xml.includes('IsPremiumName="true"') };
 }
 
-// =============================================
-// NAMECHEAP: REGISTER DOMAIN
-// =============================================
 async function registerDomain(domain) {
-  const sld = domain.replace('.com', '');
-  const params = [
-    `ApiUser=${CONFIG.namecheap.user}`,
-    `ApiKey=${CONFIG.namecheap.api_key}`,
-    `UserName=${CONFIG.namecheap.user}`,
-    `ClientIp=${CONFIG.namecheap.client_ip}`,
-    `Command=namecheap.domains.create`,
-    `DomainName=${domain}`,
-    `Years=1`,
-    // Registrant info (required by ICANN)
-    `RegistrantFirstName=Thomas`,
-    `RegistrantLastName=Flood`,
-    `RegistrantAddress1=Currumbin+Waters`,
-    `RegistrantCity=Gold+Coast`,
-    `RegistrantStateProvince=Queensland`,
-    `RegistrantPostalCode=4223`,
-    `RegistrantCountry=AU`,
-    `RegistrantPhone=+61.400000000`,
-    `RegistrantEmailAddress=REDACTED_EMAIL`,
-    // Tech contact (same)
-    `TechFirstName=Thomas`,
-    `TechLastName=Flood`,
-    `TechAddress1=Currumbin+Waters`,
-    `TechCity=Gold+Coast`,
-    `TechStateProvince=Queensland`,
-    `TechPostalCode=4223`,
-    `TechCountry=AU`,
-    `TechPhone=+61.400000000`,
-    `TechEmailAddress=REDACTED_EMAIL`,
-    // Admin contact (same)
-    `AdminFirstName=Thomas`,
-    `AdminLastName=Flood`,
-    `AdminAddress1=Currumbin+Waters`,
-    `AdminCity=Gold+Coast`,
-    `AdminStateProvince=Queensland`,
-    `AdminPostalCode=4223`,
-    `AdminCountry=AU`,
-    `AdminPhone=+61.400000000`,
-    `AdminEmailAddress=REDACTED_EMAIL`,
-    // AuxBilling contact (same)
-    `AuxBillingFirstName=Thomas`,
-    `AuxBillingLastName=Flood`,
-    `AuxBillingAddress1=Currumbin+Waters`,
-    `AuxBillingCity=Gold+Coast`,
-    `AuxBillingStateProvince=Queensland`,
-    `AuxBillingPostalCode=4223`,
-    `AuxBillingCountry=AU`,
-    `AuxBillingPhone=+61.400000000`,
-    `AuxBillingEmailAddress=REDACTED_EMAIL`,
-    // WHOIS privacy
-    `AddFreeWhoisguard=yes`,
-    `WGEnabled=yes`,
-  ].join('&');
-
-  const url = `${CONFIG.namecheap.base}?${params}`;
-  const xml = await fetchXML(url);
-  
-  const success = xml.includes('Status="OK"');
-  const registered = xml.match(/Registered="(true|false)"/);
-  const domainId = xml.match(/DomainID="(\d+)"/);
-  const chargedAmount = xml.match(/ChargedAmount="([\d.]+)"/);
-  const errorMatch = xml.match(/<Error[^>]*>(.*?)<\/Error>/);
-
+  const params = `ApiUser=${CONFIG.namecheap.user}&ApiKey=${CONFIG.namecheap.api_key}&UserName=${CONFIG.namecheap.user}&ClientIp=${CONFIG.namecheap.client_ip}&Command=namecheap.domains.create&DomainName=${domain}&Years=1&RegistrantFirstName=Thomas&RegistrantLastName=Flood&RegistrantAddress1=Currumbin+Waters&RegistrantCity=Gold+Coast&RegistrantStateProvince=Queensland&RegistrantPostalCode=4223&RegistrantCountry=AU&RegistrantPhone=%2B61.400000000&RegistrantEmailAddress=tomflood1995%40gmail.com&TechFirstName=Thomas&TechLastName=Flood&TechAddress1=Currumbin+Waters&TechCity=Gold+Coast&TechStateProvince=Queensland&TechPostalCode=4223&TechCountry=AU&TechPhone=%2B61.400000000&TechEmailAddress=tomflood1995%40gmail.com&AdminFirstName=Thomas&AdminLastName=Flood&AdminAddress1=Currumbin+Waters&AdminCity=Gold+Coast&AdminStateProvince=Queensland&AdminPostalCode=4223&AdminCountry=AU&AdminPhone=%2B61.400000000&AdminEmailAddress=tomflood1995%40gmail.com&AuxBillingFirstName=Thomas&AuxBillingLastName=Flood&AuxBillingAddress1=Currumbin+Waters&AuxBillingCity=Gold+Coast&AuxBillingStateProvince=Queensland&AuxBillingPostalCode=4223&AuxBillingCountry=AU&AuxBillingPhone=%2B61.400000000&AuxBillingEmailAddress=tomflood1995%40gmail.com&AddFreeWhoisguard=yes&WGEnabled=yes`;
+  const xml = await fetchXML(`${CONFIG.namecheap.base}?${params}`);
   return {
-    success: success && registered && registered[1] === 'true',
-    domain,
-    domainId: domainId ? domainId[1] : null,
-    cost: chargedAmount ? parseFloat(chargedAmount[1]) : null,
-    error: errorMatch ? errorMatch[1] : null,
-    raw: xml.slice(0, 500),
+    success: xml.includes('Status="OK"') && xml.includes('Registered="true"'),
+    domainId: (xml.match(/DomainID="(\d+)"/) || [])[1],
+    cost: parseFloat((xml.match(/ChargedAmount="([\d.]+)"/) || [])[1] || '10.98'),
+    error: (xml.match(/<Error[^>]*>(.*?)<\/Error>/) || [])[1],
   };
 }
 
 // =============================================
-// NAMECHEAP: VERIFY DOMAIN IN ACCOUNT
+// PHASE 1: PLAN (no money spent)
 // =============================================
-async function verifyInAccount(domain) {
-  const url = `${CONFIG.namecheap.base}?ApiUser=${CONFIG.namecheap.user}&ApiKey=${CONFIG.namecheap.api_key}&UserName=${CONFIG.namecheap.user}&ClientIp=${CONFIG.namecheap.client_ip}&Command=namecheap.domains.getList&PageSize=100`;
-  const xml = await fetchXML(url);
-  return xml.includes(`Name="${domain}"`);
-}
+async function generatePlan(userId) {
+  const jobId = 'plan_' + Date.now();
+  log('INFO', 'Generating purchase plan: ' + jobId);
 
-// =============================================
-// MAIN PROVISIONING PIPELINE
-// =============================================
-async function provisionDomains(userId) {
-  const jobId = `prov_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  log('INFO', `=== PROVISIONING START === job=${jobId} user=${userId}`);
-
-  // ---- Load + validate customer ----
   const customer = await getCustomer(userId);
   const t = customer._targeting;
   const limits = customer._limits;
   const conf = t.campaigns_confirmed || [];
+  if (conf.length < limits.campaigns) return { error: 'Campaigns not confirmed' };
 
-  log('INFO', `Customer: ${customer.business_name} | ${customer.plan} | ${conf.length}/${limits.campaigns} campaigns`);
+  const existing = ((t.provisioning || {}).domains || []).filter(d => d.status === 'purchased');
+  const remaining = limits.mailboxes - existing.length;
+  if (remaining <= 0) return { message: 'All domains already purchased' };
 
-  if (conf.length < limits.campaigns) {
-    const msg = `BLOCKED: Only ${conf.length}/${limits.campaigns} campaigns confirmed.`;
-    log('ERROR', msg);
-    await notify(`🚨 ${msg}\nCustomer: ${customer.business_name}`);
-    return { success: false, error: msg };
-  }
-
-  // ---- Check existing purchases (idempotency) ----
-  const prov = t.provisioning || {};
-  const existingDomains = (prov.domains || []).filter(d => d.status === 'purchased' || d.status === 'dns_done');
-  const alreadyPurchased = existingDomains.length;
-  const domainsNeeded = limits.mailboxes;
-  const remaining = domainsNeeded - alreadyPurchased;
-
-  if (remaining <= 0) {
-    const msg = `Already have ${alreadyPurchased}/${domainsNeeded} domains. Nothing to buy.`;
-    log('INFO', msg);
-    return { success: true, message: msg };
-  }
-
-  // ---- Budget guard ----
-  const budgetLimit = domainsNeeded * CONFIG.max_price_per_domain;
-  const budgetSpent = existingDomains.reduce((sum, d) => sum + (d.cost || 0), 0);
-
-  if (budgetSpent + CONFIG.max_price_per_domain > budgetLimit) {
-    const msg = `BUDGET EXCEEDED: limit=$${budgetLimit}, spent=$${budgetSpent}.`;
-    log('ERROR', msg);
-    await notify(`🚨 BUDGET GUARD\n${msg}\nCustomer: ${customer.business_name}`);
-    return { success: false, error: msg };
-  }
-
-  // ---- Init provisioning record ----
-  if (!t.provisioning) t.provisioning = {};
-  t.provisioning.job_id = jobId;
-  t.provisioning.status = 'purchasing';
-  t.provisioning.started_at = t.provisioning.started_at || now();
-  t.provisioning.budget_limit = budgetLimit;
-  t.provisioning.budget_spent = budgetSpent;
-  t.provisioning.domains_needed = domainsNeeded;
-  t.provisioning.domains_purchased = alreadyPurchased;
-  if (!t.provisioning.domains) t.provisioning.domains = existingDomains;
-  if (!t.provisioning.errors) t.provisioning.errors = [];
-  await updateTargetMarket(userId, t);
-
-  await notify(`🚀 PROVISIONING STARTED\nCustomer: ${customer.business_name}\nPlan: ${customer.plan}\nDomains needed: ${remaining} more\nBudget: $${(budgetLimit - budgetSpent).toFixed(2)} remaining\nJob: ${jobId}`);
-
-  // ---- Generate candidates ----
-  const candidates = generateCandidates(customer.business_name, 80);
-  const existingNames = existingDomains.map(d => d.domain);
-  const newCandidates = candidates.filter(d => !existingNames.includes(d));
-
-  // ---- Check availability via RDAP ----
+  const candidates = generateCandidates(customer.business_name).filter(d => !existing.find(e => e.domain === d));
   const available = [];
-  for (const domain of newCandidates) {
-    if (available.length >= remaining + 5) break;
-    const isAvailable = await checkAvailableRDAP(domain);
-    if (isAvailable === true) {
-      available.push(domain);
-      log('INFO', `  ✓ ${domain} — available`);
+
+  for (const domain of candidates) {
+    if (available.length >= remaining + 3) break;
+    const rdap = await checkRDAP(domain);
+    if (rdap) {
+      const nc = await checkNamecheap(domain);
+      if (nc.available && !nc.premium) { available.push({ domain, price: 10.98 }); log('INFO', '  OK: ' + domain); }
+      await sleep(CONFIG.rate_limit_ms);
     }
     await sleep(CONFIG.rdap_rate_limit_ms);
   }
 
   if (available.length < remaining) {
-    const msg = `NOT ENOUGH DOMAINS: found ${available.length}, need ${remaining}. Business: ${customer.business_name}`;
-    log('ERROR', msg);
-    await notify(`🚨 ${msg}`);
-    t.provisioning.status = 'error_insufficient_domains';
-    t.provisioning.errors.push({ ts: now(), msg });
-    await updateTargetMarket(userId, t);
-    return { success: false, error: msg };
+    await notify('🚨 Not enough domains found for ' + customer.business_name);
+    return { error: 'Not enough domains' };
   }
 
-  // ---- Purchase domains one at a time ----
-  const mbPerCampaign = Math.floor(domainsNeeded / limits.campaigns);
-  let purchased = 0;
-  let campaignIdx = Math.floor(alreadyPurchased / mbPerCampaign);
-  let mailboxIdx = alreadyPurchased % mbPerCampaign;
+  const selected = available.slice(0, remaining);
+  const total = selected.reduce((s, d) => s + d.price, 0);
 
-  for (const domain of available) {
-    if (purchased >= remaining) break;
+  const plan = { jobId, userId, customer: customer.business_name, email: customer.email, plan: customer.plan, domains: selected, total, existing: existing.length, needed: remaining, createdAt: now() };
+  pendingApprovals[jobId] = plan;
 
-    // Budget check before each purchase
-    if (t.provisioning.budget_spent + CONFIG.max_price_per_domain > budgetLimit) {
-      log('ERROR', 'BUDGET GUARD: Would exceed limit. Stopping.');
-      await notify(`🚨 BUDGET GUARD — stopping purchases`);
-      break;
-    }
+  if (!t.provisioning) t.provisioning = {};
+  t.provisioning.status = 'awaiting_approval';
+  t.provisioning.pending_plan = plan;
+  await updateTargetMarket(userId, t);
 
-    // Double-check with Namecheap before buying
-    const ncCheck = await checkAvailableNamecheap(domain);
-    if (!ncCheck.available) { log('WARN', `${domain} not available on Namecheap, skipping`); continue; }
-    if (ncCheck.premium) { log('WARN', `${domain} is premium, skipping`); continue; }
+  const list = selected.map((d, i) => `  ${i+1}. ${d.domain} — $${d.price}`).join('\n');
+  await notify(
+    `🧊 COLDFLOWS — APPROVAL REQUIRED\n━━━━━━━━━━━━━━━━━━━━\n` +
+    `<b>Customer:</b> ${customer.business_name}\n` +
+    `<b>Email:</b> ${customer.email}\n` +
+    `<b>Plan:</b> ${customer.plan.toUpperCase()}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `<b>Domains to purchase (${remaining}):</b>\n${list}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `<b>💰 Total: $${total.toFixed(2)}</b>\n` +
+    `Per domain: $${selected[0].price}\n` +
+    `Already owned: ${existing.length}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `✅ To approve, click:\nhttp://170.64.130.130:3000/approve/${jobId}\n\n` +
+    `Or reply: /approve ${jobId}\n\n` +
+    `❌ To reject, ignore. Expires 24hrs.`
+  );
 
-    log('INFO', `Purchasing ${domain}...`);
+  log('INFO', `Plan sent for approval. ${remaining} domains, $${total.toFixed(2)}`);
+  return { jobId, status: 'awaiting_approval' };
+}
 
+// =============================================
+// PHASE 2: PURCHASE (only after approval)
+// =============================================
+async function executePurchase(jobId) {
+  const plan = pendingApprovals[jobId];
+  if (!plan) return { error: 'Plan not found' };
+
+  log('INFO', '=== PURCHASE APPROVED: ' + jobId + ' ===');
+  await notify('⏳ Starting purchases for ' + plan.customer + '...');
+
+  const customer = await getCustomer(plan.userId);
+  const t = customer._targeting;
+  const limits = customer._limits;
+  const conf = t.campaigns_confirmed || [];
+  if (!t.provisioning) t.provisioning = {};
+  t.provisioning.status = 'purchasing';
+  t.provisioning.job_id = jobId;
+  if (!t.provisioning.domains) t.provisioning.domains = [];
+  if (!t.provisioning.errors) t.provisioning.errors = [];
+  t.provisioning.budget_spent = t.provisioning.budget_spent || 0;
+  await updateTargetMarket(plan.userId, t);
+
+  const mbPerCampaign = Math.floor(limits.mailboxes / limits.campaigns);
+  const existingCount = t.provisioning.domains.filter(d => d.status === 'purchased').length;
+  let cIdx = Math.floor(existingCount / mbPerCampaign);
+  let mIdx = existingCount % mbPerCampaign;
+  let bought = 0;
+
+  for (const d of plan.domains) {
+    log('INFO', 'Buying: ' + d.domain);
     try {
-      const result = await registerDomain(domain);
+      const r = await registerDomain(d.domain);
       await sleep(CONFIG.rate_limit_ms);
-
-      if (result.success) {
-        // Verify in account
-        const verified = await verifyInAccount(domain);
-        const campaignNum = conf[campaignIdx] || (campaignIdx + 1);
-
-        const domainRecord = {
-          domain,
-          status: 'purchased',
-          purchased_at: now(),
-          cost: result.cost || 10.98,
-          campaign: campaignNum,
-          mailbox_index: mailboxIdx + 1,
-          email: `outreach@${domain}`,
-          verified_in_account: verified,
-          namecheap_domain_id: result.domainId,
-          job_id: jobId,
-        };
-
-        t.provisioning.domains.push(domainRecord);
-        t.provisioning.domains_purchased++;
-        t.provisioning.budget_spent += (result.cost || 10.98);
-        purchased++;
-
-        mailboxIdx++;
-        if (mailboxIdx >= mbPerCampaign) { mailboxIdx = 0; campaignIdx++; }
-
-        // Save to Supabase IMMEDIATELY
-        await updateTargetMarket(userId, t);
-
-        log('INFO', `  ✓ PURCHASED${verified ? ' + VERIFIED' : ''}: ${domain} ($${result.cost}) [${alreadyPurchased + purchased}/${domainsNeeded}]`);
-        await notify(`✅ Purchased: ${domain}\nCost: $${result.cost}\nCampaign ${campaignNum}, mailbox ${domainRecord.mailbox_index}\n(${alreadyPurchased + purchased}/${domainsNeeded} total)`);
-
-        if (!verified) {
-          await notify(`⚠️ Domain ${domain} purchased but NOT found in account list. Manual check needed.`);
-        }
+      if (r.success) {
+        const campNum = conf[cIdx] || (cIdx + 1);
+        t.provisioning.domains.push({ domain: d.domain, status: 'purchased', purchased_at: now(), cost: r.cost || 10.98, campaign: campNum, mailbox_index: mIdx + 1, email: 'outreach@' + d.domain, namecheap_id: r.domainId, job_id: jobId });
+        t.provisioning.budget_spent += (r.cost || 10.98);
+        bought++;
+        mIdx++; if (mIdx >= mbPerCampaign) { mIdx = 0; cIdx++; }
+        await updateTargetMarket(plan.userId, t);
+        await notify(`✅ ${d.domain} — $${r.cost}\nCampaign ${campNum} / mailbox ${mIdx}\n(${existingCount + bought}/${limits.mailboxes})`);
       } else {
-        const msg = `Failed: ${domain} — ${result.error || 'Unknown error'}`;
-        log('WARN', msg);
-        t.provisioning.errors.push({ ts: now(), msg, domain });
-        await updateTargetMarket(userId, t);
+        t.provisioning.errors.push({ ts: now(), msg: r.error, domain: d.domain });
+        await updateTargetMarket(plan.userId, t);
+        await notify('⚠️ Failed: ' + d.domain + ' — ' + r.error);
       }
     } catch (e) {
-      const msg = `Exception: ${domain} — ${e.message}`;
-      log('ERROR', msg);
-      await notify(`🚨 ${msg}`);
-      t.provisioning.errors.push({ ts: now(), msg, domain });
-      await updateTargetMarket(userId, t);
+      t.provisioning.errors.push({ ts: now(), msg: e.message, domain: d.domain });
+      await updateTargetMarket(plan.userId, t);
+      await notify('🚨 Error: ' + d.domain + ' — ' + e.message);
     }
-
     await sleep(CONFIG.rate_limit_ms);
   }
 
-  // ---- Final status ----
-  const totalPurchased = t.provisioning.domains.filter(d => d.status === 'purchased' || d.status === 'dns_done').length;
-  const allDone = totalPurchased >= domainsNeeded;
+  const total = t.provisioning.domains.filter(d => d.status === 'purchased').length;
+  t.provisioning.status = total >= limits.mailboxes ? 'domains_complete' : 'domains_partial';
+  t.provisioning.domains_purchased = total;
+  t.provisioning.domains_needed = limits.mailboxes;
+  delete t.provisioning.pending_plan;
+  await updateTargetMarket(plan.userId, t);
+  delete pendingApprovals[jobId];
 
-  t.provisioning.status = allDone ? 'domains_complete' : 'domains_partial';
-  t.provisioning.completed_at = allDone ? now() : null;
-  await updateTargetMarket(userId, t);
-
-  const summary = `${allDone ? '🎉 COMPLETE' : '⚠️ PARTIAL'}\nCustomer: ${customer.business_name}\nDomains: ${totalPurchased}/${domainsNeeded}\nSpent: $${t.provisioning.budget_spent.toFixed(2)}\nErrors: ${t.provisioning.errors.length}`;
-  log('INFO', summary);
-  await notify(summary);
-
-  return { success: allDone, purchased: totalPurchased, needed: domainsNeeded, spent: t.provisioning.budget_spent, jobId };
+  await notify(`${total >= limits.mailboxes ? '🎉 ALL DONE' : '⚠️ PARTIAL'}\n${plan.customer}: ${total}/${limits.mailboxes} domains\nSpent: $${t.provisioning.budget_spent.toFixed(2)}`);
 }
 
 // =============================================
-// DRY RUN
+// TELEGRAM POLLING (listens for /approve)
 // =============================================
-async function dryRun(userId) {
-  log('INFO', '=== DRY RUN (no purchases) ===');
-  const customer = await getCustomer(userId);
-  const limits = customer._limits;
-  const candidates = generateCandidates(customer.business_name, 60);
-
-  const available = [];
-  for (const domain of candidates) {
-    const isAvail = await checkAvailableRDAP(domain);
-    if (isAvail) { available.push(domain); log('INFO', `  ✓ ${domain}`); }
-    if (available.length >= limits.mailboxes + 4) break;
-    await sleep(150);
-  }
-
-  log('INFO', `Found ${available.length} available (need ${limits.mailboxes})`);
-  return { available, needed: limits.mailboxes, estimated_cost: limits.mailboxes * 10.98 };
+let lastUpdate = 0;
+async function pollTelegram() {
+  if (!CONFIG.telegram.bot_token || !CONFIG.telegram.chat_id) return;
+  try {
+    const r = await fetchJSON(`https://api.telegram.org/bot${CONFIG.telegram.bot_token}/getUpdates?offset=${lastUpdate+1}&timeout=5`);
+    if (r.body && r.body.result) for (const u of r.body.result) {
+      lastUpdate = u.update_id;
+      const txt = u.message?.text || '';
+      if (String(u.message?.chat?.id) !== CONFIG.telegram.chat_id) continue;
+      if (txt.startsWith('/approve ')) {
+        const jid = txt.replace('/approve ', '').trim();
+        if (pendingApprovals[jid]) { await notify('⏳ Approved. Purchasing...'); executePurchase(jid).catch(e => notify('🚨 ' + e.message)); }
+        else await notify('❌ Job not found: ' + jid);
+      }
+    }
+  } catch (e) {}
 }
+setInterval(pollTelegram, 3000);
+
+// Expire old plans
+setInterval(() => { for (const [id, p] of Object.entries(pendingApprovals)) if (Date.now() - new Date(p.createdAt).getTime() > 86400000) delete pendingApprovals[id]; }, 60000);
 
 // =============================================
-// HTTP SERVER (receives Supabase webhooks)
+// HTTP SERVER
 // =============================================
-const server = http.createServer((req, res) => {
+http.createServer((req, res) => {
   if (req.method === 'POST' && req.url === '/provision') {
-    let body = '';
-    req.on('data', d => body += d);
+    let body = ''; req.on('data', d => body += d);
     req.on('end', async () => {
       try {
-        const payload = JSON.parse(body);
-        // Supabase webhook sends: { type, table, record, old_record }
-        const record = payload.record || payload;
-        const userId = record.user_id;
-        
-        if (!userId) {
-          res.writeHead(400);
-          res.end('Missing user_id');
-          return;
-        }
-
-        // Check if all campaigns are confirmed before proceeding
-        const tm = typeof record.target_market === 'string' ? JSON.parse(record.target_market) : record.target_market || {};
-        const conf = tm.campaigns_confirmed || [];
-        const plan = record.plan || 'starter';
-        const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
-
-        if (conf.length < limits.campaigns) {
-          log('INFO', `Webhook received but only ${conf.length}/${limits.campaigns} campaigns confirmed. Ignoring.`);
-          res.writeHead(200);
-          res.end('Not ready — campaigns not all confirmed');
-          return;
-        }
-
-        // Already provisioning or done?
-        const prov = tm.provisioning || {};
-        if (prov.status === 'domains_complete' || prov.status === 'purchasing') {
-          log('INFO', `Webhook received but status is ${prov.status}. Ignoring.`);
-          res.writeHead(200);
-          res.end(`Already ${prov.status}`);
-          return;
-        }
-
-        log('INFO', `Webhook received — starting provisioning for ${userId}`);
-        res.writeHead(200);
-        res.end('Provisioning started');
-
-        // Run provisioning async (don't block the response)
-        provisionDomains(userId).catch(e => {
-          log('ERROR', `Provisioning failed: ${e.message}`);
-          notify(`🚨 PROVISIONING CRASHED\n${e.message}`);
-        });
-
-      } catch (e) {
-        log('ERROR', `Webhook parse error: ${e.message}`);
-        res.writeHead(400);
-        res.end('Invalid payload');
-      }
+        const p = JSON.parse(body), rec = p.record || p, uid = rec.user_id;
+        if (!uid) { res.writeHead(400); res.end('No user_id'); return; }
+        const tm = typeof rec.target_market === 'string' ? JSON.parse(rec.target_market) : rec.target_market || {};
+        const conf = tm.campaigns_confirmed || [], lim = PLAN_LIMITS[rec.plan || 'starter'] || PLAN_LIMITS.starter;
+        if (conf.length < lim.campaigns) { res.writeHead(200); res.end('Not ready'); return; }
+        const st = (tm.provisioning || {}).status;
+        if (st === 'domains_complete' || st === 'purchasing' || st === 'awaiting_approval') { res.writeHead(200); res.end(st); return; }
+        res.writeHead(200); res.end('Plan generation started — approval required before any purchases');
+        generatePlan(uid).catch(e => notify('🚨 ' + e.message));
+      } catch (e) { res.writeHead(400); res.end('Bad request'); }
     });
+  } else if (req.method === 'GET' && req.url.startsWith('/approve/')) {
+    const jid = req.url.split('/approve/')[1];
+    const plan = pendingApprovals[jid];
+    if (!plan) { res.writeHead(404); res.end('Not found or expired'); return; }
+    const list = plan.domains.map((d,i) => `<li style="padding:4px 0">${d.domain} — <b>$${d.price}</b></li>`).join('');
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(`<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;max-width:500px;margin:40px auto;padding:20px;background:#f5f5f5">
+      <div style="background:#fff;padding:24px;border:1px solid #ddd">
+        <h2 style="margin:0 0 16px">Approve domain purchase</h2>
+        <p><b>Customer:</b> ${plan.customer}</p><p><b>Email:</b> ${plan.email}</p><p><b>Plan:</b> ${plan.plan.toUpperCase()}</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
+        <p><b>Domains (${plan.domains.length}):</b></p><ol style="padding-left:20px">${list}</ol>
+        <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
+        <p style="font-size:20px;font-weight:700">Total: $${plan.total.toFixed(2)}</p>
+        <p style="color:#666">Already owned: ${plan.existing} domains</p>
+        <form method="POST"><button type="submit" style="background:#006949;color:#fff;border:none;padding:14px 32px;font-size:16px;cursor:pointer;width:100%;margin-top:16px">APPROVE PURCHASE — $${plan.total.toFixed(2)}</button></form>
+      </div></body></html>`);
+  } else if (req.method === 'POST' && req.url.startsWith('/approve/')) {
+    const jid = req.url.split('/approve/')[1];
+    if (!pendingApprovals[jid]) { res.writeHead(404); res.end('Expired'); return; }
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>✅ Approved</h1><p>Purchasing now. Check Telegram for updates.</p></body></html>`);
+    executePurchase(jid).catch(e => notify('🚨 ' + e.message));
+  } else if (req.method === 'GET' && req.url === '/pending') {
+    res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(pendingApprovals, null, 2));
   } else if (req.method === 'GET' && req.url === '/health') {
-    res.writeHead(200);
-    res.end('OK — coldflows-automation running');
-  } else {
-    res.writeHead(404);
-    res.end('Not found');
-  }
+    res.writeHead(200); res.end('OK | pending: ' + Object.keys(pendingApprovals).length);
+  } else { res.writeHead(404); res.end('Not found'); }
+}).listen(CONFIG.port, () => {
+  log('INFO', 'Server on port ' + CONFIG.port + ' — APPROVAL GATE ACTIVE');
+  log('INFO', 'NO purchases without manual approval via Telegram');
 });
-
-server.listen(CONFIG.port, () => {
-  log('INFO', `Coldflows automation server listening on port ${CONFIG.port}`);
-  log('INFO', `Health check: http://170.64.130.130:${CONFIG.port}/health`);
-  log('INFO', `Provision endpoint: POST http://170.64.130.130:${CONFIG.port}/provision`);
-});
-
-// CLI usage
-if (process.argv[2] === '--dry-run' && process.argv[3]) {
-  dryRun(process.argv[3]).then(r => console.log(JSON.stringify(r, null, 2))).catch(console.error);
-} else if (process.argv[2] === '--provision' && process.argv[3]) {
-  provisionDomains(process.argv[3]).then(r => console.log(JSON.stringify(r, null, 2))).catch(console.error);
-}
-
-module.exports = { provisionDomains, dryRun };
