@@ -147,7 +147,7 @@ function LiveCountdown({targetDay,currentDay,phaseName}){
   </div>;
 }
 
-const D = {
+let D = {
   sentToday:187,cap:480,totalSent:14820,replies:312,bounces:89,warm:12,warmup:4200,rr:2.1,
   account:{
     daysSinceStart:8,warmupDays:28,
@@ -1212,6 +1212,60 @@ function App(){
     if(authReady){loadData();}
     else{window.__refreshAuth=loadData;}
   },[]);
+
+  // Override D with live Smartlead data if available
+  if(custData && custData.smartlead_cache){
+    try{
+      const sl=typeof custData.smartlead_cache==='string'?JSON.parse(custData.smartlead_cache):custData.smartlead_cache;
+      if(sl && sl.campaigns){
+        // Map Smartlead campaigns to D format
+        D.sentToday=sl.sentToday||0;
+        D.cap=sl.cap||90;
+        D.totalSent=sl.totalSent||0;
+        D.replies=sl.replies||0;
+        D.bounces=sl.bounces||0;
+        D.warm=sl.warm||0;
+        D.warmup=sl.warmup||0;
+        D.rr=sl.rr||0;
+        // Map campaigns
+        D.campaigns=sl.campaigns.map(c=>({
+          id:c.id,name:c.name,st:c.st||'active',sent:c.sent||0,rep:c.rep||0,bnc:c.bnc||0,
+          leads:c.leads||c.sent||0,prog:c.prog||0,tgt:c.tgt||1000,day:c.day||14,weekly:c.weekly||0,
+          a:{l:c.a?c.a.name||'Variant B':'Variant B',sub:c.a?c.a.sub||'—':'—',body:'',sent:c.a?c.a.sent||0:0,rep:c.a?c.a.replies||0:0,rate:c.a?c.a.rate||0:0,w:c.a&&c.a.rate>=(c.b?c.b.rate||0:0)},
+          b:{l:c.b?c.b.name||'Variant C':'Variant C',sub:c.b?c.b.sub||'—':'—',body:'',sent:c.b?c.b.sent||0:0,rep:c.b?c.b.replies||0:0,rate:c.b?c.b.rate||0:0,w:c.b&&c.b.rate>(c.a?c.a.rate||0:0)},
+        }));
+        // Map leads
+        if(sl.leads){
+          D.leads=sl.leads.map((l,i)=>({
+            id:l.id||i,n:l.n||'',e:l.e||'',co:l.co||'',ca:l.ca||'',s:l.s||'completed',sq:'1/3',
+            steps:[
+              {seq:1,st:l.s==='replied'?'replied':'delivered',dt:l.created||'—',sub:'Outreach email',body:'Cold email sent via Smartlead',frm:sl.mailboxes&&sl.mailboxes[0]?sl.mailboxes[0].email:'—'},
+              {seq:2,st:'pending',dt:'—',sub:'Follow-up',body:'Automated follow-up',frm:'—',note:'Scheduled'},
+              {seq:3,st:'pending',dt:'—',sub:'Final follow-up',body:'Final touch',frm:'—',note:'Scheduled'}
+            ]
+          }));
+        }
+        // Map replies (leads with replied status)
+        D.reps=(sl.leads||[]).filter(l=>l.s==='replied').map(l=>({
+          nm:l.n,co:l.co,em:l.e,ca:l.ca,cat:'warm',txt:'Reply received',t:'recently'
+        }));
+        if(D.reps.length===0){
+          D.reps=[{nm:'No replies yet',co:'—',em:'—',ca:'—',cat:'auto_reply',txt:'Campaign emails are being sent. Replies will appear here.',t:'—'}];
+        }
+        // Map mailboxes
+        if(sl.mailboxes){
+          D.mbs=sl.mailboxes.map(m=>({
+            em:m.email,s:m.sent_today||0,lim:m.daily_limit||15,
+            rep:typeof m.warmup_reputation==='string'?parseInt(m.warmup_reputation):m.warmup_reputation||0,
+            inb:typeof m.warmup_reputation==='string'?parseInt(m.warmup_reputation):m.warmup_reputation||0,
+            ws:m.warmup_status==='ACTIVE'?'Active':m.warmup_status||'Pending',
+            wt:m.warmup_sent||0,day:14
+          }));
+        }
+      }
+    }catch(e){console.log('Smartlead cache parse error:',e);}
+  }
+
   const nav=p=>{setPg(p);setMd(null);setLd(null)};
   const pct=Math.round(D.sentToday/D.cap*100);
   const wc=D.reps.filter(r=>r.cat==="warm").length;
