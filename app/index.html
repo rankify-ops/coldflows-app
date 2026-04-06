@@ -1429,7 +1429,7 @@ function App(){
                     {label:"Account created",done:true},
                     {label:"Payment confirmed",done:true},
                     {label:"Campaign setup ("+confirmed.length+"/"+totalCamps+")",done:allCampsDone,active:!allCampsDone},
-                    {label:provStatus==="active"?"Domains purchased ✓":"Purchasing domains (vendor processing order)",done:provStatus==="active",active:allCampsDone&&provStatus==="domains_suggested",pending:!allCampsDone,sub:provStatus==="domains_suggested"?"Estimated 24–48 hours":null},
+                    {label:provStatus==="active"?"Domains purchased ✓":"Purchasing domains (vendor processing order)",done:provStatus==="active",active:allCampsDone&&provStatus==="domains_suggested",pending:!allCampsDone,sub:provStatus==="domains_suggested"?"Estimated within 24 hours":null},
                     {label:provStatus==="active"?"Mailboxes created ✓":"Setting up mailboxes + email authentication",done:provStatus==="active",pending:provStatus!=="active",sub:provStatus!=="active"?"SPF, DKIM, DMARC — handled automatically":null},
                     {label:"Warmup sequence",done:false,pending:provStatus!=="active",sub:"14-day warmup period before sending"},
                     {label:"AI copy generation",pending:provStatus!=="active"},
