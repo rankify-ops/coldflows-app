@@ -148,7 +148,19 @@ async function generatePlan(userId) {
   const selected = available.slice(0, remaining);
   const total = selected.reduce((s, d) => s + d.price, 0);
 
-  const plan = { jobId, userId, customer: customer.business_name, email: customer.email, plan: customer.plan, domains: selected, total, existing: existing.length, needed: remaining, createdAt: now() };
+  // Get Namecheap account balance
+  let ncBalance = null;
+  try {
+    const balXml = await fetchXML(`${CONFIG.namecheap.base}?ApiUser=${CONFIG.namecheap.user}&ApiKey=${CONFIG.namecheap.api_key}&UserName=${CONFIG.namecheap.user}&ClientIp=${CONFIG.namecheap.client_ip}&Command=namecheap.users.getBalances`);
+    const balMatch = balXml.match(/AvailableBalance="([\d.]+)"/);
+    ncBalance = balMatch ? parseFloat(balMatch[1]) : null;
+  } catch(e) { log('WARN', 'Could not fetch Namecheap balance'); }
+
+  const audRate = 1.55;
+  const toAud = (usd) => (usd * audRate).toFixed(2);
+  const balanceShortfall = ncBalance !== null ? Math.max(0, total - ncBalance) : null;
+
+  const plan = { jobId, userId, customer: customer.business_name, email: customer.email, plan: customer.plan, domains: selected, total, existing: existing.length, needed: remaining, createdAt: now(), ncBalance, balanceShortfall };
   pendingApprovals[jobId] = plan;
 
   if (!t.provisioning) t.provisioning = {};
@@ -156,7 +168,10 @@ async function generatePlan(userId) {
   t.provisioning.pending_plan = plan;
   await updateTargetMarket(userId, t);
 
-  const list = selected.map((d, i) => `  ${i+1}. ${d.domain} — $${d.price}`).join('\n');
+  const list = selected.map((d, i) => `  ${i+1}. ${d.domain} — A$${toAud(d.price)}`).join('\n');
+  const balLine = ncBalance !== null ? `\n<b>Namecheap balance:</b> A$${toAud(ncBalance)} (US$${ncBalance.toFixed(2)})` : '';
+  const shortfallLine = balanceShortfall > 0 ? `\n⚠️ <b>Need to add: A$${toAud(balanceShortfall)} (US$${balanceShortfall.toFixed(2)})</b>` : (ncBalance !== null ? '\n✅ Balance sufficient' : '');
+
   await notify(
     `🧊 COLDFLOWS — APPROVAL REQUIRED\n━━━━━━━━━━━━━━━━━━━━\n` +
     `<b>Customer:</b> ${customer.business_name}\n` +
@@ -165,12 +180,12 @@ async function generatePlan(userId) {
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `<b>Domains to purchase (${remaining}):</b>\n${list}\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `<b>💰 Total: $${total.toFixed(2)}</b>\n` +
-    `Per domain: $${selected[0].price}\n` +
-    `Already owned: ${existing.length}\n` +
+    `<b>💰 Total: A$${toAud(total)} (US$${total.toFixed(2)})</b>\n` +
+    `Per domain: A$${toAud(selected[0].price)}` +
+    balLine + shortfallLine +
+    `\nAlready owned: ${existing.length}\n` +
     `━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `✅ To approve, click:\nhttp://170.64.130.130:3000/approve/${jobId}\n\n` +
-    `Or reply: /approve ${jobId}\n\n` +
+    `✅ Approve in Coldflows dashboard:\nhttps://coldflows.ai/app\n\n` +
     `❌ To reject, ignore. Expires 24hrs.`
   );
 
