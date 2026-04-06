@@ -1144,7 +1144,7 @@ function App(){
   const [editMode,setEditMode]=useState(false);
   const [validationErr,setValidationErr]=useState(null);
   const [opsDetail,setOpsDetail]=useState(null);
-  const [currency,setCurrency]=useState("USD");
+  const [currency,setCurrency]=useState("AUD");
   const [approvalView,setApprovalView]=useState(null);
   const audRate=1.55;
   const fx=(usd)=>currency==="AUD"?(usd*audRate).toFixed(2):usd.toFixed(2);
