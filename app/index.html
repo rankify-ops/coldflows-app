@@ -2203,6 +2203,41 @@ function App(){
             <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Forwarding Domain</div><div style={{fontSize:11,fontFamily:"var(--mono)"}}>{opsDetail.forwarding_domain||"—"}</div></div>
             <div><div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Sender Names</div><div style={{fontSize:11}}>{opsDetail.sender_names?(() => {try{return JSON.parse(opsDetail.sender_names).join(", ")}catch(e){return "—"}})():"—"}</div></div>
           </div>
+          {/* Pipeline Flowchart */}
+          {(()=>{
+            const t=opsDetail._targeting||{};
+            const prov=opsDetail._prov||{};
+            const conf=t.campaigns_confirmed||[];
+            const lim=opsDetail._limits||{campaigns:1,mailboxes:6,domains:3};
+            const allDone=conf.length>=lim.campaigns;
+            const provStatus=prov.status||"not_started";
+            const stages=[
+              {label:"Stripe",sub:"Payment",status:"done"},
+              {label:"Record",sub:"Supabase",status:"done"},
+              {label:"Onboard",sub:"Form",status:opsDetail.business_name?"done":"active"},
+              {label:"Campaigns",sub:conf.length+"/"+lim.campaigns,status:allDone?"done":conf.length>0?"active":"pending"},
+              {label:"Domains",sub:prov.suggestions?prov.suggestions.length+"":prov.domains?prov.domains.length+"":"0",status:provStatus==="active"?"done":provStatus==="domains_suggested"?"active":allDone?"next":"pending"},
+              {label:"Mailboxes",sub:lim.mailboxes+"",status:provStatus==="active"?"done":"pending"},
+              {label:"DKIM",sub:"Auto",status:provStatus==="active"?"done":"pending"},
+              {label:"Warmup",sub:"14d",status:"pending"},
+              {label:"AI Copy",sub:"Claude",status:"pending"},
+              {label:"Launch",sub:"Go live",status:"pending"},
+            ];
+            const sBg=s=>s==="done"?"var(--green)":s==="active"?"var(--orange)":s==="next"?"#006949":"var(--bg3)";
+            const sBd=s=>s==="done"?"var(--green-bd)":s==="active"?"var(--orange)":s==="next"?"var(--green-bd)":"var(--border)";
+            return <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:"12px 16px",marginBottom:16,overflowX:"auto"}}>
+              <div style={{display:"flex",alignItems:"center",gap:0,minWidth:900}}>
+                {stages.map((s,i)=><React.Fragment key={i}>
+                  {i>0&&<div style={{width:20,height:2,background:stages[i-1].status==="done"?"var(--green)":"var(--border)",flexShrink:0}}/>}
+                  <div style={{padding:"8px 10px",border:"1px solid "+sBd(s.status),background:s.status==="done"?"var(--green-bg)":s.status==="active"?"var(--orange-bg)":s.status==="next"?"var(--green-bg)":"var(--bg2)",textAlign:"center",minWidth:75,flexShrink:0,position:"relative"}}>
+                    {s.status==="done"&&<div style={{position:"absolute",top:-5,right:-5,width:14,height:14,borderRadius:7,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",fontWeight:700}}>✓</div>}
+                    <div style={{fontSize:10,fontWeight:700,color:s.status==="pending"?"var(--text3)":"var(--text)"}}>{s.label}</div>
+                    <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:1}}>{s.sub}</div>
+                  </div>
+                </React.Fragment>)}
+              </div>
+            </div>;
+          })()}
           {/* Provisioning Status */}
           {(()=>{
             const prov=opsDetail._prov||{};
