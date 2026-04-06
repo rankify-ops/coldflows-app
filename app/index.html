@@ -1357,23 +1357,23 @@ function App(){
               <div style={{fontSize:11,fontWeight:600,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"1px",marginBottom:12}}>Setup progress</div>
               <div style={{display:"flex",flexDirection:"column",gap:10}}>
                 <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
-                  <div style={{width:28,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
+                  <div style={{width:20,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
                   <span>Account created</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
-                  <div style={{width:28,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
+                  <div style={{width:20,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
                   <span>Campaign targeting saved</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12}}>
-                  <div style={{width:28,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--green)",animation:"spin 1s linear infinite"}}/>
+                  <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--green)",animation:"spin 1s linear infinite"}}/>
                   <span style={{color:"var(--text3)"}}>Purchasing domains...</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12,color:"var(--text3)"}}>
-                  <div style={{width:28,height:20,borderRadius:"50%",border:"2px solid var(--border)"}}/>
+                  <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)"}}/>
                   <span>Creating mailboxes</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:10,fontSize:12,color:"var(--text3)"}}>
-                  <div style={{width:28,height:20,borderRadius:"50%",border:"2px solid var(--border)"}}/>
+                  <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)"}}/>
                   <span>Starting warmup</span>
                 </div>
               </div>
@@ -1454,7 +1454,7 @@ function App(){
                   return <div key={i} onClick={()=>{setConfigCampaign(campNum);setValidationErr(null);}} style={{border:"1px solid var(--green-bd)",borderRadius:0,padding:16,background:"var(--green-bg)",cursor:"pointer",transition:"all .15s",position:"relative"}}
                     onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
                     onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-                    <div style={{position:"absolute",top:-8,right:12,width:28,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
+                    <div style={{position:"absolute",top:-8,right:12,width:20,height:20,borderRadius:"50%",background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:700}}>✓</div>
                     <div style={{fontSize:10,color:"var(--green)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Campaign {campNum}</div>
                     <div style={{fontSize:12,fontWeight:600,marginBottom:4}}>{(()=>{var cd=campNum===1?custData._targeting||{}:(custData._targeting||{})['campaign_'+campNum]||{};return cd.campaign_name||"Campaign "+campNum;})()}</div>
                     <div style={{fontSize:10,color:"var(--text3)"}}>{(()=>{var cd=campNum===1?custData._targeting||{}:(custData._targeting||{})['campaign_'+campNum]||{};return (cd.job_titles||[]).join(", ");})()}</div>
@@ -1750,78 +1750,96 @@ function App(){
       </div>}
 
       {pg==="mailboxes"&&<div className="fade-in" style={{padding:"24px 28px"}}>
-        <div style={{marginBottom:8}}><h1 style={{fontSize:26,fontWeight:800}}>Mailboxes</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>{custData&&custData.mailbox_count===0?"Mailboxes will be provisioned once your campaigns are configured":custData?custData._limits.mailboxes+" mailboxes active":""}</p></div>
+        <div style={{marginBottom:8}}><h1 style={{fontSize:26,fontWeight:800}}>Mailboxes</h1><p style={{fontSize:12,color:"var(--text3)",marginTop:4}}>{D.mbs?D.mbs.length+" mailboxes":""}</p></div>
         
         {/* Explainer */}
         <div style={{marginBottom:24,padding:"16px 20px",borderRadius:0,background:"var(--bg)",border:"1px solid var(--border)",fontSize:13,color:"var(--text2)",lineHeight:1.7}}>
           <strong style={{color:"var(--text)"}}>Why multiple mailboxes per campaign?</strong> Email providers limit how many emails a single mailbox can send per day (typically 30-50) before risking spam flags. By spreading your outreach across multiple dedicated mailboxes, we can send higher volumes while keeping each mailbox well under its daily limit. This protects your sender reputation and keeps inbox placement rates above 95%. Each mailbox gets its own domain, SPF, DKIM, and DMARC records — fully isolated so one mailbox's reputation never affects the others.
         </div>
         
-        {/* Provisioning state — show planned mailbox allocation */}
-        {custData&&custData.mailbox_count===0&&<div>
-          <div style={{border:"1px solid var(--orange)",borderRadius:0,padding:16,background:"var(--orange-bg)",marginBottom:20,display:"flex",alignItems:"center",gap:10}}>
-            <div style={{width:28,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--orange)",animation:"spin 1s linear infinite",flexShrink:0}}/>
-            <div style={{fontSize:12,color:"var(--text2)"}}>Your mailboxes are being set up. We'll notify you at <strong>{custData.lead_email||custData.email}</strong> when they're ready.</div>
+        {/* Active mailboxes from Smartlead */}
+        {D.mbs&&D.mbs.length>0&&D.mbs[0].em!=="thomas@outreach.studio"?<div>
+          {/* Summary bar */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12,marginBottom:16}}>
+            <div style={{border:"1px solid var(--border)",padding:12,background:"var(--bg)",textAlign:"center"}}>
+              <div style={{fontSize:20,fontWeight:700}}>{D.mbs.length}</div>
+              <div style={{fontSize:10,color:"var(--text3)"}}>Mailboxes</div>
+            </div>
+            <div style={{border:"1px solid var(--border)",padding:12,background:"var(--bg)",textAlign:"center"}}>
+              <div style={{fontSize:20,fontWeight:700,color:"var(--green)"}}>{D.mbs.filter(m=>m.ws==="Active").length}</div>
+              <div style={{fontSize:10,color:"var(--text3)"}}>Warmup Active</div>
+            </div>
+            <div style={{border:"1px solid var(--border)",padding:12,background:"var(--bg)",textAlign:"center"}}>
+              <div style={{fontSize:20,fontWeight:700}}>{D.mbs.reduce((s,m)=>s+m.s,0)}/{D.mbs.reduce((s,m)=>s+m.lim,0)}</div>
+              <div style={{fontSize:10,color:"var(--text3)"}}>Sent today / limit</div>
+            </div>
+            <div style={{border:"1px solid var(--border)",padding:12,background:"var(--bg)",textAlign:"center"}}>
+              <div style={{fontSize:20,fontWeight:700}}>{D.mbs.reduce((s,m)=>s+m.wt,0).toLocaleString()}</div>
+              <div style={{fontSize:10,color:"var(--text3)"}}>Total warmup sent</div>
+            </div>
           </div>
+          
+          {/* Group by domain */}
           {(()=>{
-            var mbPerCampaign=Math.floor((custData._limits?custData._limits.mailboxes:12)/(custData._limits?custData._limits.campaigns:4));
-            var totalCampaigns=custData._limits?custData._limits.campaigns:4;
-            var campaigns=[];
-            for(var c=0;c<totalCampaigns;c++){
-              campaigns.push({
-                name:c===0&&custData._targeting&&custData._targeting.campaign_name?custData._targeting.campaign_name:custData._targeting&&custData._targeting['campaign_'+(c+1)]&&custData._targeting['campaign_'+(c+1)].campaign_name?custData._targeting['campaign_'+(c+1)].campaign_name:"Campaign "+(c+1),
-                configured:(custData._targeting&&custData._targeting.campaigns_confirmed||[]).indexOf(c+1)!==-1,
-                mailboxes:Array.from({length:mbPerCampaign}).map((_,m)=>({
-                  email:"mailbox-"+(c*mbPerCampaign+m+1)+"@pending.coldflows.ai",
-                  status:"pending"
-                }))
-              });
-            }
-            return campaigns.map((camp,ci)=>
-              <div key={ci} style={{border:"1px solid var(--border)",borderRadius:0,marginBottom:12,overflow:"hidden",background:"var(--bg)"}}>
-                <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            const domains={};
+            D.mbs.forEach(m=>{
+              const domain=m.em.split('@')[1]||'unknown';
+              if(!domains[domain])domains[domain]=[];
+              domains[domain].push(m);
+            });
+            return Object.entries(domains).map(([domain,mboxes],di)=>
+              <div key={di} style={{border:"1px solid var(--border)",marginBottom:12,background:"var(--bg)"}}>
+                <div style={{padding:"12px 20px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center",background:"var(--bg2)"}}>
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <div style={{width:8,height:8,borderRadius:"50%",background:camp.configured?"var(--orange)":"var(--border)"}}/>
-                    <span style={{fontSize:13,fontWeight:600}}>{camp.name}</span>
-                    <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{mbPerCampaign} mailboxes</span>
+                    <div style={{width:8,height:8,borderRadius:"50%",background:mboxes.every(m=>m.ws==="Active")?"var(--green)":"var(--orange)"}}/>
+                    <span style={{fontSize:13,fontWeight:700,fontFamily:"var(--mono)"}}>{domain}</span>
                   </div>
-                  <span style={{fontSize:10,fontWeight:600,padding:"3px 8px",borderRadius:10,background:camp.configured?"var(--orange-bg)":"var(--bg3)",color:camp.configured?"var(--orange)":"var(--text3)"}}>{camp.configured?"Provisioning":"Not configured"}</span>
+                  <span style={{fontSize:10,color:"var(--text3)"}}>{mboxes.length} mailbox{mboxes.length>1?"es":""}</span>
                 </div>
-                <div style={{padding:"0"}}>
-                  {camp.mailboxes.map((mb,mi)=>
-                    <div key={mi} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 20px",borderBottom:mi<camp.mailboxes.length-1?"1px solid var(--border)":"none",fontSize:12,color:"var(--text3)"}}>
-                      <div style={{width:16,height:16,borderRadius:"50%",border:"1.5px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                        <div style={{width:6,height:6,borderRadius:"50%",background:"var(--border)"}}/>
-                      </div>
-                      <span style={{fontFamily:"var(--mono)",fontSize:11}}>Mailbox {ci*mbPerCampaign+mi+1}</span>
-                      <span style={{marginLeft:"auto",fontSize:10,padding:"2px 6px",borderRadius:4,background:"var(--bg3)"}}>Pending</span>
+                {mboxes.map((m,mi)=>{
+                  const rc=typeof m.rep==='number'?(m.rep>=95?"var(--green)":m.rep>=80?"var(--orange)":"var(--red)"):"var(--green)";
+                  const repNum=typeof m.rep==='string'?parseInt(m.rep):m.rep||0;
+                  return <div key={mi} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 80px",gap:0,padding:"10px 20px",borderBottom:mi<mboxes.length-1?"1px solid var(--border)":"none",fontSize:11,alignItems:"center"}}>
+                    <div>
+                      <div style={{fontWeight:600,fontFamily:"var(--mono)",color:"var(--green)"}}>{m.em}</div>
                     </div>
-                  )}
-                </div>
+                    <div style={{color:"var(--text2)"}}>
+                      <div style={{fontSize:9,color:"var(--text3)"}}>Sent today</div>
+                      <div style={{fontFamily:"var(--mono)"}}>{m.s}/{m.lim}</div>
+                    </div>
+                    <div>
+                      <div style={{fontSize:9,color:"var(--text3)"}}>Warmup</div>
+                      <div style={{fontWeight:600,color:m.ws==="Active"?"var(--green)":"var(--orange)"}}>{m.ws}</div>
+                    </div>
+                    <div>
+                      <div style={{fontSize:9,color:"var(--text3)"}}>Reputation</div>
+                      <div style={{display:"flex",alignItems:"center",gap:4}}>
+                        <div style={{width:40,height:3,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
+                          <div style={{height:"100%",width:repNum+"%",background:rc}}/>
+                        </div>
+                        <span style={{fontFamily:"var(--mono)",fontWeight:600,color:rc}}>{repNum}%</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{fontSize:9,color:"var(--text3)"}}>Total sent</div>
+                      <div style={{fontFamily:"var(--mono)"}}>{(m.wt||0).toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:m.ws==="Active"?"var(--green)":"var(--orange)",color:"#fff"}}>{m.ws==="Active"?"ACTIVE":"WARMUP"}</span>
+                    </div>
+                  </div>;
+                })}
               </div>
             );
           })()}
-        </div>}
-
-        {/* Active state — show real mailbox data */}
-        {custData&&custData.mailbox_count>0&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:12}}>
-          {D.mbs.map((m,i)=>{
-            const rc=m.rep>=95?"var(--green)":m.rep>=80?"var(--orange)":"var(--red)";
-            return <Card key={i} style={{padding:20}}>
-              <div style={{fontSize:11,fontWeight:700,color:"var(--green)",marginBottom:12,fontFamily:"var(--mono)"}}>{m.em}</div>
-              {[["Sent today",m.s+"/"+m.lim],["Warmup",m.ws],["Inbox rate",m.inb+"%"],["Total sent",m.wt.toLocaleString()]].map(([l,v],j)=>
-                <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text3)",marginBottom:5}}>
-                  <span>{l}</span><span style={{color:l==="Warmup"?"var(--green)":"var(--text)",fontFamily:"var(--mono)",fontWeight:500}}>{v}</span>
-                </div>)}
-              <div style={{marginTop:10}}>
-                <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text3)",marginBottom:4}}>
-                  <span>Reputation</span><span style={{color:rc,fontFamily:"var(--mono)",fontWeight:600}}>{m.rep}/100</span>
-                </div>
-                <div style={{height:3,background:"var(--bg3)",borderRadius:2,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:m.rep+"%",borderRadius:2,background:rc,boxShadow:"none"}}/>
-                </div>
-              </div>
-            </Card>;})}
+        </div>
+        
+        /* Provisioning state — campaigns not yet configured */
+        :<div>
+          <div style={{border:"1px solid var(--orange)",borderRadius:0,padding:16,background:"var(--orange-bg)",marginBottom:20,display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:20,height:20,borderRadius:"50%",border:"2px solid var(--border)",borderTopColor:"var(--orange)",animation:"spin 1s linear infinite",flexShrink:0}}/>
+            <div style={{fontSize:12,color:"var(--text2)"}}>Your mailboxes are being set up. We'll notify you at <strong>{custData?custData.lead_email||custData.email:""}</strong> when they're ready.</div>
+          </div>
         </div>}
       </div>}
 
