@@ -255,7 +255,285 @@ async function executePurchase(jobId) {
   await updateTargetMarket(plan.userId, t);
   delete pendingApprovals[jobId];
 
-  await notify(`${total >= limits.mailboxes ? '🎉 ALL DONE' : '⚠️ PARTIAL'}\n${plan.customer}: ${total}/${limits.mailboxes} domains\nSpent: $${t.provisioning.budget_spent.toFixed(2)}`);
+  await notify(`${total >= limits.mailboxes ? '🎉 ALL DOMAINS PURCHASED' : '⚠️ PARTIAL'}\n${plan.customer}: ${total}/${limits.mailboxes} domains\nSpent: $${t.provisioning.budget_spent.toFixed(2)}`);
+
+  // Auto-trigger mailbox plan if all domains are purchased
+  if (total >= limits.mailboxes) {
+    await notify('📧 Generating mailbox creation plan...');
+    generateMailboxPlan(plan.userId).catch(e => notify('🚨 Mailbox plan failed: ' + e.message));
+  }
+}
+
+// =============================================
+// GOOGLE WORKSPACE: AUTH + API HELPERS
+// =============================================
+const crypto = require('crypto');
+
+function base64url(data) {
+  return Buffer.from(data).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function getGoogleAccessToken() {
+  const fs = require('fs');
+  let sa;
+  try { sa = JSON.parse(fs.readFileSync('/opt/coldflows/service-account.json', 'utf8')); }
+  catch (e) { throw new Error('Service account key not found at /opt/coldflows/service-account.json'); }
+
+  const now_ts = Math.floor(Date.now() / 1000);
+  const header = base64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  const payload = base64url(JSON.stringify({
+    iss: sa.client_email,
+    sub: 'info@coldflows.ai',
+    scope: 'https://www.googleapis.com/auth/admin.directory.user https://www.googleapis.com/auth/admin.directory.domain https://www.googleapis.com/auth/admin.directory.user.security',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now_ts,
+    exp: now_ts + 3600,
+  }));
+
+  const sign = crypto.createSign('RSA-SHA256');
+  sign.update(header + '.' + payload);
+  const signature = base64url(sign.sign(sa.private_key));
+  const jwt = header + '.' + payload + '.' + signature;
+
+  const resp = await fetchJSON('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=' + jwt,
+  });
+
+  if (resp.body && resp.body.access_token) return resp.body.access_token;
+  throw new Error('Google auth failed: ' + JSON.stringify(resp.body));
+}
+
+async function googleAPI(method, url, body) {
+  const token = await getGoogleAccessToken();
+  const opts = {
+    method,
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  return await fetchJSON(url, opts);
+}
+
+// =============================================
+// GOOGLE WORKSPACE: ADD DOMAIN
+// =============================================
+async function addDomainToWorkspace(domain) {
+  const resp = await googleAPI('POST', 'https://admin.googleapis.com/admin/directory/v1/customer/my_customer/domains', {
+    domainName: domain,
+  });
+  return { success: resp.status >= 200 && resp.status < 300, body: resp.body };
+}
+
+// =============================================
+// GOOGLE WORKSPACE: CREATE MAILBOX
+// =============================================
+async function createMailbox(email, firstName, lastName) {
+  const domain = email.split('@')[1];
+  const password = crypto.randomBytes(16).toString('hex') + 'A1!';
+  const resp = await googleAPI('POST', 'https://admin.googleapis.com/admin/directory/v1/users', {
+    primaryEmail: email,
+    name: { givenName: firstName, familyName: lastName },
+    password: password,
+    changePasswordAtNextLogin: false,
+    orgUnitPath: '/',
+  });
+  return {
+    success: resp.status >= 200 && resp.status < 300,
+    email,
+    password,
+    body: resp.body,
+    error: resp.body && resp.body.error ? resp.body.error.message : null,
+  };
+}
+
+// =============================================
+// PHASE 3: GENERATE MAILBOX PLAN (no spending)
+// =============================================
+async function generateMailboxPlan(userId) {
+  const jobId = 'mb_' + Date.now();
+  log('INFO', 'Generating mailbox plan: ' + jobId);
+
+  const customer = await getCustomer(userId);
+  const t = customer._targeting;
+  const limits = customer._limits;
+  const prov = t.provisioning || {};
+  const domains = (prov.domains || []).filter(d => d.status === 'purchased');
+
+  if (domains.length < limits.mailboxes) {
+    log('INFO', 'Not all domains purchased yet');
+    return { error: 'Domains not complete' };
+  }
+
+  // Check which mailboxes already exist
+  const existingMailboxes = (prov.mailboxes || []).filter(m => m.status === 'created');
+  const domainsNeedingMailbox = domains.filter(d => !existingMailboxes.find(m => m.domain === d.domain));
+
+  if (domainsNeedingMailbox.length === 0) {
+    log('INFO', 'All mailboxes already created');
+    return { message: 'All mailboxes exist' };
+  }
+
+  const mailboxes = domainsNeedingMailbox.map(d => ({
+    email: 'outreach@' + d.domain,
+    domain: d.domain,
+    campaign: d.campaign,
+    costPerMonth: 7.20,
+  }));
+
+  const totalMonthlyCost = mailboxes.length * 7.20;
+  const audRate = 1.55;
+  const toAud = (usd) => (usd * audRate).toFixed(2);
+
+  const plan = {
+    jobId,
+    type: 'mailbox',
+    userId,
+    customer: customer.business_name,
+    email: customer.email,
+    plan: customer.plan,
+    mailboxes,
+    totalMonthlyCost,
+    existing: existingMailboxes.length,
+    needed: domainsNeedingMailbox.length,
+    createdAt: now(),
+  };
+
+  pendingApprovals[jobId] = plan;
+
+  if (!t.provisioning) t.provisioning = {};
+  t.provisioning.mailbox_status = 'awaiting_approval';
+  t.provisioning.pending_mailbox_plan = plan;
+  await updateTargetMarket(userId, t);
+
+  const list = mailboxes.map((m, i) => `  ${i+1}. ${m.email} — A$${toAud(m.costPerMonth)}/mo`).join('\n');
+
+  await notify(
+    `🧊 COLDFLOWS — MAILBOX APPROVAL REQUIRED\n━━━━━━━━━━━━━━━━━━━━\n` +
+    `<b>Customer:</b> ${customer.business_name}\n` +
+    `<b>Plan:</b> ${customer.plan.toUpperCase()}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `<b>Mailboxes to create (${mailboxes.length}):</b>\n${list}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `<b>💰 Monthly cost: A$${toAud(totalMonthlyCost)}/mo (US$${totalMonthlyCost.toFixed(2)})</b>\n` +
+    `Per mailbox: A$${toAud(7.20)}/mo\n` +
+    `Already created: ${existingMailboxes.length}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `This adds Google Workspace users at ~A$${toAud(7.20)}/mailbox/month.\n` +
+    `Billed to your Google Workspace account.\n\n` +
+    `✅ Approve in Coldflows dashboard:\nhttps://coldflows.ai/app\n\n` +
+    `❌ To reject, open dashboard and click Reject.`
+  );
+
+  log('INFO', `Mailbox plan sent for approval. ${mailboxes.length} mailboxes, A$${toAud(totalMonthlyCost)}/mo`);
+  return { jobId, status: 'awaiting_approval' };
+}
+
+// =============================================
+// PHASE 4: EXECUTE MAILBOX CREATION (after approval)
+// =============================================
+async function executeMailboxCreation(jobId) {
+  const plan = pendingApprovals[jobId];
+  if (!plan || plan.type !== 'mailbox') return { error: 'Mailbox plan not found' };
+
+  log('INFO', '=== MAILBOX CREATION APPROVED: ' + jobId + ' ===');
+  await notify('📧 Creating mailboxes for ' + plan.customer + '...');
+
+  const customer = await getCustomer(plan.userId);
+  const t = customer._targeting;
+  if (!t.provisioning) t.provisioning = {};
+  t.provisioning.mailbox_status = 'creating';
+  if (!t.provisioning.mailboxes) t.provisioning.mailboxes = [];
+  if (!t.provisioning.errors) t.provisioning.errors = [];
+  await updateTargetMarket(plan.userId, t);
+
+  let created = 0;
+
+  for (const mb of plan.mailboxes) {
+    log('INFO', 'Adding domain: ' + mb.domain);
+
+    // Step 1: Add domain to Google Workspace
+    try {
+      const domResult = await addDomainToWorkspace(mb.domain);
+      if (domResult.success) {
+        log('INFO', '  Domain added: ' + mb.domain);
+      } else {
+        // Domain might already be added — check error
+        const err = domResult.body && domResult.body.error ? domResult.body.error.message : 'Unknown';
+        if (err.includes('already exists') || err.includes('duplicate')) {
+          log('INFO', '  Domain already exists: ' + mb.domain);
+        } else {
+          log('WARN', '  Domain add failed: ' + mb.domain + ' — ' + err);
+          t.provisioning.errors.push({ ts: now(), msg: 'Domain add failed: ' + mb.domain + ' — ' + err });
+          await updateTargetMarket(plan.userId, t);
+          await notify('⚠️ Domain add failed: ' + mb.domain + ' — ' + err);
+          continue;
+        }
+      }
+      await sleep(2000);
+    } catch (e) {
+      log('ERROR', '  Domain add error: ' + mb.domain + ' — ' + e.message);
+      t.provisioning.errors.push({ ts: now(), msg: e.message, domain: mb.domain });
+      await updateTargetMarket(plan.userId, t);
+      continue;
+    }
+
+    // Step 2: Create the mailbox
+    log('INFO', 'Creating mailbox: ' + mb.email);
+    try {
+      const mbResult = await createMailbox(mb.email, 'Outreach', plan.customer.replace(/[^a-zA-Z0-9 ]/g, ''));
+      await sleep(2000);
+
+      if (mbResult.success) {
+        const record = {
+          email: mb.email,
+          domain: mb.domain,
+          campaign: mb.campaign,
+          status: 'created',
+          created_at: now(),
+          password: mbResult.password,
+          cost_per_month: 7.20,
+          job_id: jobId,
+        };
+        t.provisioning.mailboxes.push(record);
+        created++;
+        await updateTargetMarket(plan.userId, t);
+
+        log('INFO', '  ✓ Mailbox created: ' + mb.email);
+        await notify(`📧 ${mb.email}\nCampaign ${mb.campaign}\n(${created}/${plan.mailboxes.length})`);
+      } else {
+        const err = mbResult.error || 'Unknown';
+        if (err.includes('already exists')) {
+          log('INFO', '  Mailbox already exists: ' + mb.email);
+          t.provisioning.mailboxes.push({ email: mb.email, domain: mb.domain, campaign: mb.campaign, status: 'created', created_at: now(), cost_per_month: 7.20, job_id: jobId });
+          created++;
+          await updateTargetMarket(plan.userId, t);
+        } else {
+          log('WARN', '  Mailbox failed: ' + mb.email + ' — ' + err);
+          t.provisioning.errors.push({ ts: now(), msg: 'Mailbox failed: ' + err, email: mb.email });
+          await updateTargetMarket(plan.userId, t);
+          await notify('⚠️ Mailbox failed: ' + mb.email + ' — ' + err);
+        }
+      }
+    } catch (e) {
+      log('ERROR', '  Mailbox error: ' + mb.email + ' — ' + e.message);
+      t.provisioning.errors.push({ ts: now(), msg: e.message, email: mb.email });
+      await updateTargetMarket(plan.userId, t);
+      await notify('🚨 Error: ' + mb.email + ' — ' + e.message);
+    }
+  }
+
+  // Final status
+  const totalCreated = t.provisioning.mailboxes.filter(m => m.status === 'created').length;
+  const allDone = totalCreated >= plan.mailboxes.length + (t.provisioning.mailboxes.filter(m => m.status === 'created').length - created);
+  t.provisioning.mailbox_status = allDone ? 'mailboxes_complete' : 'mailboxes_partial';
+  t.provisioning.mailboxes_created = totalCreated;
+  delete t.provisioning.pending_mailbox_plan;
+  await updateTargetMarket(plan.userId, t);
+  delete pendingApprovals[jobId];
+
+  const audRate = 1.55;
+  await notify(`${allDone ? '🎉 ALL MAILBOXES CREATED' : '⚠️ PARTIAL'}\n${plan.customer}: ${totalCreated} mailboxes\nMonthly cost: A$${(totalCreated * 7.20 * audRate).toFixed(2)}/mo`);
 }
 
 // =============================================
@@ -272,7 +550,16 @@ async function pollTelegram() {
       if (String(u.message?.chat?.id) !== CONFIG.telegram.chat_id) continue;
       if (txt.startsWith('/approve ')) {
         const jid = txt.replace('/approve ', '').trim();
-        if (pendingApprovals[jid]) { await notify('⏳ Approved. Purchasing...'); executePurchase(jid).catch(e => notify('🚨 ' + e.message)); }
+        if (pendingApprovals[jid]) {
+          const p = pendingApprovals[jid];
+          if (p.type === 'mailbox') {
+            await notify('📧 Approved. Creating mailboxes...');
+            executeMailboxCreation(jid).catch(e => notify('🚨 ' + e.message));
+          } else {
+            await notify('⏳ Approved. Purchasing domains...');
+            executePurchase(jid).catch(e => notify('🚨 ' + e.message));
+          }
+        }
         else await notify('❌ Job not found: ' + jid);
       }
     }
@@ -330,15 +617,20 @@ http.createServer((req, res) => {
   } else if (req.method === 'GET' && req.url.startsWith('/approve/')) {
     res.writeHead(302, { 'Location': 'https://coldflows.ai/app' }); res.end();
 
-  // /approve/:jobId POST — execute purchase (requires secret OR valid browser session)
+  // /approve/:jobId POST — execute purchase or mailbox creation (requires secret)
   } else if (req.method === 'POST' && req.url.startsWith('/approve/')) {
     const secret = req.headers['x-webhook-secret'] || '';
     if (secret !== WEBHOOK_SECRET) { res.writeHead(401); res.end('Unauthorized'); return; }
     const jid = req.url.split('/approve/')[1];
     if (!pendingApprovals[jid]) { res.writeHead(404); res.end('Expired'); return; }
+    const p = pendingApprovals[jid];
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end('<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>Approved</h1><p>Purchasing now. Check Telegram.</p></body></html>');
-    executePurchase(jid).catch(e => notify('\ud83d\udea8 ' + e.message));
+    res.end('<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>Approved</h1><p>Processing now. Check Telegram.</p></body></html>');
+    if (p.type === 'mailbox') {
+      executeMailboxCreation(jid).catch(e => notify('\ud83d\udea8 ' + e.message));
+    } else {
+      executePurchase(jid).catch(e => notify('\ud83d\udea8 ' + e.message));
+    }
 
   } else { res.writeHead(404); res.end('Not found'); }
 }).listen(CONFIG.port, () => {
