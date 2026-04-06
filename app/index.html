@@ -73,6 +73,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(0,212,126,0.15)}50%{box-shadow:0 0 40px rgba(0,212,126,0.25)}}
+@keyframes approvalPulse{0%,100%{box-shadow:0 0 8px rgba(226,75,74,0.3)}50%{box-shadow:0 0 20px rgba(226,75,74,0.6)}}
 .fade-in{animation:fadeIn .4s ease both}
 .hoverable{transition:background .12s ease}
 .hoverable:hover{background:var(--bg3)!important}
@@ -1216,6 +1217,11 @@ function App(){
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             Ops Pipeline
           </a>
+          {(()=>{const p=custData._targeting&&custData._targeting.provisioning;const hasPending=p&&p.status==="awaiting_approval";return <a onClick={()=>nav("ops")} className="hoverable" style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:6,color:hasPending?"var(--red)":"var(--text3)",fontSize:12,fontWeight:hasPending?700:400,cursor:"pointer",background:hasPending?"var(--red-bg)":"transparent",border:hasPending?"1px solid var(--red)":"1px solid transparent",animation:hasPending?"approvalPulse 1.5s ease-in-out infinite":"none"}}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            Purchase approvals
+            {hasPending&&<span style={{marginLeft:"auto",background:"var(--red)",color:"#fff",fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:8}}>1</span>}
+          </a>;})()}
         </div>}
         {/* Theme toggle */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
@@ -1912,7 +1918,7 @@ function App(){
             {id:"onboard",label:"Onboard",sub:"Form",status:"done",info:"Customer fills business name, service description, initial targeting. Saved to target_market JSON. Business: "+(custData.business_name||"-")},
             {id:"campaigns",label:"Campaigns",sub:conf.length+"/"+total,status:allDone?"done":"active",info:"Customer configures each campaign: offer, pain point, social proof, targeting chips. Confirmed: ["+conf.join(",")+"], Need: "+total},
             {id:"gate",label:"Gate",sub:allDone?"Open":"Wait",status:allDone?"done":"pending",info:"Automation triggers when campaigns_confirmed.length >= "+total+". Currently: "+conf.length+"/"+total+". Gate: "+(allDone?"OPEN":"CLOSED")},
-            {id:"domains",label:"Domains",sub:domains.length+"/"+mb,status:allDone?(domains.length>=mb?"done":domains.length>0?"active":"next"):"pending",info:"Register "+mb+" .com domains via Porkbun (~$11.08 each). RDAP availability check first, then register, then verify in account. Total: ~$"+(mb*11.08).toFixed(0)+"/yr"},
+            {id:"domains",label:"Domains",sub:domains.length+"/"+mb,status:prov.status==="awaiting_approval"?"approval":allDone?(domains.length>=mb?"done":domains.length>0?"active":"next"):"pending",info:"Register "+mb+" .com domains via Namecheap (~$11/each). RDAP check, then Namecheap purchase, verify in account. Total: ~$"+(mb*11).toFixed(0)+"/yr"},
             {id:"dns",label:"DNS",sub:"Records",status:prov.dns_status==="done"?"done":"pending",info:"Set MX (aspmx.l.google.com), SPF (include:_spf.google.com), DMARC (p=none), DKIM per domain via Porkbun DNS API. Allow 24-48hrs propagation."},
             {id:"workspace",label:"Workspace",sub:"Mailboxes",status:prov.workspace_status==="done"?"done":"pending",info:"Create Google Workspace mailbox per domain (outreach@domain.com). Generate DKIM key, add to DNS. ~$6/user/mo. Count: "+mb},
             {id:"smartlead",label:"Smartlead",sub:"Connect",status:prov.smartlead_status==="done"?"done":"pending",info:"Add "+mb+" mailboxes to Smartlead. Configure warmup: 2/day ramp to 40/day. Assign "+Math.floor(mb/total)+" mailboxes per campaign. $39/mo base."},
@@ -1922,8 +1928,8 @@ function App(){
             {id:"launch",label:"Launch",sub:"Go live",status:"pending",info:"Smartlead sequences activate. ~"+(mb*35)+" emails/day across "+mb+" mailboxes. Replies forwarded to "+(custData.lead_email||custData.email)},
           ];
 
-          const sBg=s=>s==="done"?"var(--green)":s==="active"?"var(--orange)":s==="next"?"#006949":"var(--bg3)";
-          const sBd=s=>s==="done"?"var(--green-bd)":s==="active"?"var(--orange)":s==="next"?"var(--green-bd)":"var(--border)";
+          const sBg=s=>s==="done"?"var(--green)":s==="active"?"var(--orange)":s==="approval"?"var(--red)":s==="next"?"#006949":"var(--bg3)";
+          const sBd=s=>s==="done"?"var(--green-bd)":s==="active"?"var(--orange)":s==="approval"?"var(--red)":s==="next"?"var(--green-bd)":"var(--border)";
           const sTx=s=>s==="pending"?"var(--text3)":"#fff";
 
           return <div>
@@ -1951,17 +1957,96 @@ function App(){
               <div style={{display:"flex",alignItems:"center",gap:0,minWidth:1400}}>
                 {stages.map((s,i)=><React.Fragment key={i}>
                   {i>0&&<div style={{width:24,height:2,background:stages[i-1].status==="done"?"var(--green)":"var(--border)",flexShrink:0}}/>}
-                  <div onClick={()=>setDetail(s)} style={{padding:"10px 12px",border:"1px solid "+sBd(s.status),background:s.status==="done"?"var(--green-bg)":s.status==="active"?"var(--orange-bg)":s.status==="next"?"var(--green-bg)":"var(--bg2)",
-                    cursor:"pointer",textAlign:"center",minWidth:90,flexShrink:0,position:"relative",borderRadius:s.id==="gate"?20:0,transition:"transform .1s"}}
+                  <div onClick={()=>setDetail(s)} style={{padding:"10px 12px",border:(s.status==="approval"?"2px":"1px")+" solid "+sBd(s.status),background:s.status==="done"?"var(--green-bg)":s.status==="active"?"var(--orange-bg)":s.status==="approval"?"var(--red-bg)":s.status==="next"?"var(--green-bg)":"var(--bg2)",
+                    cursor:"pointer",textAlign:"center",minWidth:90,flexShrink:0,position:"relative",borderRadius:s.id==="gate"?20:0,transition:"transform .1s",
+                    animation:s.status==="approval"?"approvalPulse 1.5s ease-in-out infinite":"none",boxShadow:s.status==="approval"?"0 0 12px rgba(226,75,74,0.4)":"none"}}
                     onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
                     onMouseLeave={e=>e.currentTarget.style.transform="none"}>
                     {s.status==="done"&&<div style={{position:"absolute",top:-6,right:-6,width:16,height:16,borderRadius:8,background:"var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",fontWeight:700}}>OK</div>}
+                    {s.status==="approval"&&<div style={{position:"absolute",top:-6,right:-6,width:16,height:16,borderRadius:8,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",fontWeight:700}}>!</div>}
                     <div style={{fontSize:11,fontWeight:700,color:s.status==="pending"?"var(--text3)":"var(--text)"}}>{s.label}</div>
                     <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{s.sub}</div>
                   </div>
                 </React.Fragment>)}
               </div>
             </div>
+
+            {/* PURCHASE APPROVAL */}
+            {prov.status==="awaiting_approval"&&prov.pending_plan&&(()=>{
+              const plan=prov.pending_plan;
+              const planDomains=plan.domains||[];
+              return <div style={{border:"2px solid var(--red)",background:"var(--red-bg)",padding:20,marginBottom:16,animation:"approvalPulse 1.5s ease-in-out infinite"}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{width:28,height:28,borderRadius:14,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14}}>!</div>
+                    <div>
+                      <div style={{fontSize:16,fontWeight:700,color:"var(--red)"}}>Purchase approval required</div>
+                      <div style={{fontSize:11,color:"var(--text3)"}}>Domain purchases waiting for your approval — no money spent yet</div>
+                    </div>
+                  </div>
+                  <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>Job: {plan.jobId||"-"}</div>
+                </div>
+
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12,marginBottom:16}}>
+                  <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
+                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Customer</div>
+                    <div style={{fontSize:13,fontWeight:700}}>{plan.customer||plan.customerName||custData.business_name}</div>
+                    <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{plan.email||plan.customerEmail||custData.email}</div>
+                  </div>
+                  <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
+                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Plan</div>
+                    <div style={{fontSize:13,fontWeight:700,color:"var(--green)"}}>{((plan.plan||custData.plan||"").charAt(0).toUpperCase()+(plan.plan||custData.plan||"").slice(1))}</div>
+                    <div style={{fontSize:10,color:"var(--text3)"}}>{plan.needed||plan.domainsNeeded||0} domains needed</div>
+                  </div>
+                  <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
+                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Already owned</div>
+                    <div style={{fontSize:13,fontWeight:700}}>{plan.existing||plan.domainsAlreadyOwned||0}</div>
+                    <div style={{fontSize:10,color:"var(--text3)"}}>domains purchased</div>
+                  </div>
+                  <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
+                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Total cost</div>
+                    <div style={{fontSize:18,fontWeight:700,color:"var(--red)"}}>${(plan.total||plan.totalCost||0).toFixed(2)}</div>
+                    <div style={{fontSize:10,color:"var(--text3)"}}>${planDomains[0]?planDomains[0].price:"0"}/domain</div>
+                  </div>
+                </div>
+
+                <div style={{border:"1px solid var(--border)",background:"var(--bg)",marginBottom:16}}>
+                  <div style={{display:"grid",gridTemplateColumns:"40px 2fr 1fr",gap:0,padding:"8px 12px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
+                    <div>#</div><div>Domain</div><div>Price</div>
+                  </div>
+                  {planDomains.map((d,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"40px 2fr 1fr",gap:0,padding:"6px 12px",borderBottom:i<planDomains.length-1?"1px solid var(--border)":"none",fontSize:11}}>
+                    <div style={{fontWeight:600,color:"var(--text3)"}}>{i+1}</div>
+                    <div style={{fontFamily:"var(--mono)",fontWeight:600}}>{d.domain}</div>
+                    <div style={{fontFamily:"var(--mono)"}}>${(d.price||0).toFixed(2)}</div>
+                  </div>)}
+                  <div style={{display:"grid",gridTemplateColumns:"40px 2fr 1fr",gap:0,padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:12,fontWeight:700,background:"var(--bg2)"}}>
+                    <div></div><div>{planDomains.length} domains</div><div>${(plan.total||plan.totalCost||0).toFixed(2)}</div>
+                  </div>
+                </div>
+
+                <div style={{display:"flex",gap:12}}>
+                  <button onClick={async()=>{
+                    if(!confirm("Approve purchase of "+planDomains.length+" domains for $"+(plan.total||plan.totalCost||0).toFixed(2)+"? This will charge your Namecheap balance."))return;
+                    try{
+                      const resp=await fetch("http://170.64.130.130:3000/approve/"+(plan.jobId||""),{method:"POST"});
+                      if(resp.ok){alert("Purchase approved! Domains are being purchased now. Check Telegram for updates.");location.reload();}
+                      else{alert("Approval failed: "+await resp.text());}
+                    }catch(e){alert("Could not reach automation server: "+e.message);}
+                  }} style={{flex:1,padding:"14px 24px",background:"var(--green)",color:"#fff",border:"none",fontSize:14,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                    APPROVE PURCHASE — ${(plan.total||plan.totalCost||0).toFixed(2)}
+                  </button>
+                  <button onClick={async()=>{
+                    if(!confirm("Reject this purchase plan? The domains will NOT be purchased."))return;
+                    const t2=custData._targeting||{};
+                    if(t2.provisioning){t2.provisioning.status="rejected";delete t2.provisioning.pending_plan;}
+                    await fetch(supabaseUrl+"/rest/v1/customers?user_id=eq."+currentUser.id,{method:"PATCH",headers:{apikey:supabaseKey,Authorization:"Bearer "+supabaseKey,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({target_market:JSON.stringify(t2)})});
+                    location.reload();
+                  }} style={{padding:"14px 24px",background:"transparent",color:"var(--red)",border:"1px solid var(--red)",fontSize:14,fontWeight:600,cursor:"pointer"}}>
+                    Reject
+                  </button>
+                </div>
+              </div>;
+            })()}
 
             {/* DOMAINS TABLE */}
             <div style={{marginBottom:16}}>
