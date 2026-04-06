@@ -1172,6 +1172,24 @@ function App(){
           data._limits = limits[data.plan] || limits.starter;
           setCustData(data);
           if(!data.business_name||data.plan_status==='pending'){setIsNew(true);}
+          
+          // Auto-trigger domain suggestions for new paid customers who haven't had suggestions yet
+          if(data.business_name && data.plan && !data.provisioning){
+            // Customer has completed onboarding + payment but no provisioning yet
+            // Trigger domain suggestions via VPS
+            fetch('http://170.64.130.130:3000/suggest',{
+              method:'POST',
+              headers:{'Content-Type':'application/json','X-Webhook-Secret':'cf_wh_coldflows_2026'},
+              body:JSON.stringify({userId:currentUser.id})
+            }).then(r=>r.json()).then(r=>{
+              console.log('Domain suggestions triggered:',r);
+              // Reload customer data to show updated provisioning status
+              if(r.status==='suggestions_sent'){
+                setTimeout(()=>window.location.reload(),2000);
+              }
+            }).catch(e=>console.log('VPS suggest failed (may be offline):',e));
+          }
+          
           // If admin, fetch all customers
           if(data.email==='tomflood1995@gmail.com'||data.lead_email==='tomflood1995@gmail.com'){
             sb.from('customers').select('*').then(({data:all})=>{
