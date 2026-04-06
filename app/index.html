@@ -1221,7 +1221,7 @@ function App(){
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             Ops Pipeline
           </a>
-          {(()=>{const p=custData._targeting&&custData._targeting.provisioning;const hasPending=p&&p.status==="awaiting_approval";return <a onClick={()=>nav("ops")} className="hoverable" style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:6,color:hasPending?"var(--red)":"var(--text3)",fontSize:12,fontWeight:hasPending?700:400,cursor:"pointer",background:hasPending?"var(--red-bg)":"transparent",border:hasPending?"1px solid var(--red)":"1px solid transparent",animation:hasPending?"approvalPulse 1.5s ease-in-out infinite":"none"}}>
+          {(()=>{const p=custData._targeting&&custData._targeting.provisioning;const hasPending=p&&p.status==="awaiting_approval";return <a onClick={()=>nav("approvals")} className="hoverable" style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:6,color:hasPending?"var(--red)":pg==="approvals"?"var(--red)":"var(--text3)",fontSize:12,fontWeight:hasPending||pg==="approvals"?700:400,cursor:"pointer",background:hasPending?"var(--red-bg)":pg==="approvals"?"var(--bg2)":"transparent",border:hasPending?"1px solid var(--red)":"1px solid transparent",animation:hasPending?"approvalPulse 1.5s ease-in-out infinite":"none"}}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
             Purchase approvals
             {hasPending&&<span style={{marginLeft:"auto",background:"var(--red)",color:"#fff",fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:8}}>1</span>}
@@ -1900,6 +1900,148 @@ function App(){
 
       {/* OPS PIPELINE — admin only */}
       {/* OPS PIPELINE — admin only */}
+      {/* PURCHASE APPROVALS PAGE */}
+      {pg==="approvals"&&custData&&(custData.email==="tomflood1995@gmail.com"||custData.lead_email==="tomflood1995@gmail.com")&&<div className="fade-in" style={{padding:"24px 28px"}}>
+        <div style={{marginBottom:16}}>
+          <h1 style={{fontSize:22,fontWeight:700}}>Purchase approvals</h1>
+          <p style={{fontSize:11,color:"var(--text3)",marginTop:2}}>Review and approve domain purchases before any money is spent</p>
+        </div>
+
+        {(()=>{
+          const t=custData._targeting||{};
+          const prov=t.provisioning||{};
+          const hasPending=prov.status==="awaiting_approval"&&prov.pending_plan;
+          const plan=prov.pending_plan||{};
+          const planDomains=plan.domains||[];
+          const domains=(prov.domains||[]).filter(d=>d.status==="purchased");
+
+          return <div>
+            {/* Customer table — shows all customers, highlights ones needing approval */}
+            <div style={{border:"1px solid var(--border)",background:"var(--bg)",marginBottom:16}}>
+              <div style={{display:"grid",gridTemplateColumns:"2fr 1.5fr 1fr 1fr 1fr 120px",gap:0,padding:"8px 12px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
+                <div>Customer</div><div>Email</div><div>Plan</div><div>Domains</div><div>Status</div><div>Action</div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"2fr 1.5fr 1fr 1fr 1fr 120px",gap:0,padding:"10px 12px",fontSize:11,alignItems:"center",background:hasPending?"var(--red-bg)":"var(--bg)",borderLeft:hasPending?"3px solid var(--red)":"3px solid transparent"}}>
+                <div style={{fontWeight:700}}>{custData.business_name}</div>
+                <div style={{fontFamily:"var(--mono)",color:"var(--text2)",fontSize:10}}>{custData.email}</div>
+                <div><span style={{fontSize:9,fontWeight:700,padding:"2px 8px",background:"var(--green-bg)",color:"var(--green)"}}>{(custData.plan||"").toUpperCase()}</span></div>
+                <div style={{fontWeight:600}}>{domains.length}/{custData._limits?custData._limits.mailboxes:12}</div>
+                <div>{hasPending?<span style={{fontSize:9,fontWeight:700,padding:"2px 8px",background:"var(--red)",color:"#fff",animation:"approvalPulse 1.5s ease-in-out infinite"}}>APPROVAL NEEDED</span>:
+                  <span style={{fontSize:9,fontWeight:600,padding:"2px 8px",background:"var(--bg3)",color:"var(--text3)"}}>{(prov.status||"none").toUpperCase()}</span>}</div>
+                <div>{hasPending?<span style={{fontSize:10,color:"var(--red)",fontWeight:700,cursor:"pointer"}} onClick={()=>document.getElementById("approval-detail").scrollIntoView({behavior:"smooth"})}>Review</span>:
+                  <span style={{fontSize:10,color:"var(--text3)"}}>No action</span>}</div>
+              </div>
+            </div>
+
+            {/* Pending approval detail */}
+            {hasPending?<div id="approval-detail" style={{border:"2px solid var(--red)",background:"var(--red-bg)",padding:20,marginBottom:16}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
+                <div style={{width:32,height:32,borderRadius:16,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:16}}>!</div>
+                <div>
+                  <div style={{fontSize:18,fontWeight:700,color:"var(--red)"}}>Domain purchase request</div>
+                  <div style={{fontSize:11,color:"var(--text3)"}}>No money has been spent — review below and approve or reject</div>
+                </div>
+                <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
+                  <button onClick={()=>setCurrency(currency==="USD"?"AUD":"USD")} style={{padding:"4px 10px",fontSize:10,fontWeight:700,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",cursor:"pointer",fontFamily:"var(--mono)"}}>{currency}</button>
+                  <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>Job: {plan.jobId||"-"}</div>
+                </div>
+              </div>
+
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12,marginBottom:16}}>
+                <div style={{background:"var(--bg)",padding:14,border:"1px solid var(--border)"}}>
+                  <div style={{fontSize:9,color:"var(--text3)",marginBottom:4}}>Customer</div>
+                  <div style={{fontSize:14,fontWeight:700}}>{plan.customer||plan.customerName||custData.business_name}</div>
+                  <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{plan.email||plan.customerEmail||custData.email}</div>
+                </div>
+                <div style={{background:"var(--bg)",padding:14,border:"1px solid var(--border)"}}>
+                  <div style={{fontSize:9,color:"var(--text3)",marginBottom:4}}>Plan</div>
+                  <div style={{fontSize:14,fontWeight:700,color:"var(--green)"}}>{((plan.plan||custData.plan||"").charAt(0).toUpperCase()+(plan.plan||custData.plan||"").slice(1))}</div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{plan.needed||plan.domainsNeeded||0} domains to purchase</div>
+                </div>
+                <div style={{background:"var(--bg)",padding:14,border:"1px solid var(--border)"}}>
+                  <div style={{fontSize:9,color:"var(--text3)",marginBottom:4}}>Already owned</div>
+                  <div style={{fontSize:14,fontWeight:700}}>{plan.existing||plan.domainsAlreadyOwned||0} domains</div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>previously purchased</div>
+                </div>
+                <div style={{background:"var(--bg)",padding:14,border:"1px solid var(--border)"}}>
+                  <div style={{fontSize:9,color:"var(--text3)",marginBottom:4}}>Total cost</div>
+                  <div style={{fontSize:22,fontWeight:700,color:"var(--red)"}}>{cs}{fx(plan.total||plan.totalCost||0)}</div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{cs}{fx(planDomains[0]?planDomains[0].price:0)}/domain ({currency})</div>
+                </div>
+              </div>
+
+              <div style={{fontSize:13,fontWeight:700,marginBottom:8}}>Domains to purchase ({planDomains.length})</div>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)",marginBottom:16}}>
+                <div style={{display:"grid",gridTemplateColumns:"50px 2.5fr 1fr 1fr",gap:0,padding:"8px 14px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
+                  <div>#</div><div>Domain</div><div>Mailbox email</div><div>Price</div>
+                </div>
+                {planDomains.map((d,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"50px 2.5fr 1fr 1fr",gap:0,padding:"8px 14px",borderBottom:i<planDomains.length-1?"1px solid var(--border)":"none",fontSize:12,alignItems:"center"}}>
+                  <div style={{fontWeight:700,color:"var(--text3)"}}>{i+1}</div>
+                  <div style={{fontFamily:"var(--mono)",fontWeight:600}}>{d.domain}</div>
+                  <div style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text2)"}}>outreach@{d.domain}</div>
+                  <div style={{fontFamily:"var(--mono)",fontWeight:600}}>{cs}{fx(d.price||0)}</div>
+                </div>)}
+                <div style={{display:"grid",gridTemplateColumns:"50px 2.5fr 1fr 1fr",gap:0,padding:"10px 14px",borderTop:"2px solid var(--border)",fontSize:13,fontWeight:700,background:"var(--bg2)"}}>
+                  <div></div><div>{planDomains.length} domains</div><div></div><div style={{color:"var(--red)"}}>{cs}{fx(plan.total||plan.totalCost||0)} {currency}</div>
+                </div>
+              </div>
+
+              <div style={{display:"flex",gap:12}}>
+                <button onClick={async()=>{
+                  if(!confirm("APPROVE purchase of "+planDomains.length+" domains for "+cs+fx(plan.total||plan.totalCost||0)+" "+currency+"?\\n\\nThis will charge your Namecheap balance. Are you sure?"))return;
+                  try{
+                    const resp=await fetch("http://170.64.130.130:3000/approve/"+(plan.jobId||""),{method:"POST"});
+                    if(resp.ok){alert("Approved! Purchasing now. Check Telegram for updates on each domain.");location.reload();}
+                    else{alert("Failed: "+await resp.text());}
+                  }catch(e){alert("Could not reach automation server: "+e.message);}
+                }} style={{flex:1,padding:"16px 24px",background:"var(--green)",color:"#fff",border:"none",fontSize:15,fontWeight:700,cursor:"pointer"}}>
+                  APPROVE PURCHASE — {cs}{fx(plan.total||plan.totalCost||0)} {currency}
+                </button>
+                <button onClick={async()=>{
+                  if(!confirm("Reject this purchase plan? No domains will be purchased."))return;
+                  const t2=custData._targeting||{};
+                  if(t2.provisioning){t2.provisioning.status="rejected";delete t2.provisioning.pending_plan;}
+                  await fetch(supabaseUrl+"/rest/v1/customers?user_id=eq."+currentUser.id,{method:"PATCH",headers:{apikey:supabaseKey,Authorization:"Bearer "+supabaseKey,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({target_market:JSON.stringify(t2)})});
+                  location.reload();
+                }} style={{padding:"16px 24px",background:"transparent",color:"var(--red)",border:"2px solid var(--red)",fontSize:15,fontWeight:600,cursor:"pointer"}}>
+                  Reject
+                </button>
+              </div>
+            </div>:
+
+            <div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:32,textAlign:"center"}}>
+              <div style={{fontSize:14,color:"var(--text3)",marginBottom:4}}>No pending approvals</div>
+              <div style={{fontSize:11,color:"var(--text3)"}}>When a customer completes their campaign setup, a domain purchase request will appear here for your approval</div>
+            </div>}
+
+            {/* Purchase history */}
+            {domains.length>0&&<div style={{marginTop:16}}>
+              <div style={{fontSize:14,fontWeight:700,marginBottom:10}}>Purchase history</div>
+              <div style={{border:"1px solid var(--border)",background:"var(--bg)"}}>
+                <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
+                  <div>Domain</div><div>Customer</div><div>Purchased</div><div>Renewal</div><div>Cost</div><div>Status</div>
+                </div>
+                {domains.map((d,i)=>{
+                  var pDate=d.purchased_at?new Date(d.purchased_at):null;
+                  var rDate=pDate?new Date(pDate.getTime()+365*24*60*60*1000):null;
+                  return <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderBottom:i<domains.length-1?"1px solid var(--border)":"none",fontSize:11,alignItems:"center"}}>
+                    <div><div style={{fontWeight:600,fontFamily:"var(--mono)"}}>{d.domain}</div><div style={{fontSize:9,color:"var(--text3)"}}>outreach@{d.domain}</div></div>
+                    <div style={{fontSize:10}}>{custData.business_name}</div>
+                    <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>{pDate?pDate.toLocaleDateString("en-AU",{day:"2-digit",month:"short",year:"2-digit"}):"-"}</div>
+                    <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>{rDate?rDate.toLocaleDateString("en-AU",{day:"2-digit",month:"short",year:"2-digit"}):"-"}</div>
+                    <div style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:600}}>{cs}{fx(d.cost||0)}</div>
+                    <div><span style={{fontSize:8,fontWeight:700,padding:"2px 6px",background:"var(--green)",color:"#fff"}}>PURCHASED</span></div>
+                  </div>;
+                })}
+                <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 80px",gap:0,padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:11,fontWeight:700,background:"var(--bg2)"}}>
+                  <div>{domains.length} domains</div><div></div><div></div><div></div><div style={{fontFamily:"var(--mono)"}}>{cs}{fx(domains.reduce((s,d)=>s+(d.cost||0),0))}</div><div></div>
+                </div>
+              </div>
+            </div>}
+          </div>;
+        })()}
+      </div>}
+
       {pg==="ops"&&custData&&(custData.email==="tomflood1995@gmail.com"||custData.lead_email==="tomflood1995@gmail.com")&&<div className="fade-in" style={{padding:"24px 28px"}}>
         <div style={{marginBottom:16}}>
           <h1 style={{fontSize:22,fontWeight:700}}>Ops pipeline</h1>
@@ -1977,83 +2119,6 @@ function App(){
                 </React.Fragment>)}
               </div>
             </div>
-
-            {/* PURCHASE APPROVAL */}
-            {prov.status==="awaiting_approval"&&prov.pending_plan&&(()=>{
-              const plan=prov.pending_plan;
-              const planDomains=plan.domains||[];
-              return <div style={{border:"2px solid var(--red)",background:"var(--red-bg)",padding:20,marginBottom:16,animation:"approvalPulse 1.5s ease-in-out infinite"}}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <div style={{width:28,height:28,borderRadius:14,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14}}>!</div>
-                    <div>
-                      <div style={{fontSize:16,fontWeight:700,color:"var(--red)"}}>Purchase approval required</div>
-                      <div style={{fontSize:11,color:"var(--text3)"}}>Domain purchases waiting for your approval — no money spent yet</div>
-                    </div>
-                  </div>
-                  <div style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--text3)"}}>Job: {plan.jobId||"-"}</div>
-                </div>
-
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12,marginBottom:16}}>
-                  <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
-                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Customer</div>
-                    <div style={{fontSize:13,fontWeight:700}}>{plan.customer||plan.customerName||custData.business_name}</div>
-                    <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{plan.email||plan.customerEmail||custData.email}</div>
-                  </div>
-                  <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
-                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Plan</div>
-                    <div style={{fontSize:13,fontWeight:700,color:"var(--green)"}}>{((plan.plan||custData.plan||"").charAt(0).toUpperCase()+(plan.plan||custData.plan||"").slice(1))}</div>
-                    <div style={{fontSize:10,color:"var(--text3)"}}>{plan.needed||plan.domainsNeeded||0} domains needed</div>
-                  </div>
-                  <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
-                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Already owned</div>
-                    <div style={{fontSize:13,fontWeight:700}}>{plan.existing||plan.domainsAlreadyOwned||0}</div>
-                    <div style={{fontSize:10,color:"var(--text3)"}}>domains purchased</div>
-                  </div>
-                  <div style={{background:"var(--bg)",padding:12,border:"1px solid var(--border)"}}>
-                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:2}}>Total cost</div>
-                    <div style={{fontSize:18,fontWeight:700,color:"var(--red)"}}>{cs}{fx(plan.total||plan.totalCost||0)} {currency}</div>
-                    <div style={{fontSize:10,color:"var(--text3)"}}>{cs}{fx(planDomains[0]?planDomains[0].price:0)}/domain</div>
-                  </div>
-                </div>
-
-                <div style={{border:"1px solid var(--border)",background:"var(--bg)",marginBottom:16}}>
-                  <div style={{display:"grid",gridTemplateColumns:"40px 2fr 1fr",gap:0,padding:"8px 12px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
-                    <div>#</div><div>Domain</div><div>Price</div>
-                  </div>
-                  {planDomains.map((d,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"40px 2fr 1fr",gap:0,padding:"6px 12px",borderBottom:i<planDomains.length-1?"1px solid var(--border)":"none",fontSize:11}}>
-                    <div style={{fontWeight:600,color:"var(--text3)"}}>{i+1}</div>
-                    <div style={{fontFamily:"var(--mono)",fontWeight:600}}>{d.domain}</div>
-                    <div style={{fontFamily:"var(--mono)"}}>{cs}{fx(d.price||0)}</div>
-                  </div>)}
-                  <div style={{display:"grid",gridTemplateColumns:"40px 2fr 1fr",gap:0,padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:12,fontWeight:700,background:"var(--bg2)"}}>
-                    <div></div><div>{planDomains.length} domains</div><div>{cs}{fx(plan.total||plan.totalCost||0)} {currency}</div>
-                  </div>
-                </div>
-
-                <div style={{display:"flex",gap:12}}>
-                  <button onClick={async()=>{
-                    if(!confirm("Approve purchase of "+planDomains.length+" domains for "+cs+fx(plan.total||plan.totalCost||0)+" "+currency+"? This will charge your Namecheap balance."))return;
-                    try{
-                      const resp=await fetch("http://170.64.130.130:3000/approve/"+(plan.jobId||""),{method:"POST"});
-                      if(resp.ok){alert("Purchase approved! Domains are being purchased now. Check Telegram for updates.");location.reload();}
-                      else{alert("Approval failed: "+await resp.text());}
-                    }catch(e){alert("Could not reach automation server: "+e.message);}
-                  }} style={{flex:1,padding:"14px 24px",background:"var(--green)",color:"#fff",border:"none",fontSize:14,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                    APPROVE PURCHASE — {cs}{fx(plan.total||plan.totalCost||0)} {currency}
-                  </button>
-                  <button onClick={async()=>{
-                    if(!confirm("Reject this purchase plan? The domains will NOT be purchased."))return;
-                    const t2=custData._targeting||{};
-                    if(t2.provisioning){t2.provisioning.status="rejected";delete t2.provisioning.pending_plan;}
-                    await fetch(supabaseUrl+"/rest/v1/customers?user_id=eq."+currentUser.id,{method:"PATCH",headers:{apikey:supabaseKey,Authorization:"Bearer "+supabaseKey,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({target_market:JSON.stringify(t2)})});
-                    location.reload();
-                  }} style={{padding:"14px 24px",background:"transparent",color:"var(--red)",border:"1px solid var(--red)",fontSize:14,fontWeight:600,cursor:"pointer"}}>
-                    Reject
-                  </button>
-                </div>
-              </div>;
-            })()}
 
             {/* DOMAINS TABLE */}
             <div style={{marginBottom:16}}>
