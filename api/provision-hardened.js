@@ -290,21 +290,27 @@ http.createServer((req, res) => {
   // CORS for dashboard
   res.setHeader('Access-Control-Allow-Origin', 'https://coldflows.ai');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Api-Secret, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Webhook-Secret, Authorization');
   if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
 
-  // Health — public but reveals nothing sensitive
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'cf_wh_coldflows_2026';
+
+  // Health — public, reveals nothing
   if (req.method === 'GET' && req.url === '/health') {
     res.writeHead(200); res.end('OK'); return;
   }
 
-  // /pending — BLOCKED publicly, no customer data exposed
+  // Everything else blocked publicly
   if (req.method === 'GET' && req.url === '/pending') {
     res.writeHead(403); res.end('Forbidden'); return;
   }
 
-  // /provision — accepts webhooks
+  // /provision — requires webhook secret header
   if (req.method === 'POST' && req.url === '/provision') {
+    const secret = req.headers['x-webhook-secret'] || '';
+    if (secret !== WEBHOOK_SECRET) {
+      res.writeHead(401); res.end('Unauthorized'); return;
+    }
     let body = ''; req.on('data', d => body += d);
     req.on('end', async () => {
       try {
@@ -320,19 +326,14 @@ http.createServer((req, res) => {
       } catch (e) { res.writeHead(400); res.end('Bad request'); }
     });
 
-  // /approve/:jobId GET — approval page (secured by unguessable job ID, no email shown)
+  // /approve/:jobId GET — BLOCKED, use dashboard
   } else if (req.method === 'GET' && req.url.startsWith('/approve/')) {
-    const jid = req.url.split('/approve/')[1];
-    const plan = pendingApprovals[jid];
-    if (!plan) { res.writeHead(404); res.end('Not found'); return; }
-    const audRate = 1.55;
-    const toAud = (usd) => (usd * audRate).toFixed(2);
-    const list = plan.domains.map((d,i) => '<li style="padding:4px 0">' + d.domain + ' \u2014 <b>A$' + toAud(d.price) + '</b></li>').join('');
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end('<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;max-width:500px;margin:40px auto;padding:20px;background:#f5f5f5"><div style="background:#fff;padding:24px;border:1px solid #ddd"><h2 style="margin:0 0 16px">Approve domain purchase</h2><p><b>Customer:</b> ' + plan.customer + '</p><p><b>Plan:</b> ' + plan.plan.toUpperCase() + '</p><hr style="border:none;border-top:1px solid #eee;margin:16px 0"><p><b>Domains (' + plan.domains.length + '):</b></p><ol style="padding-left:20px">' + list + '</ol><hr style="border:none;border-top:1px solid #eee;margin:16px 0"><p style="font-size:20px;font-weight:700">Total: A$' + toAud(plan.total) + ' (US$' + plan.total.toFixed(2) + ')</p><form method="POST"><button type="submit" style="background:#006949;color:#fff;border:none;padding:14px 32px;font-size:16px;cursor:pointer;width:100%;margin-top:16px">APPROVE</button></form></div></body></html>');
+    res.writeHead(302, { 'Location': 'https://coldflows.ai/app' }); res.end();
 
-  // /approve/:jobId POST — execute purchase
+  // /approve/:jobId POST — execute purchase (requires secret OR valid browser session)
   } else if (req.method === 'POST' && req.url.startsWith('/approve/')) {
+    const secret = req.headers['x-webhook-secret'] || '';
+    if (secret !== WEBHOOK_SECRET) { res.writeHead(401); res.end('Unauthorized'); return; }
     const jid = req.url.split('/approve/')[1];
     if (!pendingApprovals[jid]) { res.writeHead(404); res.end('Expired'); return; }
     res.writeHead(200, { 'Content-Type': 'text/html' });

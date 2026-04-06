@@ -1994,7 +1994,7 @@ function App(){
                   <button onClick={async()=>{
                     if(!confirm("APPROVE purchase of "+planDomains.length+" domains for "+cs+fx(plan.total||plan.totalCost||0)+" "+currency+"?\n\nThis will charge your Namecheap balance."))return;
                     try{
-                      const resp=await fetch("http://170.64.130.130:3000/approve/"+(plan.jobId||""),{method:"POST"});
+                      const resp=await fetch("http://170.64.130.130:3000/approve/"+(plan.jobId||""),{method:"POST",headers:{"X-Webhook-Secret":"cf_wh_coldflows_2026"}});
                       if(resp.ok){alert("Approved! Purchasing now. Check Telegram for updates.");setApprovalView(null);location.reload();}
                       else{alert("Failed: "+await resp.text());}
                     }catch(e){alert("Could not reach automation server: "+e.message);}
