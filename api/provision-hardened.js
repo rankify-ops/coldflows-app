@@ -284,9 +284,26 @@ setInterval(pollTelegram, 3000);
 setInterval(() => { for (const [id, p] of Object.entries(pendingApprovals)) if (Date.now() - new Date(p.createdAt).getTime() > 86400000) delete pendingApprovals[id]; }, 60000);
 
 // =============================================
-// HTTP SERVER
+// HTTP SERVER (secured)
 // =============================================
 http.createServer((req, res) => {
+  // CORS for dashboard
+  res.setHeader('Access-Control-Allow-Origin', 'https://coldflows.ai');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Api-Secret, Authorization');
+  if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
+
+  // Health — public but reveals nothing sensitive
+  if (req.method === 'GET' && req.url === '/health') {
+    res.writeHead(200); res.end('OK'); return;
+  }
+
+  // /pending — BLOCKED publicly, no customer data exposed
+  if (req.method === 'GET' && req.url === '/pending') {
+    res.writeHead(403); res.end('Forbidden'); return;
+  }
+
+  // /provision — accepts webhooks
   if (req.method === 'POST' && req.url === '/provision') {
     let body = ''; req.on('data', d => body += d);
     req.on('end', async () => {
@@ -298,39 +315,32 @@ http.createServer((req, res) => {
         if (conf.length < lim.campaigns) { res.writeHead(200); res.end('Not ready'); return; }
         const st = (tm.provisioning || {}).status;
         if (st === 'domains_complete' || st === 'purchasing' || st === 'awaiting_approval') { res.writeHead(200); res.end(st); return; }
-        res.writeHead(200); res.end('Plan generation started — approval required before any purchases');
-        generatePlan(uid).catch(e => notify('🚨 ' + e.message));
+        res.writeHead(200); res.end('Plan generation started');
+        generatePlan(uid).catch(e => notify('\ud83d\udea8 ' + e.message));
       } catch (e) { res.writeHead(400); res.end('Bad request'); }
     });
+
+  // /approve/:jobId GET — approval page (secured by unguessable job ID, no email shown)
   } else if (req.method === 'GET' && req.url.startsWith('/approve/')) {
     const jid = req.url.split('/approve/')[1];
     const plan = pendingApprovals[jid];
-    if (!plan) { res.writeHead(404); res.end('Not found or expired'); return; }
-    const list = plan.domains.map((d,i) => `<li style="padding:4px 0">${d.domain} — <b>$${d.price}</b></li>`).join('');
+    if (!plan) { res.writeHead(404); res.end('Not found'); return; }
+    const audRate = 1.55;
+    const toAud = (usd) => (usd * audRate).toFixed(2);
+    const list = plan.domains.map((d,i) => '<li style="padding:4px 0">' + d.domain + ' \u2014 <b>A$' + toAud(d.price) + '</b></li>').join('');
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(`<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;max-width:500px;margin:40px auto;padding:20px;background:#f5f5f5">
-      <div style="background:#fff;padding:24px;border:1px solid #ddd">
-        <h2 style="margin:0 0 16px">Approve domain purchase</h2>
-        <p><b>Customer:</b> ${plan.customer}</p><p><b>Email:</b> ${plan.email}</p><p><b>Plan:</b> ${plan.plan.toUpperCase()}</p>
-        <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
-        <p><b>Domains (${plan.domains.length}):</b></p><ol style="padding-left:20px">${list}</ol>
-        <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
-        <p style="font-size:20px;font-weight:700">Total: $${plan.total.toFixed(2)}</p>
-        <p style="color:#666">Already owned: ${plan.existing} domains</p>
-        <form method="POST"><button type="submit" style="background:#006949;color:#fff;border:none;padding:14px 32px;font-size:16px;cursor:pointer;width:100%;margin-top:16px">APPROVE PURCHASE — $${plan.total.toFixed(2)}</button></form>
-      </div></body></html>`);
+    res.end('<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;max-width:500px;margin:40px auto;padding:20px;background:#f5f5f5"><div style="background:#fff;padding:24px;border:1px solid #ddd"><h2 style="margin:0 0 16px">Approve domain purchase</h2><p><b>Customer:</b> ' + plan.customer + '</p><p><b>Plan:</b> ' + plan.plan.toUpperCase() + '</p><hr style="border:none;border-top:1px solid #eee;margin:16px 0"><p><b>Domains (' + plan.domains.length + '):</b></p><ol style="padding-left:20px">' + list + '</ol><hr style="border:none;border-top:1px solid #eee;margin:16px 0"><p style="font-size:20px;font-weight:700">Total: A$' + toAud(plan.total) + ' (US$' + plan.total.toFixed(2) + ')</p><form method="POST"><button type="submit" style="background:#006949;color:#fff;border:none;padding:14px 32px;font-size:16px;cursor:pointer;width:100%;margin-top:16px">APPROVE</button></form></div></body></html>');
+
+  // /approve/:jobId POST — execute purchase
   } else if (req.method === 'POST' && req.url.startsWith('/approve/')) {
     const jid = req.url.split('/approve/')[1];
     if (!pendingApprovals[jid]) { res.writeHead(404); res.end('Expired'); return; }
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>✅ Approved</h1><p>Purchasing now. Check Telegram for updates.</p></body></html>`);
-    executePurchase(jid).catch(e => notify('🚨 ' + e.message));
-  } else if (req.method === 'GET' && req.url === '/pending') {
-    res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(pendingApprovals, null, 2));
-  } else if (req.method === 'GET' && req.url === '/health') {
-    res.writeHead(200); res.end('OK | pending: ' + Object.keys(pendingApprovals).length);
+    res.end('<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>Approved</h1><p>Purchasing now. Check Telegram.</p></body></html>');
+    executePurchase(jid).catch(e => notify('\ud83d\udea8 ' + e.message));
+
   } else { res.writeHead(404); res.end('Not found'); }
 }).listen(CONFIG.port, () => {
-  log('INFO', 'Server on port ' + CONFIG.port + ' — APPROVAL GATE ACTIVE');
-  log('INFO', 'NO purchases without manual approval via Telegram');
+  log('INFO', 'Server on port ' + CONFIG.port + ' \u2014 APPROVAL GATE ACTIVE');
+  log('INFO', '/pending BLOCKED, /health reveals nothing, approval via dashboard or Telegram only');
 });
