@@ -213,6 +213,18 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
       <input type="email" id="f-lead-email" placeholder="you@yourbusiness.com">
       <div style="font-size:10px;color:var(--text3);margin-top:4px">Warm replies will land directly in this inbox</div>
     </div>
+    <div class="field">
+      <label>Your main domain</label>
+      <input type="text" id="f-fwd-domain" placeholder="yourbusiness.com.au">
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">Your brand's primary domain — used for email forwarding</div>
+    </div>
+    <div class="field">
+      <label>Sender name(s)</label>
+      <input type="text" id="f-sender1" placeholder="First Last" style="margin-bottom:6px">
+      <input type="text" id="f-sender2" placeholder="Second sender (optional)" style="margin-bottom:6px">
+      <input type="text" id="f-sender3" placeholder="Third sender (optional)">
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">The name(s) that appear on outgoing emails. Add up to 3 — mailboxes will be distributed across them.</div>
+    </div>
     <button class="btn" onclick="goTo(2)">Continue</button>
   </div>
 
@@ -343,20 +355,20 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
         <div class="pn">Starter</div>
         <div class="pp">$690</div>
         <div class="pm">USD / month</div>
-        <div class="pi">4 mailboxes<br>2 campaigns<br>~2,000 emails/wk</div>
+        <div class="pi">6 mailboxes · 3 domains<br>1 campaign<br>~1,500 emails/mo</div>
       </div>
       <div class="plan sel" onclick="pickPlan(this,'growth')">
         <div class="pb">Most popular</div>
         <div class="pn">Growth</div>
         <div class="pp">$1,750</div>
         <div class="pm">USD / month</div>
-        <div class="pi">12 mailboxes<br>4 campaigns<br>~6,000 emails/wk</div>
+        <div class="pi">12 mailboxes · 6 domains<br>3 campaigns<br>~4,500 emails/mo</div>
       </div>
       <div class="plan" onclick="pickPlan(this,'scale')">
         <div class="pn">Scale</div>
         <div class="pp">$3,500</div>
         <div class="pm">USD / month</div>
-        <div class="pi">30 mailboxes<br>10 campaigns<br>~15,000 emails/wk</div>
+        <div class="pi">24 mailboxes · 12 domains<br>6 campaigns<br>~12,000 emails/mo</div>
       </div>
     </div>
 
@@ -377,6 +389,8 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
     <div class="summary">
       <div class="sr"><span class="sl">Business</span><span class="sv" id="rv-biz"></span></div>
       <div class="sr"><span class="sl">Leads inbox</span><span class="sv" id="rv-email"></span></div>
+      <div class="sr"><span class="sl">Main domain</span><span class="sv" id="rv-fwd"></span></div>
+      <div class="sr"><span class="sl">Sender name(s)</span><span class="sv" id="rv-senders"></span></div>
       <div class="sr"><span class="sl">Campaign</span><span class="sv" id="rv-camp"></span></div>
       <div class="sr"><span class="sl">Titles</span><span class="sv"><div class="stags" id="rv-titles"></div></span></div>
       <div class="sr"><span class="sl">Seniority</span><span class="sv"><div class="stags" id="rv-sen"></div></span></div>
@@ -416,6 +430,8 @@ sb.auth.getSession().then(function(res){
       if(d.business_name)document.getElementById('f-biz').value=d.business_name;
       if(d.service_description)document.getElementById('f-svc').value=d.service_description;
       if(d.lead_email)document.getElementById('f-lead-email').value=d.lead_email;
+      if(d.forwarding_domain)document.getElementById('f-fwd-domain').value=d.forwarding_domain;
+      if(d.sender_names){try{var sn=typeof d.sender_names==='string'?JSON.parse(d.sender_names):d.sender_names;if(sn[0])document.getElementById('f-sender1').value=sn[0];if(sn[1])document.getElementById('f-sender2').value=sn[1];if(sn[2])document.getElementById('f-sender3').value=sn[2];}catch(e){}}
       if(d.plan)plan=d.plan;
       
       // Pre-fill targeting data
@@ -457,9 +473,9 @@ sb.auth.getSession().then(function(res){
 
 var plan='growth';
 var planData={
-  starter:{name:'Starter',price:'$690/mo',priceNum:'$690',mailboxes:'4',campaigns:'2'},
-  growth:{name:'Growth',price:'$1,750/mo',priceNum:'$1,750',mailboxes:'12',campaigns:'4'},
-  scale:{name:'Scale',price:'$3,500/mo',priceNum:'$3,500',mailboxes:'30',campaigns:'10'},
+  starter:{name:'Starter',price:'$690/mo',priceNum:'$690',mailboxes:'6',domains:'3',campaigns:'1'},
+  growth:{name:'Growth',price:'$1,750/mo',priceNum:'$1,750',mailboxes:'12',domains:'6',campaigns:'3'},
+  scale:{name:'Scale',price:'$3,500/mo',priceNum:'$3,500',mailboxes:'24',domains:'12',campaigns:'6'},
 };
 var stripeLinks={
   starter:'https://buy.stripe.com/eVq14odeC2Zh8RYe9Q5gc02',
@@ -507,6 +523,9 @@ function goTo(page){
     var pd=planData[plan];
     document.getElementById('rv-biz').textContent=document.getElementById('f-biz').value;
     document.getElementById('rv-email').textContent=document.getElementById('f-lead-email').value||currentUser.email;
+    document.getElementById('rv-fwd').textContent=document.getElementById('f-fwd-domain').value||'—';
+    var senders=[document.getElementById('f-sender1').value,document.getElementById('f-sender2').value,document.getElementById('f-sender3').value].filter(function(s){return s.trim();});
+    document.getElementById('rv-senders').textContent=senders.length?senders.join(', '):'—';
     document.getElementById('rv-camp').textContent=document.getElementById('f-camp').value||'Campaign 1';
     fillTags('rv-titles',getSelected('titles'));
     fillTags('rv-sen',getSelected('seniority'));
@@ -520,7 +539,7 @@ function goTo(page){
     }else{
       document.getElementById('rv-locdetail-row').style.display='none';
     }
-    document.getElementById('rv-plan').textContent=pd.name+' — '+pd.mailboxes+' mailboxes';
+    document.getElementById('rv-plan').textContent=pd.name+' — '+pd.mailboxes+' mailboxes · '+pd.domains+' domains';
     document.getElementById('rv-price').textContent=pd.priceNum+' USD';
   }
 
@@ -534,10 +553,14 @@ async function checkout(){
   var btn=document.getElementById('btn-pay');
   btn.disabled=true;btn.textContent='Saving...';
 
+  var senders=[document.getElementById('f-sender1').value,document.getElementById('f-sender2').value,document.getElementById('f-sender3').value].filter(function(s){return s.trim();});
+
   var{error}=await sb.from('customers').update({
     business_name:document.getElementById('f-biz').value,
     lead_email:document.getElementById('f-lead-email').value||currentUser.email,
     service_description:document.getElementById('f-svc').value,
+    forwarding_domain:document.getElementById('f-fwd-domain').value,
+    sender_names:JSON.stringify(senders),
     target_market:JSON.stringify({
       website:document.getElementById('f-url').value,
       offer:document.getElementById('f-offer').value,
