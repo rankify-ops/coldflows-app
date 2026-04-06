@@ -1222,10 +1222,10 @@ function App(){
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             Ops Pipeline
           </a>
-          {(()=>{const p=custData._targeting&&custData._targeting.provisioning;const hasPending=p&&p.status==="awaiting_approval";return <a onClick={()=>nav("approvals")} className="hoverable" style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:6,color:hasPending?"var(--red)":pg==="approvals"?"var(--red)":"var(--text3)",fontSize:12,fontWeight:hasPending||pg==="approvals"?700:400,cursor:"pointer",background:hasPending?"var(--red-bg)":pg==="approvals"?"var(--bg2)":"transparent",border:hasPending?"1px solid var(--red)":"1px solid transparent",animation:hasPending?"approvalPulse 1.5s ease-in-out infinite":"none"}}>
+          {(()=>{const p=custData._targeting&&custData._targeting.provisioning;const hasPendingDomain=p&&p.status==="awaiting_approval";const hasPendingMailbox=p&&p.mailbox_status==="awaiting_approval";const pendingCount=(hasPendingDomain?1:0)+(hasPendingMailbox?1:0);const hasPending=pendingCount>0;return <a onClick={()=>nav("approvals")} className="hoverable" style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:6,color:hasPending?"var(--red)":pg==="approvals"?"var(--red)":"var(--text3)",fontSize:12,fontWeight:hasPending||pg==="approvals"?700:400,cursor:"pointer",background:hasPending?"var(--red-bg)":pg==="approvals"?"var(--bg2)":"transparent",border:hasPending?"1px solid var(--red)":"1px solid transparent",animation:hasPending?"approvalPulse 1.5s ease-in-out infinite":"none"}}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
             Purchase approvals
-            {hasPending&&<span style={{marginLeft:"auto",background:"var(--red)",color:"#fff",fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:8}}>1</span>}
+            {hasPending&&<span style={{marginLeft:"auto",background:"var(--red)",color:"#fff",fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:8}}>{pendingCount}</span>}
           </a>;})()}
         </div>}
         {/* Theme toggle */}
@@ -1918,21 +1918,27 @@ function App(){
           const plan=prov.pending_plan||{};
           const planDomains=plan.domains||[];
           const domains=(prov.domains||[]).filter(d=>d.status==="purchased");
+          const hasPendingMailbox=prov.mailbox_status==="awaiting_approval"&&prov.pending_mailbox_plan;
+          const mbPlan=prov.pending_mailbox_plan||{};
+          const mbPlanMailboxes=mbPlan.mailboxes||[];
+          const existingMailboxes=(prov.mailboxes||[]).filter(m=>m.status==="created");
+          const anyPending=hasPending||hasPendingMailbox;
 
           return <div>
             {/* Customer table */}
             <div style={{border:"1px solid var(--border)",background:"var(--bg)",marginBottom:16}}>
               <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",fontSize:11,fontWeight:700,color:"var(--text3)"}}>Customers</div>
-              <div onClick={()=>hasPending?setApprovalView(approvalView?"":"rankify"):null} style={{display:"grid",gridTemplateColumns:"2fr 1.5fr 1fr 1fr 1fr 120px",gap:0,padding:"12px 14px",fontSize:11,alignItems:"center",cursor:hasPending?"pointer":"default",background:hasPending?"var(--red-bg)":"var(--bg)",borderLeft:hasPending?"3px solid var(--red)":"3px solid transparent",transition:"background .15s"}}>
+              <div onClick={()=>anyPending?setApprovalView(approvalView?"":hasPending?"domains":"mailboxes"):null} style={{display:"grid",gridTemplateColumns:"2fr 1.5fr 1fr 1fr 1fr 120px",gap:0,padding:"12px 14px",fontSize:11,alignItems:"center",cursor:anyPending?"pointer":"default",background:anyPending?"var(--red-bg)":"var(--bg)",borderLeft:anyPending?"3px solid var(--red)":"3px solid transparent",transition:"background .15s"}}>
                 <div>
                   <div style={{fontWeight:700,fontSize:12}}>{custData.business_name}</div>
                   <div style={{fontSize:9,color:"var(--text3)",marginTop:1}}>{custData.email}</div>
                 </div>
                 <div><span style={{fontSize:9,fontWeight:700,padding:"2px 8px",background:"var(--green-bg)",color:"var(--green)"}}>{(custData.plan||"").toUpperCase()}</span></div>
                 <div style={{fontFamily:"var(--mono)",fontSize:10}}>{domains.length}/{custData._limits?custData._limits.mailboxes:12} domains</div>
-                <div>{hasPending?<span style={{fontSize:9,fontWeight:700,padding:"3px 8px",background:"var(--red)",color:"#fff",animation:"approvalPulse 1.5s ease-in-out infinite"}}>NEEDS APPROVAL</span>:
+                <div>{hasPending?<span style={{fontSize:9,fontWeight:700,padding:"3px 8px",background:"var(--red)",color:"#fff",animation:"approvalPulse 1.5s ease-in-out infinite"}}>DOMAINS</span>:
+                  hasPendingMailbox?<span style={{fontSize:9,fontWeight:700,padding:"3px 8px",background:"#6366f1",color:"#fff",animation:"approvalPulse 1.5s ease-in-out infinite"}}>MAILBOXES</span>:
                   <span style={{fontSize:9,fontWeight:600,padding:"2px 8px",background:"var(--bg3)",color:"var(--text3)"}}>{(prov.status||"none").replace(/_/g," ").toUpperCase()}</span>}</div>
-                <div style={{textAlign:"right"}}>{hasPending?<span style={{fontSize:10,fontWeight:700,color:"var(--red)"}}>Review &rarr;</span>:
+                <div style={{textAlign:"right"}}>{anyPending?<span style={{fontSize:10,fontWeight:700,color:"var(--red)"}}>Review &rarr;</span>:
                   <span style={{fontSize:10,color:"var(--text3)"}}>No action</span>}</div>
               </div>
             </div>
@@ -2014,8 +2020,83 @@ function App(){
               </div>
             </div>}
 
+            {/* MAILBOX APPROVAL — expanded view */}
+            {approvalView==="mailboxes"&&hasPendingMailbox&&<div style={{border:"2px solid #6366f1",background:"var(--bg)",padding:0,marginBottom:16,position:"relative"}}>
+              <div style={{background:"rgba(99,102,241,0.1)",padding:"14px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #6366f1"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:28,height:28,borderRadius:14,background:"#6366f1",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14}}>📧</div>
+                  <div>
+                    <div style={{fontSize:16,fontWeight:700}}>Mailbox creation request — {mbPlan.customer||custData.business_name}</div>
+                    <div style={{fontSize:11,color:"var(--text3)"}}>Google Workspace mailboxes — charged to your Workspace billing</div>
+                  </div>
+                </div>
+                <button onClick={()=>setApprovalView(null)} style={{width:28,height:28,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>X</button>
+              </div>
+
+              <div style={{padding:18}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12,marginBottom:16}}>
+                  <div style={{background:"var(--bg2)",padding:12,border:"1px solid var(--border)"}}>
+                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:3}}>Customer</div>
+                    <div style={{fontSize:13,fontWeight:700}}>{mbPlan.customer||custData.business_name}</div>
+                  </div>
+                  <div style={{background:"var(--bg2)",padding:12,border:"1px solid var(--border)"}}>
+                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:3}}>Plan</div>
+                    <div style={{fontSize:13,fontWeight:700,color:"var(--green)"}}>{((mbPlan.plan||custData.plan||"").charAt(0).toUpperCase()+(mbPlan.plan||custData.plan||"").slice(1))}</div>
+                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{mbPlan.needed||0} mailboxes to create</div>
+                  </div>
+                  <div style={{background:"var(--bg2)",padding:12,border:"1px solid var(--border)"}}>
+                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:3}}>Already created</div>
+                    <div style={{fontSize:13,fontWeight:700}}>{mbPlan.existing||0}</div>
+                  </div>
+                  <div style={{background:"var(--bg2)",padding:12,border:"1px solid var(--border)"}}>
+                    <div style={{fontSize:9,color:"var(--text3)",marginBottom:3}}>Monthly cost</div>
+                    <div style={{fontSize:20,fontWeight:700,color:"#6366f1"}}>{cs}{fx(mbPlan.totalMonthlyCost||0)}/mo</div>
+                    <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{cs}{fx(7.20)}/mailbox ({currency})</div>
+                  </div>
+                </div>
+
+                <div style={{fontSize:12,fontWeight:700,marginBottom:8}}>Mailboxes ({mbPlanMailboxes.length})</div>
+                <div style={{border:"1px solid var(--border)",background:"var(--bg)",marginBottom:16}}>
+                  <div style={{display:"grid",gridTemplateColumns:"40px 2.5fr 1fr 1fr",gap:0,padding:"8px 14px",borderBottom:"1px solid var(--border)",fontSize:9,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>
+                    <div>#</div><div>Email</div><div>Campaign</div><div>Cost/mo</div>
+                  </div>
+                  {mbPlanMailboxes.map((m,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"40px 2.5fr 1fr 1fr",gap:0,padding:"7px 14px",borderBottom:i<mbPlanMailboxes.length-1?"1px solid var(--border)":"none",fontSize:11,alignItems:"center"}}>
+                    <div style={{fontWeight:600,color:"var(--text3)"}}>{i+1}</div>
+                    <div style={{fontFamily:"var(--mono)",fontWeight:600}}>{m.email}</div>
+                    <div style={{fontSize:10}}>Campaign {m.campaign}</div>
+                    <div style={{fontFamily:"var(--mono)",fontWeight:600}}>{cs}{fx(m.costPerMonth||7.20)}</div>
+                  </div>)}
+                  <div style={{display:"grid",gridTemplateColumns:"40px 2.5fr 1fr 1fr",gap:0,padding:"10px 14px",borderTop:"2px solid var(--border)",fontSize:12,fontWeight:700,background:"var(--bg2)"}}>
+                    <div></div><div>{mbPlanMailboxes.length} mailboxes</div><div></div><div style={{color:"#6366f1"}}>{cs}{fx(mbPlan.totalMonthlyCost||0)}/mo {currency}</div>
+                  </div>
+                </div>
+
+                <div style={{display:"flex",gap:12}}>
+                  <button onClick={async()=>{
+                    if(!confirm("APPROVE creation of "+mbPlanMailboxes.length+" mailboxes for "+cs+fx(mbPlan.totalMonthlyCost||0)+"/mo "+currency+"?\\n\\nThis adds Google Workspace users to your billing."))return;
+                    try{
+                      const resp=await fetch("http://170.64.130.130:3000/approve/"+(mbPlan.jobId||""),{method:"POST",headers:{"X-Webhook-Secret":"cf_wh_coldflows_2026"}});
+                      if(resp.ok){alert("Approved! Creating mailboxes now. Check Telegram for updates.");setApprovalView(null);location.reload();}
+                      else{alert("Failed: "+await resp.text());}
+                    }catch(e){alert("Could not reach automation server: "+e.message);}
+                  }} style={{flex:1,padding:"14px 24px",background:"#6366f1",color:"#fff",border:"none",fontSize:14,fontWeight:700,cursor:"pointer"}}>
+                    APPROVE MAILBOXES — {cs}{fx(mbPlan.totalMonthlyCost||0)}/mo {currency}
+                  </button>
+                  <button onClick={async()=>{
+                    if(!confirm("Reject mailbox creation? No mailboxes will be created."))return;
+                    const t2=custData._targeting||{};
+                    if(t2.provisioning){t2.provisioning.mailbox_status="rejected";delete t2.provisioning.pending_mailbox_plan;}
+                    await fetch(supabaseUrl+"/rest/v1/customers?user_id=eq."+currentUser.id,{method:"PATCH",headers:{apikey:supabaseKey,Authorization:"Bearer "+supabaseKey,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({target_market:JSON.stringify(t2)})});
+                    setApprovalView(null);location.reload();
+                  }} style={{padding:"14px 24px",background:"transparent",color:"#6366f1",border:"2px solid #6366f1",fontSize:14,fontWeight:600,cursor:"pointer"}}>
+                    Reject
+                  </button>
+                </div>
+              </div>
+            </div>}
+
             {/* No pending approvals state */}
-            {!hasPending&&<div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:40,textAlign:"center",marginBottom:16}}>
+            {!anyPending&&<div style={{border:"1px solid var(--border)",background:"var(--bg)",padding:40,textAlign:"center",marginBottom:16}}>
               <div style={{fontSize:14,color:"var(--text3)",marginBottom:4}}>No pending approvals</div>
               <div style={{fontSize:11,color:"var(--text3)"}}>When a customer completes campaign setup, a purchase request will appear here</div>
             </div>}
