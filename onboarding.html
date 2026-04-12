@@ -266,11 +266,16 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
     <div class="field">
       <label>Seniority level</label>
       <div class="chip-wrap" id="chips-seniority">
-        <div class="chip" onclick="toggleChip(this)">C-Suite</div>
-        <div class="chip" onclick="toggleChip(this)">VP</div>
-        <div class="chip" onclick="toggleChip(this)">Director</div>
-        <div class="chip" onclick="toggleChip(this)">Manager</div>
-        <div class="chip" onclick="toggleChip(this)">Senior</div>
+        <div class="chip" data-value="owner" onclick="toggleChip(this)">Owner</div>
+        <div class="chip" data-value="founder" onclick="toggleChip(this)">Founder</div>
+        <div class="chip" data-value="c_suite" onclick="toggleChip(this)">C-Suite</div>
+        <div class="chip" data-value="partner" onclick="toggleChip(this)">Partner</div>
+        <div class="chip" data-value="vp" onclick="toggleChip(this)">VP</div>
+        <div class="chip" data-value="head" onclick="toggleChip(this)">Head</div>
+        <div class="chip" data-value="director" onclick="toggleChip(this)">Director</div>
+        <div class="chip" data-value="manager" onclick="toggleChip(this)">Manager</div>
+        <div class="chip" data-value="senior" onclick="toggleChip(this)">Senior</div>
+        <div class="chip" data-value="entry" onclick="toggleChip(this)">Entry</div>
       </div>
     </div>
 
@@ -301,14 +306,14 @@ textarea{resize:vertical;min-height:64px;line-height:1.6}
     <div class="field">
       <label>Company size (employees)</label>
       <div class="chip-wrap" id="chips-size">
-        <div class="chip" onclick="toggleChip(this)">1-10</div>
-        <div class="chip" onclick="toggleChip(this)">11-50</div>
-        <div class="chip" onclick="toggleChip(this)">51-200</div>
-        <div class="chip" onclick="toggleChip(this)">201-500</div>
-        <div class="chip" onclick="toggleChip(this)">501-1,000</div>
-        <div class="chip" onclick="toggleChip(this)">1,001-5,000</div>
-        <div class="chip" onclick="toggleChip(this)">5,001-10,000</div>
-        <div class="chip" onclick="toggleChip(this)">10,000+</div>
+        <div class="chip" data-value="1,10" onclick="toggleChip(this)">1-10</div>
+        <div class="chip" data-value="11,50" onclick="toggleChip(this)">11-50</div>
+        <div class="chip" data-value="51,200" onclick="toggleChip(this)">51-200</div>
+        <div class="chip" data-value="201,500" onclick="toggleChip(this)">201-500</div>
+        <div class="chip" data-value="501,1000" onclick="toggleChip(this)">501-1,000</div>
+        <div class="chip" data-value="1001,5000" onclick="toggleChip(this)">1,001-5,000</div>
+        <div class="chip" data-value="5001,10000" onclick="toggleChip(this)">5,001-10,000</div>
+        <div class="chip" data-value="10001,50000" onclick="toggleChip(this)">10,000+</div>
       </div>
     </div>
 
@@ -446,14 +451,15 @@ sb.auth.getSession().then(function(res){
         function selectChips(chipGroupId,values){
           if(!values||!values.length)return;
           document.querySelectorAll('#chips-'+chipGroupId+' .chip').forEach(function(c){
-            if(values.indexOf(c.textContent.trim())!==-1)c.classList.add('sel');
+            var val=c.getAttribute('data-value')||c.textContent.trim();
+            if(values.indexOf(val)!==-1||values.indexOf(c.textContent.trim())!==-1)c.classList.add('sel');
           });
         }
-        selectChips('titles',t.job_titles);
-        selectChips('seniority',t.seniority);
-        selectChips('industries',t.industries);
-        selectChips('size',t.company_size);
-        selectChips('locations',t.locations);
+        selectChips('titles',t.person_titles||t.job_titles);
+        selectChips('seniority',t.person_seniorities||t.seniority);
+        selectChips('industries',t.q_keywords?t.q_keywords.split(' '):t.industries);
+        selectChips('size',t.organization_num_employees_ranges||t.company_size);
+        selectChips('locations',t.person_locations||t.locations);
         if(t.location_detail)document.getElementById('f-locdetail').value=t.location_detail;
       }
       
@@ -487,7 +493,7 @@ function toggleChip(el){el.classList.toggle('sel');}
 
 function getSelected(id){
   var arr=[];
-  document.querySelectorAll('#chips-'+id+' .chip.sel').forEach(function(c){arr.push(c.textContent.trim());});
+  document.querySelectorAll('#chips-'+id+' .chip.sel').forEach(function(c){arr.push(c.getAttribute('data-value')||c.textContent.trim());});
   return arr;
 }
 
@@ -505,6 +511,12 @@ function fillTags(id,arr){
   var el=document.getElementById(id);el.innerHTML='';
   if(!arr.length){el.innerHTML='<span style="color:var(--text3)">—</span>';return;}
   arr.forEach(function(t){el.innerHTML+='<span class="stag">'+t+'</span>';});
+}
+function fillChipTags(id,chipGroupId){
+  var el=document.getElementById(id);el.innerHTML='';
+  var chips=document.querySelectorAll('#chips-'+chipGroupId+' .chip.sel');
+  if(!chips.length){el.innerHTML='<span style="color:var(--text3)">—</span>';return;}
+  chips.forEach(function(c){el.innerHTML+='<span class="stag">'+c.textContent.trim()+'</span>';});
 }
 
 function goTo(page){
@@ -527,11 +539,11 @@ function goTo(page){
     var senders=[document.getElementById('f-sender1').value,document.getElementById('f-sender2').value,document.getElementById('f-sender3').value].filter(function(s){return s.trim();});
     document.getElementById('rv-senders').textContent=senders.length?senders.join(', '):'—';
     document.getElementById('rv-camp').textContent=document.getElementById('f-camp').value||'Campaign 1';
-    fillTags('rv-titles',getSelected('titles'));
-    fillTags('rv-sen',getSelected('seniority'));
-    fillTags('rv-ind',getSelected('industries'));
-    fillTags('rv-size',getSelected('size'));
-    fillTags('rv-loc',getSelected('locations'));
+    fillChipTags('rv-titles','titles');
+    fillChipTags('rv-sen','seniority');
+    fillChipTags('rv-ind','industries');
+    fillChipTags('rv-size','size');
+    fillChipTags('rv-loc','locations');
     var locDetail=document.getElementById('f-locdetail').value.trim();
     if(locDetail){
       document.getElementById('rv-locdetail').textContent=locDetail;
@@ -565,12 +577,12 @@ async function checkout(){
       website:document.getElementById('f-url').value,
       offer:document.getElementById('f-offer').value,
       campaign_name:document.getElementById('f-camp').value||'Campaign 1',
-      job_titles:getSelected('titles'),
-      seniority:getSelected('seniority'),
-      industries:getSelected('industries'),
-      company_size:getSelected('size'),
-      locations:getSelected('locations'),
-      location_detail:document.getElementById('f-locdetail').value.trim()
+      person_titles:getSelected('titles'),
+      person_seniorities:getSelected('seniority'),
+      q_keywords:getSelected('industries').join(' '),
+      organization_num_employees_ranges:getSelected('size'),
+      person_locations:getSelected('locations').concat(document.getElementById('f-locdetail').value.trim()?document.getElementById('f-locdetail').value.split(',').map(function(s){return s.trim()}):[]),
+      contact_email_status:['verified']
     }),
     plan:plan,
   }).eq('user_id',currentUser.id);
